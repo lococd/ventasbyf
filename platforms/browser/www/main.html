@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <title>Productos</title>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/jquery-ui.js"></script>
+        <script type="text/javascript" src="js/main.js"></script>
+    </head>
+    <body>
+      <div class="container">
+        <nav class="navbar navbar-default">
+          <div class="container">
+            <div class="navbar-header">
+              <img class="navbar-brand" src="img/logo.jpg" />
+              <h3 class="navbar-brand texto" id="nombreCliente">Cliente Prueba</h2>
+              <h3 class="navbar-brand texto">TOTAL:$</h2>
+              <h3 class="navbar-brand texto" id="totalNota">0</h3>
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+            </div>
+            <div style="height: 1px;" aria-expanded="false" id="navbar" class="navbar-collapse collapse">
+              <ul class="nav navbar-nav navbar-right">
+                <li><a id="lblVendedor" href="#">Vendedor: </a></li>
+                <li><a href="#" id="btnCodigo">Ingresar Producto</a></li>
+                <li><a id="btnGuardar" href="#">Grabar Nota</a></li>
+                <li><a id="btnCerrarSesion" href="#">Cerrar Sesión</a></li>
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </nav>
+      </div>
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-6 text-center col-md-12 col-lg-12">
+              <!--button id="btnEscanear" class="btn btn-primary">Escanear código</button-->
+              
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 text-center">
+              <table class="table table-striped table-condensed" id="tblProd">
+                <thead>
+                  <tr>
+                    <td>CODIGO</td>
+                    <td>PRODUCTO</td>
+                    <td>PRECIO</td>
+                    <td>CANTIDAD</td>
+                    <td>TOTAL</td>
+                    <td>ELIMINAR</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                </tbody>
+              </table>
+            </div>
+          </div>
+            
+          </div>
+        </div>
+        <div class="modal fade" id="modalCodpro" data-backdrop="static" data-keyboard="false" role="dialog">
+                <div class="modal-dialog">
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal"></button>
+                      <h4 class="modal-title">Ingreso manual de código</h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <div class="ui-front">
+                          <div class="ui-widget">
+                            <input type="text" placeholder="Ingrese código o descripción producto" class="form-control" id="txtPro" >
+                          </div>
+                            <div class="row">
+                              <div class="col-md-12 text-center">
+                                <table class="table tabla-txt">
+                                  <tr>
+                                    <td>CODIGO</td>
+                                    <td>PRODUCTO</td>
+                                    <td>PRECIO</td>
+                                    <td>CANTIDAD</td>
+                                  </tr>
+                                  <tr>
+                                    <td id="modalTxtCodpro"></td>
+                                    <td class="text" id="modalTxtDespro"></td>
+                                    <td id="modalTxtPrecio"></td>
+                                    <td><input type="number" id="txtCantid" class="form-control" max="99"></td>
+                                  </tr>
+                                </table>
+                              </div>
+                            </div>
+                            <button class="btn btn-default" id="buscarProducto">Buscar Producto</button>
+                            <button class="btn btn-default disabled" id="insertarProducto" disabled="true">Guardar Producto</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
+                  </div>
+                </div>
+        </div>
+        <div class="modal fade" id="modalGuardar" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog">
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <!--button type="button" class="close" data-dismiss="modal" id="btnCerrarModallpr">&times;</button-->
+                      <h4 class="modal-title">Datos Nota de Venta</h4>
+                      <h4 id="lblTituloLpr" class="modal-title invisible"></h4>
+                      <h4 class="modal-title" id="lblRazons">Cliente</h4>
+                      <h4 class="modal-title" id="totalNota2">Total:$0</h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <div class = "ui-front">
+                            
+                            <div class="ui-widget">
+                              <input type="text" id="txtRutcli" class="form-control" placeholder="Rut Cliente">
+                            </div>
+                            <input type="text" id="txtObserv" placeholder="Observación" class="form-control">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" id="btnConfirmarGuardado" class="btn btn-default disabled">Grabar Nota</button>
+                      <button type="button" class="btn btn-default" id="btnCerrarModallpr2">Cerrar</button>
+                    </div>
+                  </div>
+                </div>
+        </div>
+    </body>
+</html>

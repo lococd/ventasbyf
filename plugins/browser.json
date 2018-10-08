@@ -1,0 +1,31 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {}
+    },
+    "installed_plugins": {
+        "phonegap-plugin-barcodescanner": {
+            "PACKAGE_NAME": "cl.dimeiggs.precios"
+        },
+        "com.phonegap.plugins.sqlite": {
+            "PACKAGE_NAME": "cl.dimeiggs.precios"
+        },
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "cl.dimeiggs.precios"
+        },
+        "cordova-plugin-file-transfer": {
+            "PACKAGE_NAME": "cl.dimeiggs.precios"
+        }
+    },
+    "dependent_plugins": {
+        "cordova-plugin-compat": {
+            "PACKAGE_NAME": "cl.dimeiggs.precios"
+        },
+        "cordova-plugin-file": {
+            "PACKAGE_NAME": "cl.dimeiggs.precios"
+        }
+    }
+}
