@@ -233,6 +233,7 @@ document.addEventListener('deviceready', function(){
 	      $("#modalTxtPrecio").text(rs.rows.item(0).PREDET);
 	      $("#insertarProducto").removeClass("disabled");
 	      $("#insertarProducto").prop("disabled", false);
+	      $("#txtCantid").focus();
 	      //getStock(rs.rows.item(0).CODPRO,window.localStorage.getItem('numlocal'),window.localStorage.getItem('tokenDMG'));
 	    }
 	  }, function(error) {
@@ -315,6 +316,7 @@ document.addEventListener('deviceready', function(){
 					"<td>"+$("#modalTxtPrecio").text() + "</td>" +
 					'<td><input type="number" class="form-control cantProd" value="'+ cantid +'"></td>' +
 					"<td>"+ netoProd +"</td>"+
+					'<td><a href="#" class="up">SUBIR</a>/<a href="#" class="down">BAJAR</a></td>'+
 					'<td><a class="eliminarFila" data-codpro="'+$("#modalTxtCodpro").text()+'" href="#">Eliminar</a></td>' +
 					"</tr>";
 			$("#tblProd").append(tr);
@@ -448,6 +450,7 @@ document.addEventListener('deviceready', function(){
 		    else{
 		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
 		    	$("#modalGuardar").modal('hide');
+		    	$("#modalCodpro").modal('toggle');
 		    }
 		  }, function(error) {
 		    alert('Error en la consulta: ' + error.message);
@@ -464,6 +467,15 @@ document.addEventListener('deviceready', function(){
 	    $("#totalNota").text("Total nota:$" + totalizaNota());
 	    $("#totalNota2").text("Total nota:$" + totalizaNota());
 	});
+
+	$(document).on('click','.up,.down',function(){
+        var row = $(this).parents("tr:first");
+        if ($(this).is(".up")) {
+            row.insertBefore(row.prev());
+        } else {
+            row.insertAfter(row.next());
+        }
+    });
 
 	$(document).on('blur','.cantProd',function() {
     	var cantid = $(this).val();
