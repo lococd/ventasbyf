@@ -46,6 +46,58 @@ document.addEventListener('deviceready', function(){
 		}
 	}
 
+	function getTotAtrib(){
+		var cantid = $("#txtCantid").val();
+		var clases = $("#tabAttrib").attr('class');
+		if(clases.indexOf("invisible") < 0){
+			var productos = $("#tblAttrib >tr");
+			var cantidAtrib = 0;
+			$(productos).each(function(i,fila){
+				cantUni = $(fila).find('td:eq(1) input').val();
+				if (cantUni === ""){
+					cantUni = 0;
+				}
+				else{
+					cantUni = parseInt(cantUni);
+				}
+				cantidAtrib = cantidAtrib + cantUni;
+			});
+			return cantidAtrib;
+		}
+		else{
+			return cantid;
+		}
+	}
+
+	function getAtributos(){
+		var atributos = '';
+		var productos = $("#tblAttrib >tr");
+		var j = 1;
+		$(productos).each(function(i,fila){
+				cantUni = $(fila).find('td:eq(1) input').val();
+				if (cantUni === ""){
+					cantUni = 0;
+				}
+				else{
+					cantUni = parseInt(cantUni);
+				}
+				if (cantUni>0){
+					atributos = atributos +
+						'<DeProducto>' +
+                 		'<Dnumnvt>${numnvt}</Dnumnvt>' +
+                 		'<Dsequen>'+ j + '</Dsequen>' +
+                 		'<Dcodpro>'+ $("#modalTxtCodpro").text() + '</Dcodpro>' +
+                 		'<Ddespro>'+ $(fila).find('td:eq(0)').text() + '</Ddespro>' +
+                 		'<Dcantid>'+ cantUni + '</Dcantid>' +
+                 		'<Dcoddom>'+ $(fila).find('td:eq(1) input').attr("data-catpro") +'</Dcoddom>' +
+             			'</DeProducto>';
+             			j = j + 1;
+				}
+			});
+		atributos = atributos + '</DeProducto>'
+		return atributos;
+	}
+
 	function duplicado(codpro){
 		var productos = $("#tblProd >tbody >tr");
 		var codproLista;
@@ -173,6 +225,8 @@ document.addEventListener('deviceready', function(){
 			var totnet;
 			var descrip;
 			var xmlDet = "";
+			var xmlProdDet = "";
+			var atributos = "";
 			productos.each(function(tr,fila) {
 				codpro = $(fila).find('td:eq(0)').text();
 				descrip = $(fila).find('td:eq(1)').text();
@@ -180,9 +234,10 @@ document.addEventListener('deviceready', function(){
 				cantid = $(fila).find('td:eq(3) >input').val();
 				costo = $(fila).find('td:eq(0)').attr("data-costo");
 				totnet = precio * cantid;
-				query = "INSERT INTO DE_NOTAVTA (CODEMP,NUMNVT,SEQUEN,CODPRO,PRECIO,CANTID,PREFIN,TOTNET,PORDOC,COMIS,PREPARACION,PESO) " +
-						"VALUES('1','"+numnvt+"','"+sequen+"','"+codpro+"','"+precio+"','"+cantid+"','"+precio+"','"+totnet+"','"+cantid+"','7.5','0','0')";
+				//query = "INSERT INTO DE_NOTAVTA (CODEMP,NUMNVT,SEQUEN,CODPRO,PRECIO,CANTID,PREFIN,TOTNET,PORDOC,COMIS,PREPARACION,PESO) " +
+				//		"VALUES('1','"+numnvt+"','"+sequen+"','"+codpro+"','"+precio+"','"+cantid+"','"+precio+"','"+totnet+"','"+cantid+"','7.5','0','0')";
 						//alert(query);
+				
 				xmlDet = xmlDet + "<Producto>" +
 									"<codemp>1</codemp>"+
 									"<numnvt>" + numnvt + "</numnvt>"+
@@ -202,13 +257,21 @@ document.addEventListener('deviceready', function(){
 									"<costo>" + costo + "</costo>" +
 									"<comis>7,5</pordoc>"
 								+ "</Producto>";
+				atributos = $(fila).find('td:eq(0)').attr("data-attrib");
+				if (atributos != ''){
+					atributos = atributos.replace(/\$\{numnvt\}/g,numnvt);
+					atributos = atributos.replace(/\$\{sequen\}/g,sequen);
+					xmlProdDet = xmlProdDet + atributos;
+				}
+				
 				sequen = sequen + 1;
 			});
+			xmlDet = xmlDet + xmlProdDet;
 			return xmlDet;
 	}
 	function getPrecio(codpro){
 
-	   var query = "select a.codpro, a.despro, a.costo, b.predet from ma_product as a, re_lvenpro as b " +
+	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip,a.catpro from ma_product as a, re_lvenpro as b " +
 	   				"where a.codpro = b.codpro " +
 	   				"and a.codpro = '" + codpro + "'";
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
@@ -220,6 +283,7 @@ document.addEventListener('deviceready', function(){
 	    	$("#modalTxtCodpro").text('');
 	    	$("#modalTxtDespro").text('');
 	    	$("#modalTxtPrecio").text('');
+	    	$("#modalTxtMultip").val(1);
 	    	$("#insertarProducto").addClass("disabled");
 	      	$("#insertarProducto").prop("disabled", true);
 	      	$("#txtCantid").val("");
@@ -227,10 +291,39 @@ document.addEventListener('deviceready', function(){
 	    	return false;
 	    }
 	    else{
+	      if(rs.rows.item(0).CATPRO>0){
+	      	var query2 = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = "+ rs.rows.item(0).CATPRO;
+      		var db2 = window.sqlitePlugin.openDatabase({name: "envios.db"});
+      		db2.executeSql(query2, [], function(rs2) {
+      			var fila = '';//'<tr><td>ATRIBUTO</td><td>CANTIDAD</td></tr>';
+      			//$("#tblAttrib").append(fila);
+      			if (rs2.rows.length>0){
+      				for (var i = 0; i < rs2.rows.length; i++) {
+	      				fila = '<tr><td>' + rs2.rows.item(i).DESVAL + '</td>' +
+	      					   '<td><input type="number" id="txtCantid" data-catpro ="'+ rs.rows.item(0).CATPRO +
+	      					   '" class="form-control" max="99"></td></tr>';
+	      				$("#tblAttrib").append(fila);
+	      			}
+	      			$("#tabAttrib").removeClass("invisible");
+      			}
+      			else{
+      				$("#tabAttrib").addClass("invisible");
+      				$("#tblAttrib").empty();
+      			}
+      			
+      		}, function(error) {
+	    		alert('Error en la consulta: ' + error.message);
+	  		});
+	      }
+	    else{
+      		$("#tabAttrib").addClass("invisible");
+      		$("#tblAttrib").empty();
+      	}
 	      $("#modalTxtCodpro").text(rs.rows.item(0).CODPRO);
 	      $("#modalTxtCodpro").attr("data-costo",rs.rows.item(0).COSTO);
 	      $("#modalTxtDespro").text(rs.rows.item(0).DESPRO);
 	      $("#modalTxtPrecio").text(rs.rows.item(0).PREDET);
+	      $("#modalTxtMultip").val(rs.rows.item(0).MULTIP);
 	      $("#insertarProducto").removeClass("disabled");
 	      $("#insertarProducto").prop("disabled", false);
 	      $("#txtCantid").focus();
@@ -257,6 +350,8 @@ document.addEventListener('deviceready', function(){
 		$("#nombreCliente").text("");
 		$("#totalNota").text("Total nota:$0");
     	$("#totalNota2").text("Total nota:$0");
+    	$("#tblAttrib").empty();
+    	$("#tabAttrib").addClass("invisible");
 		getNumnvt();
 	};
 
@@ -299,37 +394,59 @@ document.addEventListener('deviceready', function(){
 
 	$("#insertarProducto").click(function(e){
 		var cantid = $("#txtCantid").val();
+		var multip = $("#modalTxtMultip").val();
 		if(cantid != "" && cantid > 0){
-			/*if($("#modalTxtCodpro").text() != $("#txtPro").text()){
-				alert("Producto a ingresar cambiado");
-				$("#txtCantid").val("");
-				$("#insertarProducto").addClass("disabled");
-				$("#insertarProducto").prop("disabled",true);
-				$("#txtPro").text("");
-				$("#txtPro").focus();
-				return false;
-			}*/
-	      	netoProd = parseInt($("#modalTxtPrecio").text()) * cantid;
-			var tr = '<tr id="prod-'+ $("#modalTxtCodpro").text() +'"><td data-costo="'+ $("#modalTxtCodpro").attr("data-costo") + '">'
-						 + $("#modalTxtCodpro").text() + "</td>" +
-					"<td>"+$("#modalTxtDespro").text() + "</td>" +
-					"<td>"+$("#modalTxtPrecio").text() + "</td>" +
-					'<td><input type="number" class="form-control cantProd" value="'+ cantid +'"></td>' +
-					"<td>"+ netoProd +"</td>"+
-					'<td><a href="#" class="up">SUBIR</a>/<a href="#" class="down">BAJAR</a></td>'+
-					'<td><a class="eliminarFila" data-codpro="'+$("#modalTxtCodpro").text()+'" href="#">Eliminar</a></td>' +
-					"</tr>";
-			$("#tblProd").append(tr);
-			$("#btnConfirmarGuardado").removeClass("disabled");
-			$("#modalTxtCodpro").text("");
-			$("#modalTxtDespro").text("");
-			$("#modalTxtPrecio").text("");
-			$("#txtPro").val("");
-			$("#txtCantid").val("");
-			$("#insertarProducto").addClass("disabled");
-			$("#insertarProducto").prop("disabled",true);
-			$("#totalNota").text("Total nota:$"+totalizaNota());
-			$("#totalNota2").text("Total nota:$"+totalizaNota());
+			if(cantid%multip>0){
+				alert('Debe ingresar múltiplos de ' + multip);
+				$('#txtCantid').focus();
+			}
+			else{
+				if (cantid != getTotAtrib()){
+					alert('Ingrese total de variedades');
+					return false;
+				}
+				else{
+					netoProd = parseInt($("#modalTxtPrecio").text()) * cantid;
+					var xmlAtrib = getAtributos();
+					var tr = '';
+					if (xmlAtrib != ''){
+						tr = '<tr id="prod-'+ $("#modalTxtCodpro").text() +'"><td data-costo="'+ $("#modalTxtCodpro").attr("data-costo") + '"' + 
+							'data-attrib="' + xmlAtrib + '">'
+								 + $("#modalTxtCodpro").text() + "</td>" +
+							"<td>"+$("#modalTxtDespro").text() + "</td>" +
+							"<td>"+$("#modalTxtPrecio").text() + "</td>" +
+							'<td><input type="number" class="form-control cantProd disabled" disabled="true" value="'+ cantid +'"></td>' +
+							"<td>"+ netoProd +"</td>"+
+							'<td><a href="#" class="up">SUBIR</a>/<a href="#" class="down">BAJAR</a></td>'+
+							'<td><a class="eliminarFila" data-codpro="'+$("#modalTxtCodpro").text()+'" href="#">Eliminar</a></td>' +
+							"</tr>";
+					}
+					else{
+						tr = '<tr id="prod-'+ $("#modalTxtCodpro").text() +'"><td data-costo="'+ $("#modalTxtCodpro").attr("data-costo") + '">'
+								 + $("#modalTxtCodpro").text() + "</td>" +
+							"<td>"+$("#modalTxtDespro").text() + "</td>" +
+							"<td>"+$("#modalTxtPrecio").text() + "</td>" +
+							'<td><input type="number" class="form-control cantProd" value="'+ cantid +'"></td>' +
+							"<td>"+ netoProd +"</td>"+
+							'<td><a href="#" class="up">SUBIR</a>/<a href="#" class="down">BAJAR</a></td>'+
+							'<td><a class="eliminarFila" data-codpro="'+$("#modalTxtCodpro").text()+'" href="#">Eliminar</a></td>' +
+							"</tr>";
+					}
+					$("#tblProd").append(tr);
+					$("#btnConfirmarGuardado").removeClass("disabled");
+					$("#modalTxtCodpro").text("");
+					$("#modalTxtDespro").text("");
+					$("#modalTxtPrecio").text("");
+					$("#txtPro").val("");
+					$("#txtCantid").val("");
+					$("#insertarProducto").addClass("disabled");
+					$("#insertarProducto").prop("disabled",true);
+					$("#tabAttrib").addClass("invisible");
+					$("#tblAttrib").empty();
+					$("#totalNota").text("Total nota:$"+totalizaNota());
+					$("#totalNota2").text("Total nota:$"+totalizaNota());
+				}
+			}
 		}
 		else{
 			alert("Ingrese cantidad");
@@ -451,6 +568,7 @@ document.addEventListener('deviceready', function(){
 		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
 		    	$("#modalGuardar").modal('hide');
 		    	$("#modalCodpro").modal('toggle');
+		    	$("#modalTxtCodpro").focus();
 		    }
 		  }, function(error) {
 		    alert('Error en la consulta: ' + error.message);
