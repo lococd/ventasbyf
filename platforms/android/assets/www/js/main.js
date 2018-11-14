@@ -292,7 +292,10 @@ document.addEventListener('deviceready', function(){
 	    }
 	    else{
 	      if(rs.rows.item(0).CATPRO>0){
-	      	var query2 = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = "+ rs.rows.item(0).CATPRO;
+	      	var query2 = "select desval from de_dominio " +
+						 "where coddom = (select codref from de_dominio " +
+						 "where coddom = 100 " +
+						 "and codval = " + rs.rows.item(0).CATPRO + ")";
       		var db2 = window.sqlitePlugin.openDatabase({name: "envios.db"});
       		db2.executeSql(query2, [], function(rs2) {
       			var fila = '';//'<tr><td>ATRIBUTO</td><td>CANTIDAD</td></tr>';
