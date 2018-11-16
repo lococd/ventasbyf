@@ -236,7 +236,7 @@ document.addEventListener('deviceready', function(){
         });
       },
       function(msg) {
-        alert("Archivo no seleccionado");
+        alert("Archivo no seleccionado " + msg);
       });
     }    
   }
