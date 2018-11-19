@@ -83,18 +83,18 @@ document.addEventListener('deviceready', function(){
 				}
 				if (cantUni>0){
 					atributos = atributos +
-						'<DeProducto>' +
-                 		'<Dnumnvt>${numnvt}</Dnumnvt>' +
-                 		'<Dsequen>'+ j + '</Dsequen>' +
-                 		'<Dcodpro>'+ $("#modalTxtCodpro").text() + '</Dcodpro>' +
-                 		'<Ddespro>'+ $(fila).find('td:eq(0)').text() + '</Ddespro>' +
+						'<DeProducto>\n' +
+                 		'<Dnumnvt>${numnvt}</Dnumnvt>\n' +
+                 		'<Dsequen>'+ j + '</Dsequen>\n' +
+                 		'<Dcodpro>'+ $("#modalTxtCodpro").text() + '</Dcodpro>\n' +
+                 		'<Ddespro>'+ $(fila).find('td:eq(0)').text() + '</Ddespro>\n' +
                  		'<Dcantid>'+ cantUni + '</Dcantid>' +
-                 		'<Dcoddom>'+ $(fila).find('td:eq(1) input').attr("data-catpro") +'</Dcoddom>' +
-             			'</DeProducto>';
+                 		'<Dcoddom>'+ $(fila).find('td:eq(1) input').attr("data-catpro") +'</Dcoddom>\n' +
+             			'</DeProducto>\n';
              			j = j + 1;
 				}
 			});
-		atributos = atributos + '</DeProducto>'
+		//atributos = atributos + '</DeProducto>'
 		return atributos;
 	}
 
@@ -148,42 +148,42 @@ document.addEventListener('deviceready', function(){
 			    	totiva = totneto * 0.19;
 			    	totgen = Math.round(totneto + totiva);
 			    	var fecemi = getAgno() + getMes() + getDia();
-			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>" +
-			    			 "<codven>" + rs.rows.item(0).CODVEN +"</codven>" +
-			    			 "<fecemi>" + fecemi +"</fecemi>" +
-			    			 "<vendedor>" + vendedor +"</vendedor>" +
-			    			 "<razons>" + rs.rows.item(0).RAZONS +"</razons>" +
-			    			 "<direcc>" + rs.rows.item(0).DIRECC +"</direcc>" +
-			    			 "<comuna>" + rs.rows.item(0).COMUNA +"</comuna>" +
-			    			 "<ciudad>" + rs.rows.item(0).CIUDAD +"</ciudad>" +
-			    			 "<forpag>" + rs.rows.item(0).FORPAG +"</forpag>" +
-			    			 "<plapag>" + rs.rows.item(0).PLAPAG +"</plapag>" +
-			    			 "<codlis>" + rs.rows.item(0).CODLIS +"</codlis>" +
-			    			 "<subtot>" + subtot +"</subtot>" +
-			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 +"</dscto1>" +
-			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 +"</dscto2>" +
-			    			 "<totneto>" + totneto +"</totneto>" +
-			    			 "<totiva>" + totiva +"</totiva>" +
-			    			 "<totgen>" + totgen +"</totgen>" +
-			    			 "<totsal>" + totgen +"</totsal>" +
-			      			 "<numbul>0</numbul>"+
-				             "<codban>30</codban>" +
-				             "<origen>REM</origen>" +
-				             "<estado>0</estado>" +
-				             "<pagada>0</pagada>"+
-				             "<factura>N</factura>"+
-				             "<observ>"+ observ + "</observ>";
+			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>\n" +
+			    			 "<codven>" + rs.rows.item(0).CODVEN +"</codven>\n" +
+			    			 "<fecemi>" + fecemi +"</fecemi>\n" +
+			    			 "<vendedor>" + vendedor +"</vendedor>\n" +
+			    			 "<razons>" + rs.rows.item(0).RAZONS +"</razons>\n" +
+			    			 "<direcc>" + rs.rows.item(0).DIRECC +"</direcc>\n" +
+			    			 "<comuna>" + rs.rows.item(0).COMUNA +"</comuna>\n" +
+			    			 "<ciudad>" + rs.rows.item(0).CIUDAD +"</ciudad>\n" +
+			    			 "<forpag>" + rs.rows.item(0).FORPAG +"</forpag>\n" +
+			    			 "<plapag>" + rs.rows.item(0).PLAPAG +"</plapag>\n" +
+			    			 "<codlis>" + rs.rows.item(0).CODLIS +"</codlis>\n" +
+			    			 "<subtot>" + subtot +"</subtot>\n" +
+			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 +"</dscto1>\n" +
+			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 +"</dscto2>\n" +
+			    			 "<totneto>" + totneto +"</totneto>\n" +
+			    			 "<totiva>" + totiva +"</totiva>\n" +
+			    			 "<totgen>" + totgen +"</totgen>\n" +
+			    			 "<totsal>" + totgen +"</totsal>\n" +
+			      			 "<numbul>0</numbul>\n"+
+				             "<codban>30</codban>\n" +
+				             "<origen>REM</origen>\n" +
+				             "<estado>0</estado>\n" +
+				             "<pagada>0</pagada>\n"+
+				             "<factura>N</factura>\n"+
+				             "<observ>"+ observ + "</observ>\n";
 
-				            var xmlText = '<?xml version="1.0" encoding="utf-8"?>'+
-							  "<Pedidos><NotaVenta><Cabecera>"+ xmlCab +
-							  "</Cabecera><Detalle>"+ xmlDet+
+				            var xmlText = '<?xml version="1.0" encoding="utf-8"?>\n'+
+							  "<Pedidos><NotaVenta><Cabecera>\n"+ xmlCab +
+							  "</Cabecera><Detalle>\n"+ xmlDet+
 							  "</Detalle></NotaVenta></Pedidos>";
 
 							window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory+"/nvt", function( directoryEntry ) {
 								var sysdate = new Date();
 								var mes = sysdate.getMonth() + 1;
 								var fechasalida = getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString();
-							    directoryEntry.getFile(fechasalida + window.localStorage.getItem("user") + numnvt + ".txt", { create: true }, function( fileEntry ) {
+							    directoryEntry.getFile(fechasalida + window.localStorage.getItem("user") + numnvt + ".xml", { create: true }, function( fileEntry ) {
 							        fileEntry.createWriter( function( fileWriter ) {
 							            fileWriter.onwriteend = function( result ) {
 							            	alert( 'Nota de venta grabada con éxito! Numero '+ numnvt );
@@ -238,24 +238,24 @@ document.addEventListener('deviceready', function(){
 				//		"VALUES('1','"+numnvt+"','"+sequen+"','"+codpro+"','"+precio+"','"+cantid+"','"+precio+"','"+totnet+"','"+cantid+"','7.5','0','0')";
 						//alert(query);
 				
-				xmlDet = xmlDet + "<Producto>" +
-									"<codemp>1</codemp>"+
-									"<numnvt>" + numnvt + "</numnvt>"+
-									"<sequen>" + sequen + "</sequen>" +
-									"<despro>" + descrip + "</despro>" +
-									"<unidad>UND</unidad>" +
-									"<precio>" + precio + "</precio>" +
-									"<cantid>" + cantid + "</cantid>" +
-									"<desc01>0</desc01>" +
-									"<prefin>" + precio + "</prefin>" +
-									"<totnet>" + totnet + "</totnet>" +
-									"<qrevis>0</qrevis>" +
-									"<pordoc>" + cantid + "</pordoc>" +
-									"<margen>" + Math.round((((precio-costo)/precio)*100) * 100) / 100 + "</margen>" +
-									"<revision>0</revision>" +
-									"<codubi>4</codubi>" +
-									"<costo>" + costo + "</costo>" +
-									"<comis>7,5</pordoc>"
+				xmlDet = xmlDet + "<Producto>\n" +
+									"<codemp>1</codemp>\n"+
+									"<numnvt>" + numnvt + "</numnvt>\n"+
+									"<sequen>" + sequen + "</sequen>\n" +
+									"<despro>" + descrip + "</despro>\n" +
+									"<unidad>UND</unidad>\n" +
+									"<precio>" + precio + "</precio>\n" +
+									"<cantid>" + cantid + "</cantid>\n" +
+									"<desc01>0</desc01>\n" +
+									"<prefin>" + precio + "</prefin>\n" +
+									"<totnet>" + totnet + "</totnet>\n" +
+									"<qrevis>0</qrevis>\n" +
+									"<pordoc>" + cantid + "</pordoc>\n" +
+									"<margen>" + Math.round((((precio-costo)/precio)*100) * 100) / 100 + "</margen>\n" +
+									"<revision>0</revision>\n" +
+									"<codubi>4</codubi>\n" +
+									"<costo>" + costo + "</costo>\n" +
+									"<comis>7,5</pordoc>\n"
 								+ "</Producto>";
 				atributos = $(fila).find('td:eq(0)').attr("data-attrib");
 				if (atributos != ''){
