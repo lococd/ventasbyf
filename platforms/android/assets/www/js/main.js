@@ -83,14 +83,14 @@ document.addEventListener('deviceready', function(){
 				}
 				if (cantUni>0){
 					atributos = atributos +
-						'<DeProducto>\n' +
-                 		'<Dnumnvt>${numnvt}</Dnumnvt>\n' +
-                 		'<Dsequen>'+ j + '</Dsequen>\n' +
-                 		'<Dcodpro>'+ $("#modalTxtCodpro").text() + '</Dcodpro>\n' +
-                 		'<Ddespro>'+ $(fila).find('td:eq(0)').text() + '</Ddespro>\n' +
-                 		'<Dcantid>'+ cantUni + '</Dcantid>' +
-                 		'<Dcoddom>'+ $(fila).find('td:eq(1) input').attr("data-catpro") +'</Dcoddom>\n' +
-             			'</DeProducto>\n';
+						'<DeProducto>'+ String.fromCharCode(13) +
+                 		'<Dnumnvt>${numnvt}</Dnumnvt>' + String.fromCharCode(13) +
+                 		'<Dsequen>'+ j + '</Dsequen>' + String.fromCharCode(13) +
+                 		'<Dcodpro>'+ $("#modalTxtCodpro").text() + '</Dcodpro>' + String.fromCharCode(13) +
+                 		'<Ddespro>'+ $(fila).find('td:eq(0)').text() + '</Ddespro>' + String.fromCharCode(13) +
+                 		'<Dcantid>'+ cantUni + '</Dcantid>' + String.fromCharCode(13) +
+                 		'<Dcoddom>'+ $(fila).find('td:eq(1) input').attr("data-catpro") +'</Dcoddom>' + String.fromCharCode(13) +
+             			'</DeProducto>' + String.fromCharCode(13);
              			j = j + 1;
 				}
 			});
@@ -147,37 +147,44 @@ document.addEventListener('deviceready', function(){
 			    	totneto = subtot - (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
 			    	totiva = totneto * 0.19;
 			    	totgen = Math.round(totneto + totiva);
-			    	var fecemi = getAgno() + getMes() + getDia();
-			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>\n" +
-			    			 "<codven>" + rs.rows.item(0).CODVEN +"</codven>\n" +
-			    			 "<fecemi>" + fecemi +"</fecemi>\n" +
-			    			 "<vendedor>" + vendedor +"</vendedor>\n" +
-			    			 "<razons>" + rs.rows.item(0).RAZONS +"</razons>\n" +
-			    			 "<direcc>" + rs.rows.item(0).DIRECC +"</direcc>\n" +
-			    			 "<comuna>" + rs.rows.item(0).COMUNA +"</comuna>\n" +
-			    			 "<ciudad>" + rs.rows.item(0).CIUDAD +"</ciudad>\n" +
-			    			 "<forpag>" + rs.rows.item(0).FORPAG +"</forpag>\n" +
-			    			 "<plapag>" + rs.rows.item(0).PLAPAG +"</plapag>\n" +
-			    			 "<codlis>" + rs.rows.item(0).CODLIS +"</codlis>\n" +
-			    			 "<subtot>" + subtot +"</subtot>\n" +
-			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 +"</dscto1>\n" +
-			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 +"</dscto2>\n" +
-			    			 "<totneto>" + totneto +"</totneto>\n" +
-			    			 "<totiva>" + totiva +"</totiva>\n" +
-			    			 "<totgen>" + totgen +"</totgen>\n" +
-			    			 "<totsal>" + totgen +"</totsal>\n" +
-			      			 "<numbul>0</numbul>\n"+
-				             "<codban>30</codban>\n" +
-				             "<origen>REM</origen>\n" +
-				             "<estado>0</estado>\n" +
-				             "<pagada>0</pagada>\n"+
-				             "<factura>N</factura>\n"+
-				             "<observ>"+ observ + "</observ>\n";
+			    	var fecemi = getAgno().toString() + getMes().toString() + getDia().toString();
+			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>" + String.fromCharCode(13) +
+			    			 "<codven>" + rs.rows.item(0).CODVEN +"</codven>" + String.fromCharCode(13) +
+			    			 "<fecemi>" + fecemi +"</fecemi>" + String.fromCharCode(13) +
+			    			 "<vendedor>" + vendedor +"</vendedor>" + String.fromCharCode(13) +
+			    			 "<razons>" + rs.rows.item(0).RAZONS +"</razons>" + String.fromCharCode(13) +
+			    			 "<direcc>" + rs.rows.item(0).DIRECC +"</direcc>" + String.fromCharCode(13) +
+			    			 "<comuna>" + rs.rows.item(0).COMUNA +"</comuna>" + String.fromCharCode(13) +
+			    			 "<ciudad>" + rs.rows.item(0).CIUDAD +"</ciudad>" + String.fromCharCode(13) +
+			    			 "<forpag>" + rs.rows.item(0).FORPAG +"</forpag>" + String.fromCharCode(13) +
+			    			 "<plapag>" + rs.rows.item(0).PLAPAG +"</plapag>" + String.fromCharCode(13) +
+			    			 "<codlis>" + rs.rows.item(0).CODLIS +"</codlis>" + String.fromCharCode(13) +
+			    			 "<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
+			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 +"</dscto1>" + String.fromCharCode(13) +
+			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 +"</dscto2>" + String.fromCharCode(13) +
+			    			 "<totneto>" + totneto +"</totneto>" + String.fromCharCode(13) +
+			    			 "<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
+			    			 "<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
+			    			 "<totsal>" + totgen +"</totsal>" + String.fromCharCode(13) +
+			      			 "<numbul>0</numbul>" + String.fromCharCode(13)+
+				             "<codban>30</codban>" + String.fromCharCode(13) +
+				             "<origen>REM</origen>" + String.fromCharCode(13) +
+				             "<estado>0</estado>" + String.fromCharCode(13) +
+				             "<pagada>0</pagada>" + String.fromCharCode(13)+
+				             "<factura>N</factura>" + String.fromCharCode(13)+
+				             "<observ>"+ observ + "</observ>" + String.fromCharCode(13);
 
-				            var xmlText = '<?xml version="1.0" encoding="utf-8"?>\n'+
-							  "<Pedidos><NotaVenta><Cabecera>\n"+ xmlCab +
-							  "</Cabecera><Detalle>\n"+ xmlDet+
-							  "</Detalle></NotaVenta></Pedidos>";
+				            var xmlText = '<?xml version="1.0" encoding="utf-8"?>' + String.fromCharCode(13) +
+							  "<Pedidos>" + String.fromCharCode(13) +
+							  	"<NotaVenta>" + String.fromCharCode(13) +
+							  		"<Cabecera>" + String.fromCharCode(13) +
+							  			xmlCab +
+							  		"</Cabecera>" + String.fromCharCode(13) +
+							  		"<Detalle>" + String.fromCharCode(13)+
+							  			xmlDet+
+							  		"</Detalle>" + String.fromCharCode(13) +
+							  	"</NotaVenta>" + String.fromCharCode(13) +
+							  "</Pedidos>";
 
 							window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory+"/nvt", function( directoryEntry ) {
 								var sysdate = new Date();
@@ -238,29 +245,31 @@ document.addEventListener('deviceready', function(){
 				//		"VALUES('1','"+numnvt+"','"+sequen+"','"+codpro+"','"+precio+"','"+cantid+"','"+precio+"','"+totnet+"','"+cantid+"','7.5','0','0')";
 						//alert(query);
 				
-				xmlDet = xmlDet + "<Producto>\n" +
-									"<codemp>1</codemp>\n"+
-									"<numnvt>" + numnvt + "</numnvt>\n"+
-									"<sequen>" + sequen + "</sequen>\n" +
-									"<despro>" + descrip + "</despro>\n" +
-									"<unidad>UND</unidad>\n" +
-									"<precio>" + precio + "</precio>\n" +
-									"<cantid>" + cantid + "</cantid>\n" +
-									"<desc01>0</desc01>\n" +
-									"<prefin>" + precio + "</prefin>\n" +
-									"<totnet>" + totnet + "</totnet>\n" +
-									"<qrevis>0</qrevis>\n" +
-									"<pordoc>" + cantid + "</pordoc>\n" +
-									"<margen>" + Math.round((((precio-costo)/precio)*100) * 100) / 100 + "</margen>\n" +
-									"<revision>0</revision>\n" +
-									"<codubi>4</codubi>\n" +
-									"<costo>" + costo + "</costo>\n" +
-									"<comis>7,5</pordoc>\n"
+				xmlDet = xmlDet + "<Producto>" + String.fromCharCode(13) +
+									"<codemp>1</codemp>" + String.fromCharCode(13)+
+									"<numnvt>" + numnvt + "</numnvt>" + String.fromCharCode(13)+
+									"<sequen>" + sequen + "</sequen>" + String.fromCharCode(13) +
+									"<codpro>" + codpro + "</codpro>" + String.fromCharCode(13) +
+									"<despro>" + descrip + "</despro>" + String.fromCharCode(13) +
+									"<unidad>UND</unidad>" + String.fromCharCode(13) +
+									"<precio>" + precio + "</precio>" + String.fromCharCode(13) +
+									"<cantid>" + cantid + "</cantid>" + String.fromCharCode(13) +
+									"<desc01>0</desc01>" + String.fromCharCode(13) +
+									"<prefin>" + precio + "</prefin>" + String.fromCharCode(13) +
+									"<totnet>" + totnet + "</totnet>" + String.fromCharCode(13) +
+									"<qrevis>0</qrevis>" + String.fromCharCode(13) +
+									"<pordoc>" + cantid + "</pordoc>" + String.fromCharCode(13) +
+									"<margen>" + Math.round((((precio-costo)/precio)*100) * 100) / 100 + "</margen>" + String.fromCharCode(13) +
+									"<revision>0</revision>" + String.fromCharCode(13) +
+									"<codubi>4</codubi>" + String.fromCharCode(13) +
+									"<costo>" + costo + "</costo>" + String.fromCharCode(13) +
+									"<comis>7,5</comis>" + String.fromCharCode(13)
 								+ "</Producto>";
 				atributos = $(fila).find('td:eq(0)').attr("data-attrib");
 				if (atributos != ''){
 					atributos = atributos.replace(/\$\{numnvt\}/g,numnvt);
 					atributos = atributos.replace(/\$\{sequen\}/g,sequen);
+					atributos = String.fromCharCode(13) + atributos;
 					xmlProdDet = xmlProdDet + atributos;
 				}
 				
