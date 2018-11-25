@@ -131,9 +131,13 @@ document.addEventListener('deviceready', function(){
 
 		var xmlCab = "";
 		var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
-					"b.comuna, b.ciudad,b.forpag,b.plapag,b.codlis, 0 as DESCTO01, 0 as DESCTO02 "+
-					"from ma_usuario as a, en_cliente as b " +
-	   				"where a.codusu = '" + vendedor + "' " +
+					"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02 "+
+					"from ma_usuario as a, en_cliente as b, de_dominio as c,de_dominio as d " +
+					"where b.forpag = c.codval " +
+					"and c.coddom = 5 " +
+					"and b.plapag = d.codval " +
+					"and d.coddom = 6 " +
+	   				"and a.codusu = '" + vendedor + "' " +
 	   				"and b.rutcli = " + rutcli;
 	   	window.sqlitePlugin.importPrepopulatedDatabase({file: "envios.db", "importIfExists": false});
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
@@ -152,6 +156,7 @@ document.addEventListener('deviceready', function(){
 			    			 "<codven>" + rs.rows.item(0).CODVEN +"</codven>" + String.fromCharCode(13) +
 			    			 "<fecemi>" + fecemi +"</fecemi>" + String.fromCharCode(13) +
 			    			 "<vendedor>" + vendedor +"</vendedor>" + String.fromCharCode(13) +
+			    			 "<rutcli>" + rutcli +"</rutcli>" + String.fromCharCode(13) +
 			    			 "<razons>" + rs.rows.item(0).RAZONS +"</razons>" + String.fromCharCode(13) +
 			    			 "<direcc>" + rs.rows.item(0).DIRECC +"</direcc>" + String.fromCharCode(13) +
 			    			 "<comuna>" + rs.rows.item(0).COMUNA +"</comuna>" + String.fromCharCode(13) +
@@ -162,7 +167,7 @@ document.addEventListener('deviceready', function(){
 			    			 "<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
 			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 +"</dscto1>" + String.fromCharCode(13) +
 			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 +"</dscto2>" + String.fromCharCode(13) +
-			    			 "<totneto>" + totneto +"</totneto>" + String.fromCharCode(13) +
+			    			 "<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
 			    			 "<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
 			    			 "<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
 			    			 "<totsal>" + totgen +"</totsal>" + String.fromCharCode(13) +
