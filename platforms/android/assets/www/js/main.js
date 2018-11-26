@@ -149,7 +149,7 @@ document.addEventListener('deviceready', function(){
 			    }
 			    else{
 			    	totneto = subtot - (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
-			    	totiva = totneto * 0.19;
+			    	totiva = Math.round(totneto * 0.19);
 			    	totgen = Math.round(totneto + totiva);
 			    	var fecemi = getAgno().toString() + getMes().toString() + getDia().toString();
 			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>" + String.fromCharCode(13) +
@@ -157,17 +157,17 @@ document.addEventListener('deviceready', function(){
 			    			 "<fecemi>" + fecemi +"</fecemi>" + String.fromCharCode(13) +
 			    			 "<vendedor>" + vendedor +"</vendedor>" + String.fromCharCode(13) +
 			    			 "<rutcli>" + rutcli +"</rutcli>" + String.fromCharCode(13) +
-			    			 "<razons>" + rs.rows.item(0).RAZONS +"</razons>" + String.fromCharCode(13) +
-			    			 "<direcc>" + rs.rows.item(0).DIRECC +"</direcc>" + String.fromCharCode(13) +
-			    			 "<comuna>" + rs.rows.item(0).COMUNA +"</comuna>" + String.fromCharCode(13) +
-			    			 "<ciudad>" + rs.rows.item(0).CIUDAD +"</ciudad>" + String.fromCharCode(13) +
-			    			 "<forpag>" + rs.rows.item(0).FORPAG +"</forpag>" + String.fromCharCode(13) +
-			    			 "<plapag>" + rs.rows.item(0).PLAPAG +"</plapag>" + String.fromCharCode(13) +
-			    			 "<codlis>" + rs.rows.item(0).CODLIS +"</codlis>" + String.fromCharCode(13) +
+			    			 "<razons>" + rs.rows.item(0).RAZONS + "</razons>" + String.fromCharCode(13) +
+			    			 "<direcc>" + rs.rows.item(0).DIRECC + "</direcc>" + String.fromCharCode(13) +
+			    			 "<comuna>" + rs.rows.item(0).COMUNA + "</comuna>" + String.fromCharCode(13) +
+			    			 "<ciudad>" + rs.rows.item(0).CIUDAD + "</ciudad>" + String.fromCharCode(13) +
+			    			 "<forpag>" + rs.rows.item(0).FORPAG + "</forpag>" + String.fromCharCode(13) +
+			    			 "<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
+			    			 "<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
 			    			 "<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
-			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 +"</dscto1>" + String.fromCharCode(13) +
-			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 +"</dscto2>" + String.fromCharCode(13) +
-			    			 "<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
+			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 + "</dscto1>" + String.fromCharCode(13) +
+			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 + "</dscto2>" + String.fromCharCode(13) +
+			    			 "<totneto>" + totneto +"</totneto>" + String.fromCharCode(13) +
 			    			 "<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
 			    			 "<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
 			    			 "<totsal>" + totgen +"</totsal>" + String.fromCharCode(13) +
@@ -268,7 +268,7 @@ document.addEventListener('deviceready', function(){
 									"<revision>0</revision>" + String.fromCharCode(13) +
 									"<codubi>4</codubi>" + String.fromCharCode(13) +
 									"<costo>" + costo + "</costo>" + String.fromCharCode(13) +
-									"<comis>7,5</comis>" + String.fromCharCode(13)
+									"<comis>7.5</comis>" + String.fromCharCode(13)
 								+ "</Producto>";
 				atributos = $(fila).find('td:eq(0)').attr("data-attrib");
 				if (atributos != ''){

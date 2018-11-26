@@ -149,7 +149,7 @@ document.addEventListener('deviceready', function(){
 			    }
 			    else{
 			    	totneto = subtot - (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
-			    	totiva = totneto * 0.19;
+			    	totiva = Math.round(totneto * 0.19);
 			    	totgen = Math.round(totneto + totiva);
 			    	var fecemi = getAgno().toString() + getMes().toString() + getDia().toString();
 			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>" + String.fromCharCode(13) +
@@ -167,7 +167,7 @@ document.addEventListener('deviceready', function(){
 			    			 "<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
 			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 + "</dscto1>" + String.fromCharCode(13) +
 			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 + "</dscto2>" + String.fromCharCode(13) +
-			    			 "<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
+			    			 "<totneto>" + totneto +"</totneto>" + String.fromCharCode(13) +
 			    			 "<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
 			    			 "<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
 			    			 "<totsal>" + totgen +"</totsal>" + String.fromCharCode(13) +
