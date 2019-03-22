@@ -269,7 +269,7 @@ document.addEventListener('deviceready', function(){
 									"<codubi>4</codubi>" + String.fromCharCode(13) +
 									"<costo>" + costo + "</costo>" + String.fromCharCode(13) +
 									"<comis>7.5</comis>" + String.fromCharCode(13)
-								+ "</Producto>";
+								+ "</Producto>" + String.fromCharCode(13);
 				atributos = $(fila).find('td:eq(0)').attr("data-attrib");
 				if (atributos != ''){
 					atributos = atributos.replace(/\$\{numnvt\}/g,numnvt);
@@ -280,6 +280,7 @@ document.addEventListener('deviceready', function(){
 				
 				sequen = sequen + 1;
 			});
+			xmlDet = xmlDet.substring(0, xmlDet.length-1);
 			xmlDet = xmlDet + xmlProdDet;
 			return xmlDet;
 	}
