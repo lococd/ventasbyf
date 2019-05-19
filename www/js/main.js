@@ -128,7 +128,6 @@ document.addEventListener('deviceready', function(){
 		var totneto;
 		var totiva;
 		var totgen;
-
 		var xmlCab = "";
 		var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
 					"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02 "+
@@ -142,7 +141,6 @@ document.addEventListener('deviceready', function(){
 	   	window.sqlitePlugin.importPrepopulatedDatabase({file: "envios.db", "importIfExists": false});
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 		db.transaction(function(tx){
-
 			tx.executeSql(query, [], function(tx,rs) {
 			    if(rs.rows.length == 0){
 			    	alert("Cliente no configurado");
@@ -271,13 +269,12 @@ document.addEventListener('deviceready', function(){
 									"<comis>7.5</comis>" + String.fromCharCode(13)
 								+ "</Producto>" + String.fromCharCode(13);
 				atributos = $(fila).find('td:eq(0)').attr("data-attrib");
-				if (atributos != ''){
+				if (typeof atributos != 'undefined'){
 					atributos = atributos.replace(/\$\{numnvt\}/g,numnvt);
 					atributos = atributos.replace(/\$\{sequen\}/g,sequen);
 					atributos = String.fromCharCode(13) + atributos;
 					xmlProdDet = xmlProdDet + atributos;
 				}
-				
 				sequen = sequen + 1;
 			});
 			xmlDet = xmlDet.substring(0, xmlDet.length-1);
