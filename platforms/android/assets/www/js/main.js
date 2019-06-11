@@ -281,9 +281,9 @@ document.addEventListener('deviceready', function(){
 			xmlDet = xmlDet + xmlProdDet;
 			return xmlDet;
 	}
-	function getPrecio(codpro){
+	function getPrecio(codpro, cantid){
 
-	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip,a.catpro from ma_product as a, re_lvenpro as b " +
+	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip,a.catpro, b.canmay,b.premay from ma_product as a, re_lvenpro as b " +
 	   				"where a.codpro = b.codpro " +
 	   				"and a.codpro = '" + codpro + "'";
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
@@ -334,10 +334,17 @@ document.addEventListener('deviceready', function(){
       		$("#tabAttrib").addClass("invisible");
       		$("#tblAttrib").empty();
       	}
+      	var precio = 0;
+      	if(cantid >= rs.rows.item(0).CANMAY){
+      		precio = rs.rows.item(0).PREMAY;
+      	}
+      	else{
+      		precio = rs.rows.item(0).PREDET;
+      	}
 	      $("#modalTxtCodpro").text(rs.rows.item(0).CODPRO);
 	      $("#modalTxtCodpro").attr("data-costo",rs.rows.item(0).COSTO);
 	      $("#modalTxtDespro").text(rs.rows.item(0).DESPRO);
-	      $("#modalTxtPrecio").text(rs.rows.item(0).PREDET);
+	      $("#modalTxtPrecio").text(precio);
 	      $("#modalTxtMultip").val(rs.rows.item(0).MULTIP);
 	      $("#insertarProducto").removeClass("disabled");
 	      $("#insertarProducto").prop("disabled", false);
@@ -379,15 +386,16 @@ document.addEventListener('deviceready', function(){
 
 	$("#buscarProducto").click(function(e){
 		var txtPro =  $("#txtPro").val();
-	    if(txtPro!=''){
+		var txtCantid =  $("#txtCantid").val();
+	    if(txtPro!='' && txtCantid!=''){
 	    	if(duplicado(txtPro) == true){
 	    		alert("Producto ya ingresado");
 	    		return;
 	    	}
-	      	getPrecio(parseInt(txtPro));
+	      	getPrecio(parseInt(txtPro),parseInt(txtCantid));
 	    }
 	    else{
-	      alert('Ingrese un código válido');
+	      alert('Ingrese un código válido y cantidad');
 	      return;
 		}
 	});

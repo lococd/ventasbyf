@@ -27,7 +27,7 @@ document.addEventListener('deviceready', function(){
           var dia = parseInt(fecha.substr(6,2));
           var sysdate = new Date();
           var fechaVenc = new Date(agno,mes-1,dia);
-          if( fechaVenc > sysdate ){
+          if( fechaVenc > sysdate ){ //>
             query = "select count(*) as TOTAL from ma_usuario where codusu = '" + user + "' and clave1 = '" + password + "'";
             db.executeSql(query, [], function(rs2) {
               if(rs2.rows.item(0).TOTAL > 0){
