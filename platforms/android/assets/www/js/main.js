@@ -282,7 +282,9 @@ document.addEventListener('deviceready', function(){
 			return xmlDet;
 	}
 	function getPrecio(codpro, cantid){
-
+	   if(cantid == ""){
+	   	cantid = 1;
+	   }
 	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip,a.catpro, b.canmay,b.premay from ma_product as a, re_lvenpro as b " +
 	   				"where a.codpro = b.codpro " +
 	   				"and a.codpro = '" + codpro + "'";
@@ -335,7 +337,7 @@ document.addEventListener('deviceready', function(){
       		$("#tblAttrib").empty();
       	}
       	var precio = 0;
-      	if(cantid >= rs.rows.item(0).CANMAY){
+      	if(cantid >= rs.rows.item(0).CANMAY && rs.rows.item(0).PREMAY > 0){
       		precio = rs.rows.item(0).PREMAY;
       	}
       	else{
@@ -387,15 +389,15 @@ document.addEventListener('deviceready', function(){
 	$("#buscarProducto").click(function(e){
 		var txtPro =  $("#txtPro").val();
 		var txtCantid =  $("#txtCantid").val();
-	    if(txtPro!='' && txtCantid!=''){
+	    if(txtPro!=''){
 	    	if(duplicado(txtPro) == true){
 	    		alert("Producto ya ingresado");
 	    		return;
 	    	}
-	      	getPrecio(parseInt(txtPro),parseInt(txtCantid));
+	      	getPrecio(parseInt(txtPro),txtCantid);
 	    }
 	    else{
-	      alert('Ingrese un código válido y cantidad');
+	      alert('Ingrese un código válido');
 	      return;
 		}
 	});
@@ -602,6 +604,19 @@ document.addEventListener('deviceready', function(){
     	}
     });
 
+    $("#modalTxtPrecio").change(function(){
+    	var cantid = $(this).val();
+    	if(cantid == "" || cantid == null || cantid == 0){
+    		alert("Ingrese cantidad");
+    		$(this).focus();
+    		return false;
+    	}
+    	else{
+    		var codpro = $(this).parent().parent().find('td:eq(0)').text();
+    		getPrecio(codpro,cantid);
+    	}
+    });
+
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');
 	    $("#prod-"+cid).remove();
@@ -632,7 +647,4 @@ document.addEventListener('deviceready', function(){
     		$("#totalNota2").text("Total nota:$" + totalizaNota());
     	}
 	});
-
-	
-
 }, false);
