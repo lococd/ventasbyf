@@ -14,7 +14,6 @@ document.addEventListener('deviceready', function(){
     var baseOK = false;
     //compruebo validez de la base
     createCarpetaNvt();
-    //window.sqlitePlugin.importPrepopulatedDatabase({file: "envios2.db", "importIfExists": false});
       var db = window.sqlitePlugin.openDatabase({name: "envios2.db"});
       var query = "select fecact from ma_update";
 
@@ -27,12 +26,13 @@ document.addEventListener('deviceready', function(){
           var dia = parseInt(fecha.substr(6,2));
           var sysdate = new Date();
           var fechaVenc = new Date(agno,mes-1,dia);
-          if( fechaVenc < sysdate ){ // > sysdate
+          if( fechaVenc < sysdate ){ //>
             query = "select count(*) as TOTAL from ma_usuario where codusu = '" + user + "' and clave1 = '" + password + "'";
             db.executeSql(query, [], function(rs2) {
               if(rs2.rows.item(0).TOTAL > 0){
                 window.localStorage.setItem("user", user);
                 window.localStorage.setItem("password", password);
+                window.localStorage.setItem("fecVenBase", dia + "/" + (mes -1) + "/" + agno);
                 window.location.replace("main.html");
               }
               else{
@@ -65,57 +65,6 @@ document.addEventListener('deviceready', function(){
     }, function (error) {
         console.log('transaction error: ' + error.message);
     }, null);
-
-
-
-
-
-
-
-      /*db.executeSql(query, [], function(rs) {
-        var fecha = rs.rows.item(0).fecact.toString();
-        var agno = parseInt(fecha.substr(0,4));
-        var mes = parseInt(fecha.substr(4,2));
-        var dia = parseInt(fecha.substr(6,2));
-        var sysdate = new Date();
-        var fechaVenc = new Date(agno,mes-1,dia);
-        if( fechaVenc > sysdate ){
-          checkLogin();
-        }
-        else{
-          alert("Base vencida, ingrese una nueva");
-          getBase();
-          return false;
-        }
-      }, function(error) {
-        var strErr = JSON.stringify(error);
-        if(strErr.includes("2:")){
-          alert("No hay base de datos cargada, ingrese una");
-          getBase();
-          return false;
-        }
-        else{
-            alert("problema en query " + strErr);
-            return false;
-        }
-      });*/
-
-      /*db = window.sqlitePlugin.openDatabase({name: "envios2.db"});
-      query = "select count(*) as TOTAL from ma_usuario where codusu = '" + user + "' and clave1 = '" + password + "'";
-      db.executeSql(query, [], function(rs) {
-        if(rs.rows.item(0).TOTAL > 0){
-          window.localStorage.setItem("user", user);
-          window.localStorage.setItem("password", password);
-          window.location.replace("main.html");
-        }
-        else{
-          alert("logueado incorrecto");
-          return false;
-        }
-      }, function(error) {
-          alert("logueado incorrecto " + JSON.stringify(error));
-          return false;
-      });*/
   }
 
     function getBase(){
@@ -159,84 +108,13 @@ document.addEventListener('deviceready', function(){
               function(){
                   alert('failure! database was not found');
               });
-
-
-
-
-          /*window.resolveLocalFileSystemURL( path2, function( directoryEntry ) {
-            directoryEntry.getDirectory("databases", {create: false, exclusive: false}, function(dir) {  //tomo el directorio databases
-              // tomo un lector del directorio
-              var directoryReader = dir.createReader();
-
-              // borro todos los ficheros
-              directoryReader.readEntries(function(entries) {
-                                              var i;
-                                              for (i=0; i<entries.length; i++) {
-                                                  //tomo archivo por archivo
-                                                  dir.getFile(entries[i].name, {create:false}, function(fileEntry2) {
-                                                              //y borro el archivo
-                                                              fileEntry2.remove(function(){
-                                                                  //alert("archivo removido! " + entries[i].name);
-                                                              },function(error){
-                                                                  alert("Problemas al borrar");
-                                                              },function(){
-                                                                 alert("Archivo no existe");
-                                                              });
-                                                  });
-                                              }
-                                          }
-              ,function fail(error) {
-                alert("Failed to list directory contents: " + error.code);
-            });
-
-            },
-            function(error) { 
-              alert("Error "+error.code); 
-            });
-          });*/
-
-
-          /*var strDB;
-
-          window.localStorage.setItem("numnvt", 1);
-                                          deleteNvts();
-                                          alert("¡Base de datos cargada correctamente!");
-                                          checkLogin();*/ //DESCOMENTAR AL TERMINAR
-          
-
-          /*window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fs){
-            window.resolveLocalFileSystemURL(pathDB,function(dirCopy){
-            fileEntry.copyTo(dirCopy, 'envios.db',function(){
-                        fileEntry.copyTo(dirCopy, 'envios2.db',function(){
-                        window.localStorage.setItem("numnvt", 1);
-                        deleteNvts();
-                        alert("¡Base de datos cargada correctamente!");
-                        checkLogin();
-                        },
-                      function(err)
-                      {
-                          alert(err.code);
-                      });
-                      },
-                    function(err)
-                    {
-                        alert(err.code);
-                    });
-            },
-            function(err){
-              alert("err getAppDir " +err.code);
-            });
-          },function(err){
-            alert("error al copiar! " + err);
-          });*/
-
         },
         function(error) {
           alert("err getBaseNueva " + error.code);
         });
       },
       function(msg) {
-        alert("Archivo no seleccionado");
+        alert("Archivo no seleccionado " + msg);
       });
     }    
   }

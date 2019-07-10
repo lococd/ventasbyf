@@ -1,4 +1,5 @@
 document.addEventListener('deviceready', function(){
+	var limpiando = true;
 	//funciones auxiliares
 	function cargarModalGuardar(){
 		//createDb();
@@ -83,18 +84,18 @@ document.addEventListener('deviceready', function(){
 				}
 				if (cantUni>0){
 					atributos = atributos +
-						'<DeProducto>' +
-                 		'<Dnumnvt>${numnvt}</Dnumnvt>' +
-                 		'<Dsequen>'+ j + '</Dsequen>' +
-                 		'<Dcodpro>'+ $("#modalTxtCodpro").text() + '</Dcodpro>' +
-                 		'<Ddespro>'+ $(fila).find('td:eq(0)').text() + '</Ddespro>' +
-                 		'<Dcantid>'+ cantUni + '</Dcantid>' +
-                 		'<Dcoddom>'+ $(fila).find('td:eq(1) input').attr("data-catpro") +'</Dcoddom>' +
-             			'</DeProducto>';
+						'<DeProducto>'+ String.fromCharCode(13) +
+                 		'<Dnumnvt>${numnvt}</Dnumnvt>' + String.fromCharCode(13) +
+                 		'<Dsequen>'+ j + '</Dsequen>' + String.fromCharCode(13) +
+                 		'<Dcodpro>'+ $("#modalTxtCodpro").text() + '</Dcodpro>' + String.fromCharCode(13) +
+                 		'<Ddespro>'+ $(fila).find('td:eq(0)').text() + '</Ddespro>' + String.fromCharCode(13) +
+                 		'<Dcantid>'+ cantUni + '</Dcantid>' + String.fromCharCode(13) +
+                 		'<Dcoddom>'+ $(fila).find('td:eq(1) input').attr("data-catpro") +'</Dcoddom>' + String.fromCharCode(13) +
+             			'</DeProducto>' + String.fromCharCode(13);
              			j = j + 1;
 				}
 			});
-		atributos = atributos + '</DeProducto>'
+		//atributos = atributos + '</DeProducto>'
 		return atributos;
 	}
 
@@ -128,62 +129,72 @@ document.addEventListener('deviceready', function(){
 		var totneto;
 		var totiva;
 		var totgen;
-
 		var xmlCab = "";
 		var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
-					"b.comuna, b.ciudad,b.forpag,b.plapag,b.codlis, 0 as DESCTO01, 0 as DESCTO02 "+
-					"from ma_usuario as a, en_cliente as b " +
-	   				"where a.codusu = '" + vendedor + "' " +
+					"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02 "+
+					"from ma_usuario as a, en_cliente as b, de_dominio as c,de_dominio as d " +
+					"where b.forpag = c.codval " +
+					"and c.coddom = 5 " +
+					"and b.plapag = d.codval " +
+					"and d.coddom = 6 " +
+	   				"and a.codusu = '" + vendedor + "' " +
 	   				"and b.rutcli = " + rutcli;
 	   	window.sqlitePlugin.importPrepopulatedDatabase({file: "envios.db", "importIfExists": false});
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 		db.transaction(function(tx){
-
 			tx.executeSql(query, [], function(tx,rs) {
 			    if(rs.rows.length == 0){
 			    	alert("Cliente no configurado");
 			    }
 			    else{
 			    	totneto = subtot - (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
-			    	totiva = totneto * 0.19;
+			    	totiva = Math.round(totneto * 0.19);
 			    	totgen = Math.round(totneto + totiva);
-			    	var fecemi = getAgno() + getMes() + getDia();
-			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>" +
-			    			 "<codven>" + rs.rows.item(0).CODVEN +"</codven>" +
-			    			 "<fecemi>" + fecemi +"</fecemi>" +
-			    			 "<vendedor>" + vendedor +"</vendedor>" +
-			    			 "<razons>" + rs.rows.item(0).RAZONS +"</razons>" +
-			    			 "<direcc>" + rs.rows.item(0).DIRECC +"</direcc>" +
-			    			 "<comuna>" + rs.rows.item(0).COMUNA +"</comuna>" +
-			    			 "<ciudad>" + rs.rows.item(0).CIUDAD +"</ciudad>" +
-			    			 "<forpag>" + rs.rows.item(0).FORPAG +"</forpag>" +
-			    			 "<plapag>" + rs.rows.item(0).PLAPAG +"</plapag>" +
-			    			 "<codlis>" + rs.rows.item(0).CODLIS +"</codlis>" +
-			    			 "<subtot>" + subtot +"</subtot>" +
-			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 +"</dscto1>" +
-			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 +"</dscto2>" +
-			    			 "<totneto>" + totneto +"</totneto>" +
-			    			 "<totiva>" + totiva +"</totiva>" +
-			    			 "<totgen>" + totgen +"</totgen>" +
-			    			 "<totsal>" + totgen +"</totsal>" +
-			      			 "<numbul>0</numbul>"+
-				             "<codban>30</codban>" +
-				             "<origen>REM</origen>" +
-				             "<estado>0</estado>" +
-				             "<pagada>0</pagada>"+
-				             "<factura>N</factura>"+
-				             "<observ>"+ observ + "</observ>";
+			    	var fecemi = getAgno().toString() + getMes().toString() + getDia().toString();
+			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>" + String.fromCharCode(13) +
+			    			 "<codven>" + rs.rows.item(0).CODVEN +"</codven>" + String.fromCharCode(13) +
+			    			 "<fecemi>" + fecemi +"</fecemi>" + String.fromCharCode(13) +
+			    			 "<vendedor>" + vendedor +"</vendedor>" + String.fromCharCode(13) +
+			    			 "<rutcli>" + rutcli +"</rutcli>" + String.fromCharCode(13) +
+			    			 "<razons>" + rs.rows.item(0).RAZONS + "</razons>" + String.fromCharCode(13) +
+			    			 "<direcc>" + rs.rows.item(0).DIRECC + "</direcc>" + String.fromCharCode(13) +
+			    			 "<comuna>" + rs.rows.item(0).COMUNA + "</comuna>" + String.fromCharCode(13) +
+			    			 "<ciudad>" + rs.rows.item(0).CIUDAD + "</ciudad>" + String.fromCharCode(13) +
+			    			 "<forpag>" + rs.rows.item(0).FORPAG + "</forpag>" + String.fromCharCode(13) +
+			    			 "<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
+			    			 "<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
+			    			 "<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
+			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 + "</dscto1>" + String.fromCharCode(13) +
+			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 + "</dscto2>" + String.fromCharCode(13) +
+			    			 "<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
+			    			 "<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
+			    			 "<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
+			    			 "<totsal>" + totgen +"</totsal>" + String.fromCharCode(13) +
+			      			 "<numbul>0</numbul>" + String.fromCharCode(13)+
+				             "<codban>30</codban>" + String.fromCharCode(13) +
+				             "<origen>REM</origen>" + String.fromCharCode(13) +
+				             "<estado>0</estado>" + String.fromCharCode(13) +
+				             "<pagada>0</pagada>" + String.fromCharCode(13)+
+				             "<factura>N</factura>" + String.fromCharCode(13)+
+				             "<observ>"+ observ + "</observ>" + String.fromCharCode(13);
 
-				            var xmlText = '<?xml version="1.0" encoding="utf-8"?>'+
-							  "<Pedidos><NotaVenta><Cabecera>"+ xmlCab +
-							  "</Cabecera><Detalle>"+ xmlDet+
-							  "</Detalle></NotaVenta></Pedidos>";
+				            var xmlText = '<?xml version="1.0" encoding="utf-8"?>' + String.fromCharCode(13) +
+							  "<Pedidos>" + String.fromCharCode(13) +
+							  	"<NotaVenta>" + String.fromCharCode(13) +
+							  		"<Cabecera>" + String.fromCharCode(13) +
+							  			xmlCab +
+							  		"</Cabecera>" + String.fromCharCode(13) +
+							  		"<Detalle>" + String.fromCharCode(13)+
+							  			xmlDet+
+							  		"</Detalle>" + String.fromCharCode(13) +
+							  	"</NotaVenta>" + String.fromCharCode(13) +
+							  "</Pedidos>";
 
 							window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory+"/nvt", function( directoryEntry ) {
 								var sysdate = new Date();
 								var mes = sysdate.getMonth() + 1;
 								var fechasalida = getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString();
-							    directoryEntry.getFile(fechasalida + window.localStorage.getItem("user") + numnvt + ".txt", { create: true }, function( fileEntry ) {
+							    directoryEntry.getFile(fechasalida + window.localStorage.getItem("user") + numnvt + ".xml", { create: true }, function( fileEntry ) {
 							        fileEntry.createWriter( function( fileWriter ) {
 							            fileWriter.onwriteend = function( result ) {
 							            	alert( 'Nota de venta grabada con éxito! Numero '+ numnvt );
@@ -238,40 +249,44 @@ document.addEventListener('deviceready', function(){
 				//		"VALUES('1','"+numnvt+"','"+sequen+"','"+codpro+"','"+precio+"','"+cantid+"','"+precio+"','"+totnet+"','"+cantid+"','7.5','0','0')";
 						//alert(query);
 				
-				xmlDet = xmlDet + "<Producto>" +
-									"<codemp>1</codemp>"+
-									"<numnvt>" + numnvt + "</numnvt>"+
-									"<sequen>" + sequen + "</sequen>" +
-									"<despro>" + descrip + "</despro>" +
-									"<unidad>UND</unidad>" +
-									"<precio>" + precio + "</precio>" +
-									"<cantid>" + cantid + "</cantid>" +
-									"<desc01>0</desc01>" +
-									"<prefin>" + precio + "</prefin>" +
-									"<totnet>" + totnet + "</totnet>" +
-									"<qrevis>0</qrevis>" +
-									"<pordoc>" + cantid + "</pordoc>" +
-									"<margen>" + Math.round((((precio-costo)/precio)*100) * 100) / 100 + "</margen>" +
-									"<revision>0</revision>" +
-									"<codubi>4</codubi>" +
-									"<costo>" + costo + "</costo>" +
-									"<comis>7,5</pordoc>"
-								+ "</Producto>";
+				xmlDet = xmlDet + "<Producto>" + String.fromCharCode(13) +
+									"<codemp>1</codemp>" + String.fromCharCode(13)+
+									"<numnvt>" + numnvt + "</numnvt>" + String.fromCharCode(13)+
+									"<sequen>" + sequen + "</sequen>" + String.fromCharCode(13) +
+									"<codpro>" + codpro + "</codpro>" + String.fromCharCode(13) +
+									"<despro>" + descrip + "</despro>" + String.fromCharCode(13) +
+									"<unidad>UND</unidad>" + String.fromCharCode(13) +
+									"<precio>" + precio + "</precio>" + String.fromCharCode(13) +
+									"<cantid>" + cantid + "</cantid>" + String.fromCharCode(13) +
+									"<desc01>0</desc01>" + String.fromCharCode(13) +
+									"<prefin>" + precio + "</prefin>" + String.fromCharCode(13) +
+									"<totnet>" + totnet + "</totnet>" + String.fromCharCode(13) +
+									"<qrevis>0</qrevis>" + String.fromCharCode(13) +
+									"<pordoc>" + cantid + "</pordoc>" + String.fromCharCode(13) +
+									"<margen>" + Math.round((((precio-costo)/precio)*100) * 100) / 100 + "</margen>" + String.fromCharCode(13) +
+									"<revision>0</revision>" + String.fromCharCode(13) +
+									"<codubi>4</codubi>" + String.fromCharCode(13) +
+									"<costo>" + costo + "</costo>" + String.fromCharCode(13) +
+									"<comis>7.5</comis>" + String.fromCharCode(13)
+								+ "</Producto>" + String.fromCharCode(13);
 				atributos = $(fila).find('td:eq(0)').attr("data-attrib");
-				if (atributos != ''){
+				if (typeof atributos != 'undefined'){
 					atributos = atributos.replace(/\$\{numnvt\}/g,numnvt);
 					atributos = atributos.replace(/\$\{sequen\}/g,sequen);
+					atributos = String.fromCharCode(13) + atributos;
 					xmlProdDet = xmlProdDet + atributos;
 				}
-				
 				sequen = sequen + 1;
 			});
+			xmlDet = xmlDet.substring(0, xmlDet.length-1);
 			xmlDet = xmlDet + xmlProdDet;
 			return xmlDet;
 	}
-	function getPrecio(codpro){
-
-	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip,a.catpro from ma_product as a, re_lvenpro as b " +
+	function getPrecio(codpro, cantid){
+	   if(cantid == ""){
+	   	cantid = 1;
+	   }
+	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip,a.catpro, b.canmay,b.premay from ma_product as a, re_lvenpro as b " +
 	   				"where a.codpro = b.codpro " +
 	   				"and a.codpro = '" + codpro + "'";
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
@@ -286,13 +301,16 @@ document.addEventListener('deviceready', function(){
 	    	$("#modalTxtMultip").val(1);
 	    	$("#insertarProducto").addClass("disabled");
 	      	$("#insertarProducto").prop("disabled", true);
-	      	$("#txtCantid").val("");
+	      	$("#txtCantid").trigger(':reset');
 	      	$("#txtPro").focus();
 	    	return false;
 	    }
 	    else{
 	      if(rs.rows.item(0).CATPRO>0){
-	      	var query2 = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = "+ rs.rows.item(0).CATPRO;
+	      	var query2 = "select desval from de_dominio " +
+						 "where coddom = (select codref from de_dominio " +
+						 "where coddom = 100 " +
+						 "and codval = " + rs.rows.item(0).CATPRO + ")";
       		var db2 = window.sqlitePlugin.openDatabase({name: "envios.db"});
       		db2.executeSql(query2, [], function(rs2) {
       			var fila = '';//'<tr><td>ATRIBUTO</td><td>CANTIDAD</td></tr>';
@@ -319,10 +337,17 @@ document.addEventListener('deviceready', function(){
       		$("#tabAttrib").addClass("invisible");
       		$("#tblAttrib").empty();
       	}
+      	var precio = 0;
+      	if(cantid >= rs.rows.item(0).CANMAY && rs.rows.item(0).PREMAY > 0){
+      		precio = rs.rows.item(0).PREMAY;
+      	}
+      	else{
+      		precio = rs.rows.item(0).PREDET;
+      	}
 	      $("#modalTxtCodpro").text(rs.rows.item(0).CODPRO);
 	      $("#modalTxtCodpro").attr("data-costo",rs.rows.item(0).COSTO);
 	      $("#modalTxtDespro").text(rs.rows.item(0).DESPRO);
-	      $("#modalTxtPrecio").text(rs.rows.item(0).PREDET);
+	      $("#modalTxtPrecio").text(precio);
 	      $("#modalTxtMultip").val(rs.rows.item(0).MULTIP);
 	      $("#insertarProducto").removeClass("disabled");
 	      $("#insertarProducto").prop("disabled", false);
@@ -358,18 +383,21 @@ document.addEventListener('deviceready', function(){
 	limpiar();
 	cargarModalGuardar();
 
-	$("#lblVendedor").text("Ejecutivo: " + window.localStorage.getItem("user"));
+	$(".lblVendedor").text("Ejecutivo: " + window.localStorage.getItem("user"));
+	$("#lblVendedor2").text("Ejecutivo: " + window.localStorage.getItem("user"));
+	$("#lblVigencia").text("BD Válida hasta: " + window.localStorage.getItem("fecVenBase"));
 
 	//eventos de botones
 
 	$("#buscarProducto").click(function(e){
 		var txtPro =  $("#txtPro").val();
+		var txtCantid =  $("#txtCantid").val();
 	    if(txtPro!=''){
 	    	if(duplicado(txtPro) == true){
 	    		alert("Producto ya ingresado");
 	    		return;
 	    	}
-	      	getPrecio(parseInt(txtPro));
+	      	getPrecio(parseInt(txtPro),txtCantid);
 	    }
 	    else{
 	      alert('Ingrese un código válido');
@@ -386,13 +414,14 @@ document.addEventListener('deviceready', function(){
 		cargarModalGuardar();
 	});
 
-	$("#btnCerrarSesion").click(function(e){
+	$(".btnCerrarSesion").click(function(e){
 		window.localStorage.setItem("user", "");
 		window.localStorage.setItem("password", "");
 		window.location.replace("index.html");
 	});
 
 	$("#insertarProducto").click(function(e){
+		//$("#txtCantid").trigger("change");
 		var cantid = $("#txtCantid").val();
 		var multip = $("#modalTxtMultip").val();
 		if(cantid != "" && cantid > 0){
@@ -406,6 +435,8 @@ document.addEventListener('deviceready', function(){
 					return false;
 				}
 				else{
+					//getPrecio(parseInt($("#modalTxtCodpro").text()), cantid, false);
+					//$("#buscarProducto").trigger("click");
 					netoProd = parseInt($("#modalTxtPrecio").text()) * cantid;
 					var xmlAtrib = getAtributos();
 					var tr = '';
@@ -426,7 +457,7 @@ document.addEventListener('deviceready', function(){
 								 + $("#modalTxtCodpro").text() + "</td>" +
 							"<td>"+$("#modalTxtDespro").text() + "</td>" +
 							"<td>"+$("#modalTxtPrecio").text() + "</td>" +
-							'<td><input type="number" class="form-control cantProd" value="'+ cantid +'"></td>' +
+							'<td><input type="number" class="form-control cantProd" disabled value="'+ cantid +'"></td>' +
 							"<td>"+ netoProd +"</td>"+
 							'<td><a href="#" class="up">SUBIR</a>/<a href="#" class="down">BAJAR</a></td>'+
 							'<td><a class="eliminarFila" data-codpro="'+$("#modalTxtCodpro").text()+'" href="#">Eliminar</a></td>' +
@@ -438,13 +469,14 @@ document.addEventListener('deviceready', function(){
 					$("#modalTxtDespro").text("");
 					$("#modalTxtPrecio").text("");
 					$("#txtPro").val("");
-					$("#txtCantid").val("");
+					$("#txtCantid").val(" "); //ojo con ese trucazo! permite vaciar el valor sin desencadenar el trigger
 					$("#insertarProducto").addClass("disabled");
 					$("#insertarProducto").prop("disabled",true);
 					$("#tabAttrib").addClass("invisible");
 					$("#tblAttrib").empty();
 					$("#totalNota").text("Total nota:$"+totalizaNota());
 					$("#totalNota2").text("Total nota:$"+totalizaNota());
+					limpiando = false;
 				}
 			}
 		}
@@ -579,6 +611,20 @@ document.addEventListener('deviceready', function(){
     	}
     });
 
+    $("#txtCantid").change(function(){
+    	if(limpiando==false){
+    		if(cantid == "" || cantid == null || cantid == 0){
+	    		alert("Ingrese cantidad");
+	    		$(this).focus();
+	    		return false;
+	    	}
+	    	else{
+	    		var codpro = $(this).parent().parent().find('td:eq(0)').text();
+	    		getPrecio(codpro,cantid);
+	    	}
+    	}
+    });
+
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');
 	    $("#prod-"+cid).remove();
@@ -609,7 +655,4 @@ document.addEventListener('deviceready', function(){
     		$("#totalNota2").text("Total nota:$" + totalizaNota());
     	}
 	});
-
-	
-
 }, false);

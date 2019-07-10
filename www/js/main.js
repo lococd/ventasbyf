@@ -1,4 +1,5 @@
 document.addEventListener('deviceready', function(){
+	var limpiando = true;
 	//funciones auxiliares
 	function cargarModalGuardar(){
 		//createDb();
@@ -300,7 +301,7 @@ document.addEventListener('deviceready', function(){
 	    	$("#modalTxtMultip").val(1);
 	    	$("#insertarProducto").addClass("disabled");
 	      	$("#insertarProducto").prop("disabled", true);
-	      	$("#txtCantid").val("");
+	      	$("#txtCantid").trigger(':reset');
 	      	$("#txtPro").focus();
 	    	return false;
 	    }
@@ -382,7 +383,9 @@ document.addEventListener('deviceready', function(){
 	limpiar();
 	cargarModalGuardar();
 
-	$("#lblVendedor").text("Ejecutivo: " + window.localStorage.getItem("user"));
+	$(".lblVendedor").text("Ejecutivo: " + window.localStorage.getItem("user"));
+	$("#lblVendedor2").text("Ejecutivo: " + window.localStorage.getItem("user"));
+	$("#lblVigencia").text("BD Válida hasta: " + window.localStorage.getItem("fecVenBase"));
 
 	//eventos de botones
 
@@ -411,13 +414,14 @@ document.addEventListener('deviceready', function(){
 		cargarModalGuardar();
 	});
 
-	$("#btnCerrarSesion").click(function(e){
+	$(".btnCerrarSesion").click(function(e){
 		window.localStorage.setItem("user", "");
 		window.localStorage.setItem("password", "");
 		window.location.replace("index.html");
 	});
 
 	$("#insertarProducto").click(function(e){
+		//$("#txtCantid").trigger("change");
 		var cantid = $("#txtCantid").val();
 		var multip = $("#modalTxtMultip").val();
 		if(cantid != "" && cantid > 0){
@@ -431,6 +435,8 @@ document.addEventListener('deviceready', function(){
 					return false;
 				}
 				else{
+					//getPrecio(parseInt($("#modalTxtCodpro").text()), cantid, false);
+					//$("#buscarProducto").trigger("click");
 					netoProd = parseInt($("#modalTxtPrecio").text()) * cantid;
 					var xmlAtrib = getAtributos();
 					var tr = '';
@@ -451,7 +457,7 @@ document.addEventListener('deviceready', function(){
 								 + $("#modalTxtCodpro").text() + "</td>" +
 							"<td>"+$("#modalTxtDespro").text() + "</td>" +
 							"<td>"+$("#modalTxtPrecio").text() + "</td>" +
-							'<td><input type="number" class="form-control cantProd" value="'+ cantid +'"></td>' +
+							'<td><input type="number" class="form-control cantProd" disabled value="'+ cantid +'"></td>' +
 							"<td>"+ netoProd +"</td>"+
 							'<td><a href="#" class="up">SUBIR</a>/<a href="#" class="down">BAJAR</a></td>'+
 							'<td><a class="eliminarFila" data-codpro="'+$("#modalTxtCodpro").text()+'" href="#">Eliminar</a></td>' +
@@ -463,13 +469,14 @@ document.addEventListener('deviceready', function(){
 					$("#modalTxtDespro").text("");
 					$("#modalTxtPrecio").text("");
 					$("#txtPro").val("");
-					$("#txtCantid").val("");
+					$("#txtCantid").val(" "); //ojo con ese trucazo! permite vaciar el valor sin desencadenar el trigger
 					$("#insertarProducto").addClass("disabled");
 					$("#insertarProducto").prop("disabled",true);
 					$("#tabAttrib").addClass("invisible");
 					$("#tblAttrib").empty();
 					$("#totalNota").text("Total nota:$"+totalizaNota());
 					$("#totalNota2").text("Total nota:$"+totalizaNota());
+					limpiando = false;
 				}
 			}
 		}
@@ -604,16 +611,17 @@ document.addEventListener('deviceready', function(){
     	}
     });
 
-    $("#modalTxtPrecio").change(function(){
-    	var cantid = $(this).val();
-    	if(cantid == "" || cantid == null || cantid == 0){
-    		alert("Ingrese cantidad");
-    		$(this).focus();
-    		return false;
-    	}
-    	else{
-    		var codpro = $(this).parent().parent().find('td:eq(0)').text();
-    		getPrecio(codpro,cantid);
+    $("#txtCantid").change(function(){
+    	if(limpiando==false){
+    		if(cantid == "" || cantid == null || cantid == 0){
+	    		alert("Ingrese cantidad");
+	    		$(this).focus();
+	    		return false;
+	    	}
+	    	else{
+	    		var codpro = $(this).parent().parent().find('td:eq(0)').text();
+	    		getPrecio(codpro,cantid);
+	    	}
     	}
     });
 

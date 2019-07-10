@@ -32,6 +32,7 @@ document.addEventListener('deviceready', function(){
               if(rs2.rows.item(0).TOTAL > 0){
                 window.localStorage.setItem("user", user);
                 window.localStorage.setItem("password", password);
+                window.localStorage.setItem("fecVenBase", dia + "/" + (mes -1) + "/" + agno);
                 window.location.replace("main.html");
               }
               else{
