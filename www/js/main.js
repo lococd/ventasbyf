@@ -193,7 +193,7 @@ document.addEventListener('deviceready', function(){
 							window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory+"/nvt", function( directoryEntry ) {
 								var sysdate = new Date();
 								var mes = sysdate.getMonth() + 1;
-								var fechasalida = getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString();
+								var fechasalida = (sysdate.getYear() + 1900).toString() + getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString() + sysdate.getSeconds().toString();
 							    directoryEntry.getFile(fechasalida + window.localStorage.getItem("user") + numnvt + ".xml", { create: true }, function( fileEntry ) {
 							        fileEntry.createWriter( function( fileWriter ) {
 							            fileWriter.onwriteend = function( result ) {
@@ -368,7 +368,7 @@ document.addEventListener('deviceready', function(){
 		$("#modalTxtPrecio").text("");
 		$("#txtCantid").val("");
 		$("#txtRutcli").val("");
-		$("#txtObserv").text("");
+		$("#txtObserv").val("");
 		$("#btnConfirmarGuardado").prop("enabled",false);
 		$("#btnConfirmarGuardado").addClass("disabled");
 		$("#tblProd >tbody").empty();
@@ -419,8 +419,7 @@ document.addEventListener('deviceready', function(){
 		//window.localStorage.setItem("password", "");
 		window.localStorage.removeItem("user");
 		window.localStorage.removeItem("password");
-		//window.location = window.location.href;
-		window.location.replace("index.html");
+		navigator.app.loadUrl("file:///android_asset/www/index.html");
 	});
 
 	$("#insertarProducto").click(function(e){
@@ -497,7 +496,7 @@ document.addEventListener('deviceready', function(){
 			    var xmlDet = getDetalle(productos);
 				var numnvt = parseInt($("#lblTituloLpr").text());
 				var vendedor = window.localStorage.getItem("user");
-				var observ = $("#txtObserv").text();
+				var observ = $("#txtObserv").val();
 				grabaXML(rutcli,numnvt,vendedor,observ,xmlDet);
 			} else {
 			    return false;
