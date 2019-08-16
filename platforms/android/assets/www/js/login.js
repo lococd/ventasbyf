@@ -14,11 +14,13 @@ document.addEventListener('deviceready', function(){
     var baseOK = false;
     //compruebo validez de la base
     createCarpetaNvt();
+    //compruebo si el archivo existe
+      var baseCargada = "file:///data/data/cl.dimeiggs.precios/databases/envios.db";
+      checkIfFileExists(baseCargada);
       var db = window.sqlitePlugin.openDatabase({name: "envios2.db"});
       var query = "select fecact from ma_update";
 
       db.transaction(function (tx) {
-
         tx.executeSql(query, [], function (tx, rs) {
           var fecha = rs.rows.item(0).fecact.toString();
           var agno = parseInt(fecha.substr(0,4));
@@ -26,13 +28,14 @@ document.addEventListener('deviceready', function(){
           var dia = parseInt(fecha.substr(6,2));
           var sysdate = new Date();
           var fechaVenc = new Date(agno,mes-1,dia);
+          alert(fecha);
           if( fechaVenc > sysdate ){ //>
             query = "select count(*) as TOTAL from ma_usuario where codusu = '" + user + "' and clave1 = '" + password + "'";
             db.executeSql(query, [], function(rs2) {
               if(rs2.rows.item(0).TOTAL > 0){
                 window.localStorage.setItem("user", user);
                 window.localStorage.setItem("password", password);
-                window.localStorage.setItem("fecVenBase", dia + "/" + (mes -1) + "/" + agno);
+                window.localStorage.setItem("fecVenBase", dia + "/" + mes + "/" + agno);
                 window.location.replace("main.html");
               }
               else{
@@ -67,39 +70,27 @@ document.addEventListener('deviceready', function(){
     }, null);
   }
 
-    function getBase(){
-    if(!confirm("Recuerde enviar todas las notas de venta antes de cargar nueva base, se borrarán las notas existentes. ¿Quiere continuar?")){
-      return false;
-    }
-    else{
-      filechooser.open({"mime": "application/octet-stream"}, function(data) {
-        var pathDB = "file:///data/data/cl.dimeiggs.precios/databases/";
-
-        var seleccionado = data.url;
-
-        window.resolveLocalFileSystemURI(seleccionado, function(fileEntrySelected) {
-          var path2 = "file:///data/data/cl.dimeiggs.precios/"
+  function copyBase(seleccionado, nombreDestino, enjundia){
+    window.resolveLocalFileSystemURI(seleccionado, function(fileEntrySelected) {
+          var path2 = "file:///data/data/cl.dimeiggs.precios/";
           //agarro el directorio root
           window.resolveLocalFileSystemURL(seleccionado, 
               function(fileDB){
                   window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
                           window.resolveLocalFileSystemURL( path2, function( directoryEntry ) {
                             directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
-                              fileDB.copyTo(dirDB, 'envios2.db',
+                              fileDB.copyTo(dirDB, nombreDestino,
                               function(){
-                                  fileDB.copyTo(dirDB, 'envios.db',
-                                  function(){
-                                      window.localStorage.setItem("numnvt", 1);
-                                      deleteNvts();
-                                      alert("¡Base de datos cargada correctamente!");
-                                      checkLogin();
-                                  }, 
-                                  function(err){
-                                      alert('unsuccessful copying ' + err);
-                                  });
+                                if(enjundia){
+                                  window.localStorage.setItem("numnvt", 1);
+                                  deleteNvts();
+                                  alert("¡Base de datos cargada correctamente!");
+                                  checkLogin();
+                                }
                               }, 
                               function(err){
                                   alert('unsuccessful copying ' + err);
+                                  return false;
                               });
                             },null);
                           },null);                        
@@ -112,6 +103,19 @@ document.addEventListener('deviceready', function(){
         function(error) {
           alert("err getBaseNueva " + error.code);
         });
+  }
+
+    function getBase(){
+    if(!confirm("Recuerde enviar todas las notas de venta antes de cargar nueva base, se borrarán las notas existentes. ¿Quiere continuar?")){
+      return false;
+    }
+    else{
+      filechooser.open({"mime": "application/octet-stream"}, function(data) {
+        var pathDB = "file:///data/data/cl.dimeiggs.precios/databases/";
+
+        var seleccionado = data.url;
+        var copiaOk = copyBase(seleccionado, "envios.db");
+        copyBase(seleccionado, "envios2.db", true);
       },
       function(msg) {
         alert("Archivo no seleccionado " + msg);
@@ -181,6 +185,48 @@ function deleteDB() {
       alert("Error "+error.code); 
     });
   });
+}
+
+function deleteFile(nombreBase){
+  var path = "file:///data/data/cl.dimeiggs.precios/";
+  //agarro el directorio root
+  window.resolveLocalFileSystemURL( path, function( directoryEntry ) {
+    directoryEntry.getDirectory("databases", {create: false, exclusive: false}, function(dir) {  //tomo el directorio databases
+      dir.getFile(nombreBase, {
+        create: false,
+        exclusive: false
+    }, function(fileEntry) {
+        fileEntry.remove(function (file) {
+            // File deleted successfully
+        }, function (err) {
+            console.log(err); // Error while removing File
+        });
+
+    }, function(err) {
+        console.log(err)  // Error while requesting File.
+    });
+
+    },
+    function(error) { 
+      alert("Error "+error.code); 
+    });
+  });
+}
+
+function checkIfFileExists(path){
+    // path is the full absolute path to the file.
+    window.resolveLocalFileSystemURL(path, fileExists, fileDoesNotExist);
+}
+function fileExists(fileEntry){
+  deleteFile("envios2.db");
+  copyBase("file:///data/data/cl.dimeiggs.precios/databases/envios.db", "envios2.db", false);
+    //alert("File " + fileEntry.fullPath + " exists!");
+}
+function fileDoesNotExist(){
+    alert("No hay base de datos cargada, ingrese una plox");
+    getBase();
+    return false;
+    //alert("file does not exist");
 }
 
 function deleteNvts(){

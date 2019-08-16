@@ -293,7 +293,7 @@ document.addEventListener('deviceready', function(){
 
 
 	   	db.executeSql(query, [], function(rs) {
-	    if(rs.rows.length == 0){
+	    if(rs.rows.length == 0){ //busco precio
 	    	alert('Código '+ codpro +' no tiene precio configurado');
 	    	$("#modalTxtCodpro").text('');
 	    	$("#modalTxtDespro").text('');
@@ -415,8 +415,11 @@ document.addEventListener('deviceready', function(){
 	});
 
 	$(".btnCerrarSesion").click(function(e){
-		window.localStorage.setItem("user", "");
-		window.localStorage.setItem("password", "");
+		//window.localStorage.setItem("user", "");
+		//window.localStorage.setItem("password", "");
+		window.localStorage.removeItem("user");
+		window.localStorage.removeItem("password");
+		//window.location = window.location.href;
 		window.location.replace("index.html");
 	});
 
