@@ -11,6 +11,7 @@
     }
   },
   "dependencies": {
+    "cordova-zip-plugin": "^1.1.0",
     "cordova.plugins.diagnostic": "^3.9.2"
   }
 }

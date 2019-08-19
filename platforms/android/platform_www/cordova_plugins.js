@@ -212,6 +212,14 @@ module.exports = [
         "clobbers": [
             "FileChooser"
         ]
+    },
+    {
+        "id": "com.jjdltc.cordova.plugin.zip.JJzip",
+        "file": "plugins/com.jjdltc.cordova.plugin.zip/www/JJzip.js",
+        "pluginId": "com.jjdltc.cordova.plugin.zip",
+        "clobbers": [
+            "JJzip"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -223,7 +231,8 @@ module.exports.metadata =
     "cordova-plugin-whitelist": "1.3.2",
     "cordova-plugin-file": "4.3.3",
     "cordova-plugin-file-transfer": "1.6.3",
-    "com.cesidiodibenedetto.filechooser": "1.0.4"
+    "com.cesidiodibenedetto.filechooser": "1.0.4",
+    "com.jjdltc.cordova.plugin.zip": "1.1.0"
 };
 // BOTTOM OF METADATA
 });

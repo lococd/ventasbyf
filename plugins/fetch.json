@@ -49,5 +49,13 @@
     "variables": {
       "ANDROID_SUPPORT_VERSION": "27.+"
     }
+  },
+  "com.jjdltc.cordova.plugin.zip": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-zip-plugin@1.1.0"
+    },
+    "is_top_level": true,
+    "variables": {}
   }
 }

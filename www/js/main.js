@@ -662,19 +662,26 @@ document.addEventListener('deviceready', function(){
     	}
     });
 
-    /*$("#txtCantid").change(function(){
-    	if(limpiando==false){
-    		if(cantid == "" || cantid == null || cantid == 0){
-	    		alert("Ingrese cantidad");
-	    		$(this).focus();
-	    		return false;
-	    	}
-	    	else{
-	    		var codpro = $(this).parent().parent().find('td:eq(0)').text();
-	    		getPrecio(codpro,cantid);
-	    	}
-    	}
-    });*/
+    $("#btnZip").click(function(e){
+		var PathToFileInString  = cordova.file.externalRootDirectory+"nvt",
+	        PathToResultZip     = cordova.file.externalRootDirectory;
+	    JJzip.zip(PathToFileInString, {target:PathToResultZip,name:"nvt"},function(data){
+	        //funcó e.e
+	        alert("ok!");
+	        navigator.share({
+			    title: "Share topic",
+			    text: "Share message",
+			    url: PathToResultZip+"nvt.zip"
+			}).then(() => {
+			    alert("Data was shared successfully");
+			}).catch((err) => {
+			    alert("Share failed:", err.message);
+			});
+	        //window.plugins.socialsharing.share('Notas de Venta', 'BYF', PathToResultZip+"nvt.zip");
+	    },function(error){
+	        alert("error: " + error);
+	    })
+	});
 
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');
@@ -691,19 +698,4 @@ document.addEventListener('deviceready', function(){
             row.insertAfter(row.next());
         }
     });
-
-	/*$(document).on('blur','.cantProd',function() {
-    	var cantid = $(this).val();
-    	if(cantid == "" || cantid == null || cantid == 0){
-    		alert("Ingrese cantidad");
-    		$(this).focus();
-    		return false;
-    	}
-    	else{
-    		var precio = $(this).parent().parent().find('td:eq(2)').text();
-    		$(this).parent().parent().find('td:eq(4)').text(precio * cantid);
-    		$("#totalNota").text("Total nota:$" + totalizaNota());
-    		$("#totalNota2").text("Total nota:$" + totalizaNota());
-    	}
-	});*/
 }, false);

@@ -21,6 +21,9 @@
     },
     "com.cesidiodibenedetto.filechooser": {
       "PACKAGE_NAME": "cl.dimeiggs.precios"
+    },
+    "com.jjdltc.cordova.plugin.zip": {
+      "PACKAGE_NAME": "cl.dimeiggs.precios"
     }
   },
   "dependent_plugins": {
