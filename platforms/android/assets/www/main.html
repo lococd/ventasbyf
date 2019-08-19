@@ -91,19 +91,20 @@
                                   <tr>
                                     <td>CODIGO</td>
                                     <td>PRODUCTO</td>
-                                    <td>PRECIO</td>
-                                    <td>CANTIDAD</td>
+                                    <td>PR NOR</td>
+                                    <td>PR MAY</td>
+                                    <td>CANTID</td>
                                   </tr>
-                                  <tr>
+                                  <tr id="modalDatosProducto" class="textoVerde">
                                     <td id="modalTxtCodpro"></td>
                                     <td class="text" id="modalTxtDespro"></td>
-                                    <td id="modalTxtPrecio"></td>
+                                    <td id="modalTxtPrecioNor"></td>
+                                    <td id="modalTxtPrecioMay"></td>
                                     <td><input type="number" id="txtCantid" class="form-control" max="99"></td>
                                   </tr>
                                 </table>
                               </div>
                             </div>
-                            <button class="btn btn-default" id="buscarProducto">Buscar Producto</button>
                             <div class="row invisible" id="tabAttrib">
                               <div class="col-md-12 text-center">
                                 <table class="table tabla-txt" id="tblAttrib">
@@ -112,7 +113,11 @@
                               </div>
                             </div>
                             <button class="btn btn-default disabled" id="insertarProducto" disabled="true">Guardar Producto</button>
+                            <button class="btn btn-default" id="btnLimpiarModal">Limpiar</button>
+                            <h5>Cantidad Mayorista</h5>
+                            <input type="number" id="modalTxtCanMay" disabled="true">
                             <input type="number" id="modalTxtMultip" class="invisible">
+                            <input type="text" id="modalTxtProdFacturable" class="invisible">
                         </div>
                       </div>
                     </div>
@@ -129,16 +134,16 @@
                     <div class="modal-header">
                       <!--button type="button" class="close" data-dismiss="modal" id="btnCerrarModallpr">&times;</button-->
                       <button type="button" class="btn btn-default pull-right btnCerrarSesion">Cerrar Sesión</button>
-                      <h4 class="modal-title">Datos Nota de Venta</h4>
+                      <h4 class="modal-title">V1.1.2 Datos Nota de Venta</h4>
                       <h4 class="modal-title" id="lblVendedor2">Ejecutivo: </h4>
                       <h4 id="lblTituloLpr" class="modal-title invisible"></h4>
                       <h4 class="modal-title" id="lblRazons">Cliente</h4>
+                      <h4 id="lblComuna"></h4>
                       <h4 class="modal-title" id="totalNota2">Total:$0</h4>
                     </div>
                     <div class="modal-body">
                       <div class="form-group">
                         <div class = "ui-front">
-                            
                             <div class="ui-widget">
                               <input type="text" id="txtRutcli" class="form-control" placeholder="Rut Cliente">
                             </div>
@@ -147,7 +152,6 @@
                       </div>
                     </div>
                     <div class="modal-footer">
-                      
                       <button type="button" id="btnConfirmarGuardado" class="btn btn-default disabled">Grabar Nota</button>
                       <button type="button" class="btn btn-default" id="btnCerrarModallpr2">Seguir Nota</button>
                       <h4 id="lblVigencia"></h4>

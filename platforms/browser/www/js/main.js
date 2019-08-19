@@ -131,7 +131,7 @@ document.addEventListener('deviceready', function(){
 		var totgen;
 		var xmlCab = "";
 		var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
-					"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02 "+
+					"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02, b.facturable "+
 					"from ma_usuario as a, en_cliente as b, de_dominio as c,de_dominio as d " +
 					"where b.forpag = c.codval " +
 					"and c.coddom = 5 " +
@@ -176,7 +176,8 @@ document.addEventListener('deviceready', function(){
 				             "<estado>0</estado>" + String.fromCharCode(13) +
 				             "<pagada>0</pagada>" + String.fromCharCode(13)+
 				             "<factura>N</factura>" + String.fromCharCode(13)+
-				             "<observ>"+ observ + "</observ>" + String.fromCharCode(13);
+				             "<observ>"+ observ + "</observ>" + String.fromCharCode(13)+
+				             "<facturable>" + rs.rows.item(0).FACTURABLE + "</facturable>" + String.fromCharCode(13);
 
 				            var xmlText = '<?xml version="1.0" encoding="utf-8"?>' + String.fromCharCode(13) +
 							  "<Pedidos>" + String.fromCharCode(13) +
@@ -193,7 +194,7 @@ document.addEventListener('deviceready', function(){
 							window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory+"/nvt", function( directoryEntry ) {
 								var sysdate = new Date();
 								var mes = sysdate.getMonth() + 1;
-								var fechasalida = getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString();
+								var fechasalida = (sysdate.getYear() + 1900).toString() + getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString() + sysdate.getSeconds().toString();
 							    directoryEntry.getFile(fechasalida + window.localStorage.getItem("user") + numnvt + ".xml", { create: true }, function( fileEntry ) {
 							        fileEntry.createWriter( function( fileWriter ) {
 							            fileWriter.onwriteend = function( result ) {
@@ -235,6 +236,7 @@ document.addEventListener('deviceready', function(){
 			var costo;
 			var totnet;
 			var descrip;
+			var facturable;
 			var xmlDet = "";
 			var xmlProdDet = "";
 			var atributos = "";
@@ -244,6 +246,7 @@ document.addEventListener('deviceready', function(){
 				precio = $(fila).find('td:eq(2)').text();
 				cantid = $(fila).find('td:eq(3) >input').val();
 				costo = $(fila).find('td:eq(0)').attr("data-costo");
+				facturable = $(fila).find('td:eq(0)').attr("data-facturable");
 				totnet = precio * cantid;
 				//query = "INSERT INTO DE_NOTAVTA (CODEMP,NUMNVT,SEQUEN,CODPRO,PRECIO,CANTID,PREFIN,TOTNET,PORDOC,COMIS,PREPARACION,PESO) " +
 				//		"VALUES('1','"+numnvt+"','"+sequen+"','"+codpro+"','"+precio+"','"+cantid+"','"+precio+"','"+totnet+"','"+cantid+"','7.5','0','0')";
@@ -267,8 +270,9 @@ document.addEventListener('deviceready', function(){
 									"<revision>0</revision>" + String.fromCharCode(13) +
 									"<codubi>4</codubi>" + String.fromCharCode(13) +
 									"<costo>" + costo + "</costo>" + String.fromCharCode(13) +
-									"<comis>7.5</comis>" + String.fromCharCode(13)
-								+ "</Producto>" + String.fromCharCode(13);
+									"<comis>7.5</comis>" + String.fromCharCode(13) +
+									"<facturable>" + facturable + "</facturable>" + String.fromCharCode(13) +
+									"</Producto>" + String.fromCharCode(13);
 				atributos = $(fila).find('td:eq(0)').attr("data-attrib");
 				if (typeof atributos != 'undefined'){
 					atributos = atributos.replace(/\$\{numnvt\}/g,numnvt);
@@ -286,33 +290,37 @@ document.addEventListener('deviceready', function(){
 	   if(cantid == ""){
 	   	cantid = 1;
 	   }
-	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip,a.catpro, b.canmay,b.premay from ma_product as a, re_lvenpro as b " +
+	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip, a.catpro, b.canmay,b.premay, a.factur " +
+	   		 		"from ma_product as a, re_lvenpro as b " +
 	   				"where a.codpro = b.codpro " +
 	   				"and a.codpro = '" + codpro + "'";
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
 
 	   	db.executeSql(query, [], function(rs) {
-	    if(rs.rows.length == 0){
+	    if(rs.rows.length == 0){ //busco precio
 	    	alert('Código '+ codpro +' no tiene precio configurado');
 	    	$("#modalTxtCodpro").text('');
 	    	$("#modalTxtDespro").text('');
+	    	$("#modalTxtProdFacturable").val('');
 	    	$("#modalTxtPrecio").text('');
 	    	$("#modalTxtMultip").val(1);
 	    	$("#insertarProducto").addClass("disabled");
 	      	$("#insertarProducto").prop("disabled", true);
-	      	$("#txtCantid").trigger(':reset');
+	      	//$("#txtCantid").trigger(':reset');
 	      	$("#txtPro").focus();
 	    	return false;
 	    }
 	    else{
-	      if(rs.rows.item(0).CATPRO>0){
-	      	var query2 = "select desval from de_dominio " +
-						 "where coddom = (select codref from de_dominio " +
-						 "where coddom = 100 " +
-						 "and codval = " + rs.rows.item(0).CATPRO + ")";
-      		var db2 = window.sqlitePlugin.openDatabase({name: "envios.db"});
-      		db2.executeSql(query2, [], function(rs2) {
+
+	    	//atributos en caso de ser producto con múltiples variantes
+	      	if(rs.rows.item(0).CATPRO>0){
+	      		var query2 = "select desval from de_dominio " +
+							 "where coddom = (select codref from de_dominio " +
+							 "where coddom = 100 " +
+							 "and codval = " + rs.rows.item(0).CATPRO + ")";
+      			var db2 = window.sqlitePlugin.openDatabase({name: "envios.db"});
+      			db2.executeSql(query2, [], function(rs2) {
       			var fila = '';//'<tr><td>ATRIBUTO</td><td>CANTIDAD</td></tr>';
       			//$("#tblAttrib").append(fila);
       			if (rs2.rows.length>0){
@@ -328,7 +336,6 @@ document.addEventListener('deviceready', function(){
       				$("#tabAttrib").addClass("invisible");
       				$("#tblAttrib").empty();
       			}
-      			
       		}, function(error) {
 	    		alert('Error en la consulta: ' + error.message);
 	  		});
@@ -337,18 +344,34 @@ document.addEventListener('deviceready', function(){
       		$("#tabAttrib").addClass("invisible");
       		$("#tblAttrib").empty();
       	}
+      	//añado precios
       	var precio = 0;
-      	if(cantid >= rs.rows.item(0).CANMAY && rs.rows.item(0).PREMAY > 0){
+      	/*if(cantid >= rs.rows.item(0).CANMAY && rs.rows.item(0).PREMAY > 0){
       		precio = rs.rows.item(0).PREMAY;
       	}
       	else{
       		precio = rs.rows.item(0).PREDET;
-      	}
+      	}*/
+      	//cargo datos de producto
+      	  if(rs.rows.item(0).FACTUR == "S"){ //si es facturable es verde, sino azul
+      	  	$("#modalDatosProducto").prop("class","textoVerde");
+      	  }
+      	  else{
+      	  	$("#modalDatosProducto").prop("class","textoAzul");
+      	  }
 	      $("#modalTxtCodpro").text(rs.rows.item(0).CODPRO);
 	      $("#modalTxtCodpro").attr("data-costo",rs.rows.item(0).COSTO);
 	      $("#modalTxtDespro").text(rs.rows.item(0).DESPRO);
-	      $("#modalTxtPrecio").text(precio);
+	      $("#modalTxtPrecioNor").text(rs.rows.item(0).PREDET);
+	      if(rs.rows.item(0).PREMAY > 0){
+	      	$("#modalTxtPrecioMay").text(rs.rows.item(0).PREMAY);
+	      }
+	      else{
+	      	$("#modalTxtPrecioMay").text(rs.rows.item(0).PREDET);
+	      }
+	      $("#modalTxtCanMay").val(rs.rows.item(0).CANMAY);
 	      $("#modalTxtMultip").val(rs.rows.item(0).MULTIP);
+	      $("#modalTxtProdFacturable").val(rs.rows.item(0).FACTUR);
 	      $("#insertarProducto").removeClass("disabled");
 	      $("#insertarProducto").prop("disabled", false);
 	      $("#txtCantid").focus();
@@ -363,22 +386,36 @@ document.addEventListener('deviceready', function(){
 
 
 	function limpiar(){
-		$("#modalTxtCodpro").text("");
-		$("#modalTxtDespro").text("");
-		$("#modalTxtPrecio").text("");
-		$("#txtCantid").val("");
 		$("#txtRutcli").val("");
-		$("#txtObserv").text("");
+		$("#txtObserv").val("");
 		$("#btnConfirmarGuardado").prop("enabled",false);
 		$("#btnConfirmarGuardado").addClass("disabled");
 		$("#tblProd >tbody").empty();
 		$("#nombreCliente").text("");
+		$("txtPro").removeClass("disabled");
 		$("#totalNota").text("Total nota:$0");
     	$("#totalNota2").text("Total nota:$0");
-    	$("#tblAttrib").empty();
-    	$("#tabAttrib").addClass("invisible");
+    	limpiarModal();
 		getNumnvt();
 	};
+
+	function limpiarModal(){
+		$("#txtPro").text("");
+		$("#txtPro").val("");
+		$("#modalTxtCodpro").text("");
+		$("#modalTxtDespro").text("");
+		$("#modalTxtPrecioNor").text("");
+		$("#modalTxtPrecioMay").text("");
+		$("#modalTxtCanMay").val("");
+		$("#txtCantid").val("");
+		$("#tblAttrib").empty();
+    	$("#tabAttrib").addClass("invisible");
+    	$("#insertarProducto").addClass("disabled");
+		$("#insertarProducto").prop("disabled",true);
+		$("#tabAttrib").addClass("invisible");
+		$("#tblAttrib").empty();
+		$("#modalTxtProdFacturable").val("");
+	}
 
 	limpiar();
 	cargarModalGuardar();
@@ -388,8 +425,7 @@ document.addEventListener('deviceready', function(){
 	$("#lblVigencia").text("BD Válida hasta: " + window.localStorage.getItem("fecVenBase"));
 
 	//eventos de botones
-
-	$("#buscarProducto").click(function(e){
+	function buscarProducto(){
 		var txtPro =  $("#txtPro").val();
 		var txtCantid =  $("#txtCantid").val();
 	    if(txtPro!=''){
@@ -403,11 +439,15 @@ document.addEventListener('deviceready', function(){
 	      alert('Ingrese un código válido');
 	      return;
 		}
-	});
+	}
 
 	$("#btnCodigo").click(function (e) {
 		$('#modalCodpro').modal('toggle');
 		//$("#txtPro").focus();
+	});
+
+	$("#btnLimpiarModal").click(function(e){
+		limpiarModal();
 	});
 
 	$("#btnGuardar").click(function(e){
@@ -415,15 +455,18 @@ document.addEventListener('deviceready', function(){
 	});
 
 	$(".btnCerrarSesion").click(function(e){
-		window.localStorage.setItem("user", "");
-		window.localStorage.setItem("password", "");
-		window.location.replace("index.html");
+		//window.localStorage.setItem("user", "");
+		//window.localStorage.setItem("password", "");
+		window.localStorage.removeItem("user");
+		window.localStorage.removeItem("password");
+		navigator.app.loadUrl("file:///android_asset/www/index.html");
 	});
 
 	$("#insertarProducto").click(function(e){
 		//$("#txtCantid").trigger("change");
 		var cantid = $("#txtCantid").val();
 		var multip = $("#modalTxtMultip").val();
+		var precio;
 		if(cantid != "" && cantid > 0){
 			if(cantid%multip>0){
 				alert('Debe ingresar múltiplos de ' + multip);
@@ -437,15 +480,24 @@ document.addEventListener('deviceready', function(){
 				else{
 					//getPrecio(parseInt($("#modalTxtCodpro").text()), cantid, false);
 					//$("#buscarProducto").trigger("click");
-					netoProd = parseInt($("#modalTxtPrecio").text()) * cantid;
+					var canMay = parseInt($("#modalTxtCanMay").val());
+					if(cantid >= canMay){
+						netoProd = parseInt($("#modalTxtPrecioMay").text()) * cantid;
+						precio = $("#modalTxtPrecioMay").text();
+					}
+					else{
+						netoProd = parseInt($("#modalTxtPrecioNor").text()) * cantid;
+						precio = $("#modalTxtPrecioNor").text();
+					}
+					
 					var xmlAtrib = getAtributos();
 					var tr = '';
-					if (xmlAtrib != ''){
+					if (xmlAtrib != ''){ //si tiene atributos
 						tr = '<tr id="prod-'+ $("#modalTxtCodpro").text() +'"><td data-costo="'+ $("#modalTxtCodpro").attr("data-costo") + '"' + 
-							'data-attrib="' + xmlAtrib + '">'
+							' data-facturable ="' + $("#modalTxtProdFacturable").val() +'" data-attrib="' + xmlAtrib + '">'
 								 + $("#modalTxtCodpro").text() + "</td>" +
 							"<td>"+$("#modalTxtDespro").text() + "</td>" +
-							"<td>"+$("#modalTxtPrecio").text() + "</td>" +
+							"<td>"+ precio + "</td>" +
 							'<td><input type="number" class="form-control cantProd disabled" disabled="true" value="'+ cantid +'"></td>' +
 							"<td>"+ netoProd +"</td>"+
 							'<td><a href="#" class="up">SUBIR</a>/<a href="#" class="down">BAJAR</a></td>'+
@@ -453,10 +505,11 @@ document.addEventListener('deviceready', function(){
 							"</tr>";
 					}
 					else{
-						tr = '<tr id="prod-'+ $("#modalTxtCodpro").text() +'"><td data-costo="'+ $("#modalTxtCodpro").attr("data-costo") + '">'
+						tr = '<tr id="prod-'+ $("#modalTxtCodpro").text() +'"><td data-costo="'+ $("#modalTxtCodpro").attr("data-costo") + '"' + 
+							' data-facturable ="' + $("#modalTxtProdFacturable").val() +'">'
 								 + $("#modalTxtCodpro").text() + "</td>" +
 							"<td>"+$("#modalTxtDespro").text() + "</td>" +
-							"<td>"+$("#modalTxtPrecio").text() + "</td>" +
+							"<td>"+ precio + "</td>" +
 							'<td><input type="number" class="form-control cantProd" disabled value="'+ cantid +'"></td>' +
 							"<td>"+ netoProd +"</td>"+
 							'<td><a href="#" class="up">SUBIR</a>/<a href="#" class="down">BAJAR</a></td>'+
@@ -465,18 +518,9 @@ document.addEventListener('deviceready', function(){
 					}
 					$("#tblProd").append(tr);
 					$("#btnConfirmarGuardado").removeClass("disabled");
-					$("#modalTxtCodpro").text("");
-					$("#modalTxtDespro").text("");
-					$("#modalTxtPrecio").text("");
-					$("#txtPro").val("");
-					$("#txtCantid").val(" "); //ojo con ese trucazo! permite vaciar el valor sin desencadenar el trigger
-					$("#insertarProducto").addClass("disabled");
-					$("#insertarProducto").prop("disabled",true);
-					$("#tabAttrib").addClass("invisible");
-					$("#tblAttrib").empty();
+					limpiarModal();
 					$("#totalNota").text("Total nota:$"+totalizaNota());
 					$("#totalNota2").text("Total nota:$"+totalizaNota());
-					limpiando = false;
 				}
 			}
 		}
@@ -494,7 +538,7 @@ document.addEventListener('deviceready', function(){
 			    var xmlDet = getDetalle(productos);
 				var numnvt = parseInt($("#lblTituloLpr").text());
 				var vendedor = window.localStorage.getItem("user");
-				var observ = $("#txtObserv").text();
+				var observ = $("#txtObserv").val();
 				grabaXML(rutcli,numnvt,vendedor,observ,xmlDet);
 			} else {
 			    return false;
@@ -512,10 +556,17 @@ document.addEventListener('deviceready', function(){
     $("#txtRutcli" ).autocomplete({
       source: function( request, response ) {
       	var buscarPor = request.term;
+      	var query = "";
       	if (!$.isNumeric(buscarPor)){
-      		var query = "select a.rutcli, a.razons as value from en_cliente as a " +
+      		query = "select a.rutcli, a.razons as value, a.comuna from en_cliente as a " +
 	   				"where upper(a.razons) like '%" + buscarPor.toUpperCase() + "%'";
-	      	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+      	}
+      	else{
+      		query = "select a.rutcli, a.razons as value, a.comuna from en_cliente as a " +
+	   				"where rutcli like '%" + buscarPor.toUpperCase() + "%'";
+      	}
+
+      var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
 		   	db.executeSql(query, [], function(rs) {
 		    if(rs.rows.length == 0){
@@ -531,11 +582,6 @@ document.addEventListener('deviceready', function(){
 		  }, function(error) {
 		    alert('Error en la consulta: ' + error.message);
 		  });
-      		
-      	}
-      else{
-      	return false;
-      }
       	
       },
       minLength: 4,
@@ -543,6 +589,7 @@ document.addEventListener('deviceready', function(){
         $("#txtRutcli").val(parseInt(ui.item.RUTCLI));
         $("#nombreCliente").text(ui.item.value);
         $("#lblRazons").text(ui.item.value);
+        $("#lblComuna").text(ui.item.COMUNA);
         return false;
       }
     } );
@@ -550,12 +597,18 @@ document.addEventListener('deviceready', function(){
     $("#txtPro").autocomplete({
       source: function( request, response ) {
       	var buscarPor = request.term;
+      	var query = "";
       	if (!$.isNumeric(buscarPor)){
-      		var query = "select a.codpro, a.despro as value from ma_product as a " +
+      		query = "select a.codpro, a.despro as value from ma_product as a " +
 	   				"where upper(a.despro) like '%" + buscarPor.toUpperCase() + "%'";
-	      	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+      	}
+      	else{
+      		query = "select a.codpro, a.despro as value from ma_product as a " +
+	   				"where codpro like '%" + buscarPor.toUpperCase() + "%'";
+      	}
+      	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
-		   	db.executeSql(query, [], function(rs) {
+		db.executeSql(query, [], function(rs) {
 		    if(rs.rows.length == 0){
 		    	//alert("no items");
 		      return false;
@@ -570,17 +623,13 @@ document.addEventListener('deviceready', function(){
 		  }, function(error) {
 		    alert('Error en la consulta: ' + error.message);
 		  });
-      		
-      	}
-      else{
-      	return false;
-      }
       	
       },
       minLength: 4,
       select: function( event, ui ) {
         $("#txtPro").val(parseInt(ui.item.CODPRO));
-        $("#buscarProducto").trigger("click");
+        $("#txtPro").addClass("disabled");
+       	buscarProducto();
         return false;
       }
     } );
@@ -588,7 +637,7 @@ document.addEventListener('deviceready', function(){
     $("#btnCerrarModallpr2").click(function(){
     	var rutcli = $("#txtRutcli").val();
     	if(rutcli.length > 0){
-    		var sql = "SELECT razons, direccion from en_cliente " +
+    		var sql = "SELECT razons, direccion, comuna from en_cliente " +
     				  "where rutcli =" + rutcli;
     		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
@@ -598,6 +647,8 @@ document.addEventListener('deviceready', function(){
 		    }
 		    else{
 		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
+        		$("#lblRazons").text(rs.rows.item(0).RAZONS);
+		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
 		    	$("#modalGuardar").modal('hide');
 		    	$("#modalCodpro").modal('toggle');
 		    	$("#modalTxtCodpro").focus();
@@ -611,7 +662,7 @@ document.addEventListener('deviceready', function(){
     	}
     });
 
-    $("#txtCantid").change(function(){
+    /*$("#txtCantid").change(function(){
     	if(limpiando==false){
     		if(cantid == "" || cantid == null || cantid == 0){
 	    		alert("Ingrese cantidad");
@@ -623,7 +674,7 @@ document.addEventListener('deviceready', function(){
 	    		getPrecio(codpro,cantid);
 	    	}
     	}
-    });
+    });*/
 
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');
@@ -641,7 +692,7 @@ document.addEventListener('deviceready', function(){
         }
     });
 
-	$(document).on('blur','.cantProd',function() {
+	/*$(document).on('blur','.cantProd',function() {
     	var cantid = $(this).val();
     	if(cantid == "" || cantid == null || cantid == 0){
     		alert("Ingrese cantidad");
@@ -654,5 +705,5 @@ document.addEventListener('deviceready', function(){
     		$("#totalNota").text("Total nota:$" + totalizaNota());
     		$("#totalNota2").text("Total nota:$" + totalizaNota());
     	}
-	});
+	});*/
 }, false);

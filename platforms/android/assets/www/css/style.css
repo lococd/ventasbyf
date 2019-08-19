@@ -110,6 +110,7 @@ h3{
 
 .tabla-txt {
   table-layout:fixed;
+  text-overflow: ellipsis;
 }
 
 .table-txt td {
@@ -121,4 +122,18 @@ h3{
 .modal-body {
     max-height: calc(100vh - 20px);
     overflow-y: auto;
+}
+
+#modalTxtDespro{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.textoAzul td{
+  color: blue;
+}
+
+.textoVerde td{
+  color: green;
 }

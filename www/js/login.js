@@ -1,6 +1,5 @@
 document.addEventListener('deviceready', function(){
-  function checkLogin()
-  {
+  function checkLogin(){
     if (window.localStorage.getItem("user") != "" && window.localStorage.getItem("password") != "" && window.localStorage.getItem("user") != null && window.localStorage.getItem("password") != null){
       login(window.localStorage.getItem("user"),window.localStorage.getItem("password"));
     }

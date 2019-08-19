@@ -1,6 +1,5 @@
 document.addEventListener('deviceready', function(){
-  function checkLogin()
-  {
+  function checkLogin(){
     if (window.localStorage.getItem("user") != "" && window.localStorage.getItem("password") != "" && window.localStorage.getItem("user") != null && window.localStorage.getItem("password") != null){
       login(window.localStorage.getItem("user"),window.localStorage.getItem("password"));
     }
@@ -32,7 +31,7 @@ document.addEventListener('deviceready', function(){
               if(rs2.rows.item(0).TOTAL > 0){
                 window.localStorage.setItem("user", user);
                 window.localStorage.setItem("password", password);
-                window.localStorage.setItem("fecVenBase", dia + "/" + (mes -1) + "/" + agno);
+                window.localStorage.setItem("fecVenBase", dia + "/" + mes + "/" + agno);
                 window.location.replace("main.html");
               }
               else{
