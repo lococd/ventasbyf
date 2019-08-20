@@ -24,6 +24,12 @@
     },
     "com.jjdltc.cordova.plugin.zip": {
       "PACKAGE_NAME": "cl.dimeiggs.precios"
+    },
+    "es6-promise-plugin": {
+      "PACKAGE_NAME": "cl.dimeiggs.precios"
+    },
+    "cordova-plugin-x-socialsharing": {
+      "PACKAGE_NAME": "cl.dimeiggs.precios"
     }
   },
   "dependent_plugins": {

@@ -662,24 +662,13 @@ document.addEventListener('deviceready', function(){
     	}
     });
 
-    $("#btnZip").click(function(e){
+	$("#btnZip").click(function(e){
 		var PathToFileInString  = cordova.file.externalRootDirectory+"nvt",
 	        PathToResultZip     = cordova.file.externalRootDirectory;
 	    JJzip.zip(PathToFileInString, {target:PathToResultZip,name:"nvt"},function(data){
-	        //funcó e.e
-	        alert("ok!");
-	        navigator.share({
-			    title: "Share topic",
-			    text: "Share message",
-			    url: PathToResultZip+"nvt.zip"
-			}).then(() => {
-			    alert("Data was shared successfully");
-			}).catch((err) => {
-			    alert("Share failed:", err.message);
-			});
-	        //window.plugins.socialsharing.share('Notas de Venta', 'BYF', PathToResultZip+"nvt.zip");
+	        window.plugins.socialsharing.share('Notas de Venta', 'BYF', PathToResultZip+"nvt.zip");
 	    },function(error){
-	        alert("error: " + error);
+	        alert("error: " + JSON.stringify(error));
 	    })
 	});
 

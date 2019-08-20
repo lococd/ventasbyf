@@ -39,6 +39,10 @@
             {
               "xml": "<feature name=\"JJzip\"><param name=\"android-package\" value=\"com.jjdltc.cordova.plugin.zip.JJzip\" /></feature>",
               "count": 1
+            },
+            {
+              "xml": "<feature name=\"SocialSharing\"><param name=\"android-package\" value=\"nl.xservices.plugins.SocialSharing\" /></feature>",
+              "count": 1
             }
           ]
         }
@@ -64,6 +68,10 @@
             },
             {
               "xml": "<provider android:authorities=\"com.crypho.localstorage.documents\" android:enabled=\"@bool/use_provider\" android:exported=\"true\" android:grantUriPermissions=\"true\" android:name=\"com.crypho.localstorage.LocalStorageProvider\" android:permission=\"android.permission.MANAGE_DOCUMENTS\"><intent-filter><action android:name=\"android.content.action.DOCUMENTS_PROVIDER\" /></intent-filter></provider>",
+              "count": 1
+            },
+            {
+              "xml": "<provider android:authorities=\"${applicationId}.sharing.provider\" android:exported=\"false\" android:grantUriPermissions=\"true\" android:name=\"nl.xservices.plugins.FileProvider\"><meta-data android:name=\"android.support.FILE_PROVIDER_PATHS\" android:resource=\"@xml/sharing_paths\" /></provider>",
               "count": 1
             }
           ],
@@ -92,7 +100,13 @@
           "/*": [
             {
               "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
-              "count": 2
+              "count": 1
+            }
+          ],
+          "/*/application": [
+            {
+              "xml": "<receiver android:enabled=\"true\" android:name=\"nl.xservices.plugins.ShareChooserPendingIntent\"><intent-filter><action android:name=\"android.intent.action.SEND\" /></intent-filter></receiver>",
+              "count": 1
             }
           ]
         }
@@ -157,6 +171,12 @@
       "PACKAGE_NAME": "cl.dimeiggs.precios"
     },
     "com.jjdltc.cordova.plugin.zip": {
+      "PACKAGE_NAME": "cl.dimeiggs.precios"
+    },
+    "es6-promise-plugin": {
+      "PACKAGE_NAME": "cl.dimeiggs.precios"
+    },
+    "cordova-plugin-x-socialsharing": {
       "PACKAGE_NAME": "cl.dimeiggs.precios"
     }
   },
@@ -382,6 +402,20 @@
       "clobbers": [
         "JJzip"
       ]
+    },
+    {
+      "id": "es6-promise-plugin.Promise",
+      "file": "plugins/es6-promise-plugin/www/promise.js",
+      "pluginId": "es6-promise-plugin",
+      "runs": true
+    },
+    {
+      "id": "cordova-plugin-x-socialsharing.SocialSharing",
+      "file": "plugins/cordova-plugin-x-socialsharing/www/SocialSharing.js",
+      "pluginId": "cordova-plugin-x-socialsharing",
+      "clobbers": [
+        "window.plugins.socialsharing"
+      ]
     }
   ],
   "plugin_metadata": {
@@ -392,6 +426,8 @@
     "cordova-plugin-file": "4.3.3",
     "cordova-plugin-file-transfer": "1.6.3",
     "com.cesidiodibenedetto.filechooser": "1.0.4",
-    "com.jjdltc.cordova.plugin.zip": "1.1.0"
+    "com.jjdltc.cordova.plugin.zip": "1.1.0",
+    "es6-promise-plugin": "4.2.2",
+    "cordova-plugin-x-socialsharing": "5.4.0"
   }
 }

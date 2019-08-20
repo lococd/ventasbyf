@@ -7,11 +7,15 @@
       "phonegap-plugin-barcodescanner": {},
       "com.phonegap.plugins.sqlite": {},
       "cordova-plugin-whitelist@1.3.2": {},
-      "cordova-plugin-file-transfer": {}
+      "cordova-plugin-file-transfer": {},
+      "es6-promise-plugin": {},
+      "cordova-plugin-x-socialsharing": {}
     }
   },
   "dependencies": {
+    "cordova-plugin-x-socialsharing": "^5.4.0",
     "cordova-zip-plugin": "^1.1.0",
-    "cordova.plugins.diagnostic": "^3.9.2"
+    "cordova.plugins.diagnostic": "^3.9.2",
+    "es6-promise-plugin": "git+https://github.com/vstirbu/PromisesPlugin.git"
   }
 }
