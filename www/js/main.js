@@ -687,4 +687,11 @@ document.addEventListener('deviceready', function(){
             row.insertAfter(row.next());
         }
     });
+
+	document.addEventListener("backbutton", function(e) { 
+   		e.preventDefault(); 
+   		return false;
+	}, false);  
+
+
 }, false);

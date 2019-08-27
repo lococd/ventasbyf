@@ -666,21 +666,6 @@ document.addEventListener('deviceready', function(){
 		var PathToFileInString  = cordova.file.externalRootDirectory+"nvt",
 	        PathToResultZip     = cordova.file.externalRootDirectory;
 	    JJzip.zip(PathToFileInString, {target:PathToResultZip,name:"nvt"},function(data){
-	        //funcó e.e
-	        //alert("ok!");
-	        // this is the complete list of currently supported params you can pass to the plugin (all optional)
-			var options = {
-			  message: 'Notas de venta', // not supported on some apps (Facebook, Instagram)
-			  files: [PathToResultZip+"nvt.zip", ''], // an array of filenames either locally or remotely
-			  chooserTitle: 'Seleccione aplicación', // Android only, you can override the default share sheet title
-			};
-
-			/*window.plugins.socialsharing.shareWithOptions(options, function(result) {
-			  alert("Share completed? " + result.completed); // On Android apps mostly return false even while it's true
-			  alert("Shared to app: " + result.app); // On Android result.app since plugin version 5.4.0 this is no longer empty. On iOS it's empty when sharing is cancelled (result.completed=false)
-			}, function(msg) {
-			  alert("Sharing failed with message: " + msg);
-			});*/
 	        window.plugins.socialsharing.share('Notas de Venta', 'BYF', PathToResultZip+"nvt.zip");
 	    },function(error){
 	        alert("error: " + JSON.stringify(error));
@@ -702,4 +687,11 @@ document.addEventListener('deviceready', function(){
             row.insertAfter(row.next());
         }
     });
+
+	document.addEventListener("backbutton", function(e) { 
+   		e.preventDefault(); 
+   		return false;
+	}, false);  
+
+
 }, false);
