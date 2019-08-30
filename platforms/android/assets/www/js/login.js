@@ -13,6 +13,7 @@ document.addEventListener('deviceready', function(){
     var baseOK = false;
     //compruebo validez de la base
     createCarpetaNvt();
+    createCarpetaNvtEnviadas();
       var db = window.sqlitePlugin.openDatabase({name: "envios2.db"});
       var query = "select fecact from ma_update";
 
@@ -138,6 +139,18 @@ function createCarpetaNvt(){
   //genero carpeta nvt
   window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
     directoryEntry.getDirectory("nvt", {create: true, exclusive: false}, function(dir) { 
+      //alert("Created dir "+dir.name); 
+    },
+    function(error) { 
+      alert("Error creando directorio "+error.code); 
+    });
+  });
+}
+
+function createCarpetaNvtEnviadas(){
+  //genero carpeta nvt
+  window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
+    directoryEntry.getDirectory("nvtEnviadas", {create: true, exclusive: false}, function(dir) { 
       //alert("Created dir "+dir.name); 
     },
     function(error) { 

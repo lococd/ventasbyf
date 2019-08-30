@@ -666,11 +666,103 @@ document.addEventListener('deviceready', function(){
 		var PathToFileInString  = cordova.file.externalRootDirectory+"nvt",
 	        PathToResultZip     = cordova.file.externalRootDirectory;
 	    JJzip.zip(PathToFileInString, {target:PathToResultZip,name:"nvt"},function(data){
+	    	moveNotasEnviadas();
 	        window.plugins.socialsharing.share('Notas de Venta', 'BYF', PathToResultZip+"nvt.zip");
 	    },function(error){
 	        alert("error: " + JSON.stringify(error));
 	    })
 	});
+
+	function moveNotasEnviadas(){
+		var pathDestino = cordova.file.externalRootDirectory+"nvtEnviadas";
+		var pathOrigen = cordova.file.externalRootDirectory;
+		  //agarro el directorio root
+	  window.resolveLocalFileSystemURL(pathOrigen, function( directoryEntry ) {
+	    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio nvt
+	      // tomo un lector del directorio
+	      var directoryReader = dir.createReader();
+	      // listo todos los ficheros
+	      directoryReader.readEntries(function(entries) {
+	                                      var i;
+	                                      for (i=0; i<entries.length; i++) {
+	                                          //muevo archivo por archivo
+	                                          moveFile(entries[i].nativeURL,entries[i].name, pathOrigen);
+	                                      }
+	                                  }
+	      ,function fail(error) {
+	        alert("Failed to list directory contents: " + error.code);
+	    });
+
+	    },
+	    function(error) { 
+	      alert("Error "+error.code); 
+	    });
+	  });
+	}
+
+	function moveFile(urlFile, name, pathDestino){
+	    window.resolveLocalFileSystemURI(urlFile, function(fileEntrySelected) {
+          //var path2 = "file:///data/data/cl.dimeiggs.precios/"
+          //agarro el directorio root
+          window.resolveLocalFileSystemURL(urlFile, 
+              function(fileDB){
+                  window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
+                          window.resolveLocalFileSystemURL( pathDestino, function( directoryEntry ) {
+                            directoryEntry.getDirectory("nvtEnviadas", {create: false, exclusive: false}, function(dirDB) {
+                              fileDB.moveTo(dirDB, name,
+                              function(){
+                              },
+                              function(err){
+                                  alert('unsuccessful copying ' + err);
+                              });
+                            },null);
+                          },null);                        
+                      }, null);
+              }, 
+              function(){
+                  alert('failure! database was not found');
+              });
+        },
+        function(error) {
+          alert("err getBaseNueva " + error.code);
+        });
+	}
+
+	$("#btnBorrarEnviadas").click(function(e){
+		//agarro el directorio root
+	  	window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
+	    directoryEntry.getDirectory("nvtEnviadas", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
+	      // tomo un lector del directorio
+	      var directoryReader = dir.createReader();
+
+	      // listo todos los ficheros
+	      directoryReader.readEntries(function(entries) {
+	                                      var i;
+	                                      for (i=0; i<entries.length; i++) {
+	                                          //tomo archivo por archivo
+	                                          dir.getFile(entries[i].name, {create:false}, function(fileEntry) {
+	                                                      //y borro el archivo
+	                                                      fileEntry.remove(function(){
+	                                                          //alert("archivo removido!");
+	                                                      },function(error){
+	                                                          alert("Problemas al borrar");
+	                                                      },function(){
+	                                                         alert("Archivo no existe");
+	                                                      });
+	                                          });
+	                                      }
+	                                  }
+	      ,function fail(error) {
+	        alert("Failed to list directory contents: " + error.code);
+	    });
+
+	    },
+	    function(error) { 
+	      alert("Error "+error.code); 
+	    });
+	  });
+	});
+
 
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');
