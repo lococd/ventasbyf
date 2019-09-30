@@ -53,15 +53,23 @@ document.addEventListener('deviceready', function(){
 		if(clases.indexOf("invisible") < 0){
 			var productos = $("#tblAttrib >tr");
 			var cantidAtrib = 0;
+			var parar = false;
 			$(productos).each(function(i,fila){
 				cantUni = $(fila).find('td:eq(1) input').val();
-				if (cantUni === ""){
+				var multip = $("#modalTxtMultip").val();
+				if (cantUni == ""){
 					cantUni = 0;
 				}
 				else{
+					if(cantUni%multip > 0){
+						cantidAtrib = -1;
+						parar = true;
+					}
 					cantUni = parseInt(cantUni);
 				}
-				cantidAtrib = cantidAtrib + cantUni;
+				if (!parar){
+					cantidAtrib = cantidAtrib + cantUni;
+				}
 			});
 			return cantidAtrib;
 		}
@@ -473,7 +481,12 @@ document.addEventListener('deviceready', function(){
 				$('#txtCantid').focus();
 			}
 			else{
-				if (cantid != getTotAtrib()){
+				var cantAtrib = getTotAtrib();
+				if(cantAtrib == -1){ //validación detalle
+					alert("Ingresar múltiplos de " + multip + " en las variedades");
+					return false;
+				}
+				if (cantid != cantAtrib){
 					alert('Ingrese total de variedades');
 					return false;
 				}
