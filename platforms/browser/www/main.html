@@ -135,7 +135,7 @@
                     <div class="modal-header">
                       <!--button type="button" class="close" data-dismiss="modal" id="btnCerrarModallpr">&times;</button-->
                       <button type="button" class="btn btn-default pull-right btnCerrarSesion">Cerrar Sesión</button>
-                      <h4 class="modal-title">V1.4.1 Datos Nota de Venta</h4>
+                      <h4 class="modal-title">V1.5.1 Datos Nota de Venta</h4>
                       <h4 class="modal-title" id="lblVendedor2">Ejecutivo: </h4>
                       <h4 id="lblTituloLpr" class="modal-title invisible"></h4>
                       <h4 class="modal-title" id="lblRazons">Cliente</h4>
@@ -149,6 +149,12 @@
                               <input type="text" id="txtRutcli" class="form-control" placeholder="Rut Cliente">
                             </div>
                             <input type="text" id="txtObserv" placeholder="Observación" class="form-control">
+                            <input type="number" id="txtDescuento" placeholder="% Descuento" class="form-control">
+                            <h4 class="modal-title" id="lblRazons">Facturable</h4>
+                            <select id="cmbFacturable" class="form-control">
+                              <option>S</option>
+                              <option>N</option>
+                            </select>
                         </div>
                       </div>
                     </div>
@@ -156,7 +162,62 @@
                       <button type="button" id="btnConfirmarGuardado" class="btn btn-default disabled">Grabar Nota</button>
                       <button type="button" class="btn btn-default" id="btnCerrarModallpr2">Seguir Nota</button>
                       <button id="btnZip" class="btn btn-default pull-left">Enviar Notas</button>
+                      <button id="btnNuevoCliente" class="btn btn-default">Nuevo Cliente</button>
                       <h4 id="lblVigencia"></h4>
+                    </div>
+                  </div>
+                </div>
+        </div>
+        <div class="modal fade" id="modalNuevoCliente" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog">
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h4 class="modal-title">Nuevo Cliente</h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <div class = "ui-front">
+                            <div class="ui-widget">
+                              <input type="number" id="txtNewRut" class="form-control" placeholder="Rut Cliente">
+                            </div>
+                            <div class="ui-widget">
+                              <input type="text" id="txtNewDV" class="form-control" placeholder="Dígito Verificador">
+                            </div>
+                            <div class="ui-widget">
+                              <input type="text" id="txtNewRazons" class="form-control" placeholder="Razón Social">
+                            </div>
+                            <div class="ui-widget">
+                              <input type="text" id="txtNewDireccion" class="form-control" placeholder="Dirección">
+                            </div>
+                            <div class="ui-widget">
+                              <select id="cmbNewComuna" class="form-control">
+                              </select>
+                            </div>
+                            <div class="ui-widget">
+                              <select id="cmbNewCiudad" class="form-control">
+                              </select>
+                            </div>
+                            <div class="ui-widget">
+                              <input type="number" id="txtNewFono" class="form-control" placeholder="Fono">
+                            </div>
+                            <div class="ui-widget">
+                              <select id="cmbNewGiro" class="form-control">
+                                <!--option>VENTA</option-->
+                              </select>
+                            </div>
+                            <div class="ui-widget">
+                              <input type="text" id="txtNewContacto" class="form-control" placeholder="Contacto">
+                            </div>
+                            <div class="ui-widget">
+                              <input type="text" id="txtNewObservacion" class="form-control" placeholder="Observación">
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" id="btnConfirmarCliente" class="btn btn-default">Grabar Cliente</button>
+                      <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCancelarCliente">Cancelar</button>
                     </div>
                   </div>
                 </div>

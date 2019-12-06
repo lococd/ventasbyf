@@ -2,10 +2,8 @@ document.addEventListener('deviceready', function(){
 	var limpiando = true;
 	//funciones auxiliares
 	function cargarModalGuardar(){
-		//createDb();
 		$('#modalGuardar').modal('toggle');
-		//$("#lblTituloGuardar").text('Datos Nota de Venta');
-		//totalizaNota();
+		//$('#modalNuevoCliente').modal('toggle');
 	};
 
 	function totalizaNota(){
@@ -53,15 +51,23 @@ document.addEventListener('deviceready', function(){
 		if(clases.indexOf("invisible") < 0){
 			var productos = $("#tblAttrib >tr");
 			var cantidAtrib = 0;
+			var parar = false;
 			$(productos).each(function(i,fila){
 				cantUni = $(fila).find('td:eq(1) input').val();
-				if (cantUni === ""){
+				var multip = $("#modalTxtMultip").val();
+				if (cantUni == ""){
 					cantUni = 0;
 				}
 				else{
+					if(cantUni%multip > 0){
+						cantidAtrib = -1;
+						parar = true;
+					}
 					cantUni = parseInt(cantUni);
 				}
-				cantidAtrib = cantidAtrib + cantUni;
+				if (!parar){
+					cantidAtrib = cantidAtrib + cantUni;
+				}
 			});
 			return cantidAtrib;
 		}
@@ -129,6 +135,7 @@ document.addEventListener('deviceready', function(){
 		var totneto;
 		var totiva;
 		var totgen;
+		var dscto;
 		var xmlCab = "";
 		var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
 					"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02, b.facturable "+
@@ -150,6 +157,10 @@ document.addEventListener('deviceready', function(){
 			    	totneto = subtot - (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
 			    	totiva = Math.round(totneto * 0.19);
 			    	totgen = Math.round(totneto + totiva);
+			    	dscto = rs.rows.item(0).DESCTO01;
+			    	if($("#txtDescuento").val() != ""){
+			    		dscto = $("#txtDescuento").val();
+			    	}
 			    	var fecemi = getAgno().toString() + getMes().toString() + getDia().toString();
 			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>" + String.fromCharCode(13) +
 			    			 "<codven>" + rs.rows.item(0).CODVEN +"</codven>" + String.fromCharCode(13) +
@@ -164,7 +175,7 @@ document.addEventListener('deviceready', function(){
 			    			 "<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
 			    			 "<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
 			    			 "<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
-			    			 "<dscto1>" + rs.rows.item(0).DESCTO01 + "</dscto1>" + String.fromCharCode(13) +
+			    			 "<dscto1>" + dscto + "</dscto1>" + String.fromCharCode(13) +
 			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 + "</dscto2>" + String.fromCharCode(13) +
 			    			 "<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
 			    			 "<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
@@ -175,9 +186,9 @@ document.addEventListener('deviceready', function(){
 				             "<origen>REM</origen>" + String.fromCharCode(13) +
 				             "<estado>0</estado>" + String.fromCharCode(13) +
 				             "<pagada>0</pagada>" + String.fromCharCode(13)+
-				             "<factura>N</factura>" + String.fromCharCode(13)+
+				             //"<factura>N</factura>" + String.fromCharCode(13)+
 				             "<observ>"+ observ + "</observ>" + String.fromCharCode(13)+
-				             "<facturable>" + rs.rows.item(0).FACTURABLE + "</facturable>" + String.fromCharCode(13);
+				             "<factura>" + $("#cmbFacturable option:selected").text() + "</factura>" + String.fromCharCode(13);
 
 				            var xmlText = '<?xml version="1.0" encoding="utf-8"?>' + String.fromCharCode(13) +
 							  "<Pedidos>" + String.fromCharCode(13) +
@@ -382,7 +393,57 @@ document.addEventListener('deviceready', function(){
 	  });
 	};
 	
+	function cargarCombos(){
+		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+		var query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 1";
+		db.executeSql(query, [], function(rs) {
+		    if(rs.rows.length == 0){
+		    	//alert("no items");
+		      return false;
+		    }
+		    else{
+		    	var fila;
+		    	//alert(JSON.stringify(rs));
+		    	for (i=0; i<rs.rows.length; ++i){
+		    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
+		    		$("#cmbNewCiudad").append(fila);
+			    }
 
+			    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 2";
+				db.executeSql(query, [], function(rs) {
+				    if(rs.rows.length == 0){
+				    	//alert("no items");
+				      return false;
+				    }
+				    else{
+				    	for (i=0; i<rs.rows.length; ++i){
+				    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
+				    		$("#cmbNewComuna").append(fila);
+					    }
+					    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 8";
+						db.executeSql(query, [], function(rs) {
+						    if(rs.rows.length == 0){
+						    	//alert("no items");
+						      return false;
+						    }
+						    else{
+						    	for (i=0; i<rs.rows.length; ++i){
+						    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
+						    		$("#cmbNewGiro").append(fila);
+							    }
+						    }
+						  }, function(error) {
+						    alert('Error en la consulta: ' + error.message);
+						  });
+				    }
+				  }, function(error) {
+				    alert('Error en la consulta: ' + error.message);
+				  });
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+	}
 
 
 	function limpiar(){
@@ -395,6 +456,7 @@ document.addEventListener('deviceready', function(){
 		$("txtPro").removeClass("disabled");
 		$("#totalNota").text("Total nota:$0");
     	$("#totalNota2").text("Total nota:$0");
+    	$("#txtDescuento").val("");
     	limpiarModal();
 		getNumnvt();
 	};
@@ -417,8 +479,19 @@ document.addEventListener('deviceready', function(){
 		$("#modalTxtProdFacturable").val("");
 	}
 
+	function limpiarFicha(){
+		$("#txtNewRut").val("");
+		$("#txtNewDV").val("");
+		$("#txtNewRazons").val("");
+		$("#txtNewDireccion").val("");
+		$("#txtNewFono").val("");
+		$("#txtNewContacto").val("");
+		$("#txtNewObservacion").val("");
+	}
+
 	limpiar();
 	cargarModalGuardar();
+	cargarCombos();
 
 	$(".lblVendedor").text("Ejecutivo: " + window.localStorage.getItem("user"));
 	$("#lblVendedor2").text("Ejecutivo: " + window.localStorage.getItem("user"));
@@ -473,7 +546,12 @@ document.addEventListener('deviceready', function(){
 				$('#txtCantid').focus();
 			}
 			else{
-				if (cantid != getTotAtrib()){
+				var cantAtrib = getTotAtrib();
+				if(cantAtrib == -1){ //validación detalle
+					alert("Ingresar múltiplos de " + multip + " en las variedades");
+					return false;
+				}
+				if (cantid != cantAtrib){
 					alert('Ingrese total de variedades');
 					return false;
 				}
@@ -534,7 +612,7 @@ document.addEventListener('deviceready', function(){
 		var productos = $("#tblProd >tbody >tr");
 		if(productos.length > 0 && rutcli.length > 0){
 			var nombreCliente = $("#nombreCliente").text();
-			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Cliente:"+nombreCliente)) {
+			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Cliente:"+nombreCliente)){
 			    var xmlDet = getDetalle(productos);
 				var numnvt = parseInt($("#lblTituloLpr").text());
 				var vendedor = window.localStorage.getItem("user");
@@ -542,14 +620,12 @@ document.addEventListener('deviceready', function(){
 				grabaXML(rutcli,numnvt,vendedor,observ,xmlDet);
 			} else {
 			    return false;
-			} 
-			
+			}
 		}
 		else{
 			alert("Debe ingresar rut y al menos un producto");
 			return;
 		}
-		
 	});
 
 
@@ -573,9 +649,11 @@ document.addEventListener('deviceready', function(){
 		      return false;
 		    }
 		    else{
+		    	//alert(JSON.stringify(rs));
 		    	var data = [];
 			    for (i=0; i<rs.rows.length; ++i){
 			        data.push(rs.rows.item(i));
+			        //alert(JSON.stringify(rs.rows.item(i)));
 			    }
 	      		response(data);
 		    }
@@ -632,7 +710,7 @@ document.addEventListener('deviceready', function(){
        	buscarProducto();
         return false;
       }
-    } );
+    });
 
     $("#btnCerrarModallpr2").click(function(){
     	var rutcli = $("#txtRutcli").val();
@@ -763,6 +841,34 @@ document.addEventListener('deviceready', function(){
 	  });
 	});
 
+	$("#btnConfirmarCliente").click(function(e){
+		var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
+										   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG) " +
+										   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1)";
+		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		db.executeSql(query, [$("#txtNewRut").val(), $("#txtNewDV").val(),$("#txtNewRazons").val(),
+							  $("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
+							  $("#txtNewFono").val(), window.localStorage.getItem("codven"), $("#txtNewGiro").val(),
+							  $("#txtNewContacto").val(), $("#txtNewObservacion").val(), "S"], function(rs) {
+			//alert(JSON.stringify(rs));
+		    if(rs.rowsAffected == 0){
+		      alert("Error al ingresar Cliente");
+		      return false;
+		    }
+		    else{
+		    	alert("Cliente Ingresado");
+		    	$("#txtRutcli").val($("#txtNewRut").val());
+		    	limpiarFicha();
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+	});
+
+	$("#btnNuevoCliente").click(function(e){
+		$('#modalNuevoCliente').modal('toggle');
+	});
 
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');
