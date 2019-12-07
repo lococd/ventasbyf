@@ -412,7 +412,7 @@ document.addEventListener('deviceready', function(){
 	
 	function cargarCombos(){
 		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-		var query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 1";
+		var query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 1 ORDER BY DESVAL ASC";
 		db.executeSql(query, [], function(rs) {
 		    if(rs.rows.length == 0){
 		    	//alert("no items");
@@ -426,7 +426,7 @@ document.addEventListener('deviceready', function(){
 		    		$("#cmbNewCiudad").append(fila);
 			    }
 
-			    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 2";
+			    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 2 ORDER BY DESVAL ASC";
 				db.executeSql(query, [], function(rs) {
 				    if(rs.rows.length == 0){
 				    	//alert("no items");
@@ -437,7 +437,7 @@ document.addEventListener('deviceready', function(){
 				    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
 				    		$("#cmbNewComuna").append(fila);
 					    }
-					    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 8";
+					    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 8 ORDER BY DESVAL ASC";
 						db.executeSql(query, [], function(rs) {
 						    if(rs.rows.length == 0){
 						    	//alert("no items");
@@ -856,6 +856,20 @@ document.addEventListener('deviceready', function(){
 	      alert("Error "+error.code); 
 	    });
 	  });
+	});
+
+	$("#txtNewDV").blur(function(e){
+		if ($("#txtNewDV").val().length>0){
+			if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
+				alert("Rut inválido");
+				return false;
+			}	
+		}
+		else{
+			alert("Ingrese DV");
+			return false;
+		}
+		
 	});
 
 	$("#btnConfirmarCliente").click(function(e){
