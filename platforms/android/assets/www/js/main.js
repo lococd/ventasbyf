@@ -122,6 +122,36 @@ document.addEventListener('deviceready', function(){
 		return atributos;
 	}
 
+	function buscarClienteModal(rutcli, hideModal){
+		if(rutcli.length > 0){
+    		var sql = "SELECT razons, direccion, comuna from en_cliente " +
+    				  "where rutcli =" + rutcli;
+    		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		   	db.executeSql(sql, [], function(rs) {
+		    if(rs.rows.length == 0){
+		      alert("Rut inválido");
+		    }
+		    else{
+		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
+        		$("#lblRazons").text(rs.rows.item(0).RAZONS);
+		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
+		    	if(hideModal){
+		    		$("#modalGuardar").modal('hide');
+		    		$("#modalCodpro").modal('toggle');
+		    		$("#modalTxtCodpro").focus();
+		    	}
+		    	
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+    	}
+    	else{
+    		alert("Ingrese cliente para continuar");
+    	}
+	}
+
 	function duplicado(codpro){
 		var productos = $("#tblProd >tbody >tr");
 		var codproLista;
@@ -730,31 +760,7 @@ document.addEventListener('deviceready', function(){
     });
 
     $("#btnCerrarModallpr2").click(function(){
-    	var rutcli = $("#txtRutcli").val();
-    	if(rutcli.length > 0){
-    		var sql = "SELECT razons, direccion, comuna from en_cliente " +
-    				  "where rutcli =" + rutcli;
-    		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-
-		   	db.executeSql(sql, [], function(rs) {
-		    if(rs.rows.length == 0){
-		      alert("Rut inválido");
-		    }
-		    else{
-		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
-        		$("#lblRazons").text(rs.rows.item(0).RAZONS);
-		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
-		    	$("#modalGuardar").modal('hide');
-		    	$("#modalCodpro").modal('toggle');
-		    	$("#modalTxtCodpro").focus();
-		    }
-		  }, function(error) {
-		    alert('Error en la consulta: ' + error.message);
-		  });
-    	}
-    	else{
-    		alert("Ingrese cliente para continuar");
-    	}
+    	buscarClienteModal($("#txtRutcli").val(), true);
     });
 
 	$("#btnZip").click(function(e){
@@ -858,6 +864,30 @@ document.addEventListener('deviceready', function(){
 	  });
 	});
 
+	$("#txtNewRut").blur(function(e){
+		var sql = "SELECT razons, direccion, comuna from en_cliente " +
+    				  "where rutcli =" + $("#txtNewRut").val();
+    	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		db.executeSql(sql, [], function(rs){
+		    if(rs.rows.length > 0){
+		      alert("Rut existe");
+		      $("#txtNewRut").focus();
+		      return false;
+			}
+		}, function(error) {
+			alert('Error en la consulta: ' + error.message);
+			return false;
+		});
+
+		if ($("#txtNewDV").val().length>0){
+			if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
+				alert("Rut inválido");
+				return false;
+			}	
+		}
+	});
+
 	$("#txtNewDV").blur(function(e){
 		if ($("#txtNewDV").val().length>0){
 			if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
@@ -869,7 +899,6 @@ document.addEventListener('deviceready', function(){
 			alert("Ingrese DV");
 			return false;
 		}
-		
 	});
 
 	$("#btnConfirmarCliente").click(function(e){
@@ -877,10 +906,25 @@ document.addEventListener('deviceready', function(){
 			alert("Rut inválido");
 			return false;
 		}
+
+		var sql = "SELECT razons, direccion, comuna from en_cliente " +
+    				  "where rutcli =" + $("#txtNewRut").val();
+    	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		db.executeSql(sql, [], function(rs){
+		    if(rs.rows.length > 0){
+		      alert("Rut existe");
+		      return false;
+			}
+		}, function(error) {
+			alert('Error en la consulta: ' + error.message);
+			return false;
+		});
+
 		var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
 										   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG) " +
 										   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1)";
-		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+		db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
 		db.executeSql(query, [$("#txtNewRut").val(), $("#txtNewDV").val(),$("#txtNewRazons").val(),
 							  $("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
@@ -895,6 +939,8 @@ document.addEventListener('deviceready', function(){
 		    	alert("Cliente Ingresado");
 		    	$("#txtRutcli").val($("#txtNewRut").val());
 		    	limpiarFicha();
+		    	$('#btnCancelarCliente').trigger("click");
+		    	buscarClienteModal($("#txtRutcli").val(), false);
 		    }
 		  }, function(error) {
 		    alert('Error en la consulta: ' + error.message);
