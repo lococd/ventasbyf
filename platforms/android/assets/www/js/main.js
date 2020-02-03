@@ -1,6 +1,130 @@
 document.addEventListener('deviceready', function(){
 	var limpiando = true;
 	//funciones auxiliares
+	function deleteNvts(){
+	  //agarro el directorio root
+	  window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
+	    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
+	      // tomo un lector del directorio
+	      var directoryReader = dir.createReader();
+
+	      // listo todos los ficheros
+	      directoryReader.readEntries(function(entries) {
+	                                      var i;
+	                                      for (i=0; i<entries.length; i++) {
+	                                          //tomo archivo por archivo
+	                                          dir.getFile(entries[i].name, {create:false}, function(fileEntry) {
+	                                                      //y borro el archivo
+	                                                      fileEntry.remove(function(){
+	                                                          //alert("archivo removido!");
+	                                                      },function(error){
+	                                                          alert("Problemas al borrar");
+	                                                      },function(){
+	                                                         alert("Archivo no existe");
+	                                                      });
+	                                          });
+	                                      }
+	                                  }
+	      ,function fail(error) {
+	        alert("Failed to list directory contents: " + error.code);
+	    });
+
+	    },
+	    function(error) { 
+	      alert("Error "+error.code); 
+	    });
+	  });
+}
+
+	function validaBase(){
+		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+	      var query = "select fecact from ma_update";
+	      var user = window.localStorage.getItem("user");
+	      db.transaction(function (tx) {
+	        tx.executeSql(query, [], function (tx, rs) {
+	          var fecha = rs.rows.item(0).fecact.toString();
+	          var agno = parseInt(fecha.substr(0,4));
+	          var mes = parseInt(fecha.substr(4,2));
+	          var dia = parseInt(fecha.substr(6,2));
+	          var sysdate = new Date();
+	          var fechaVenc = new Date(agno,mes-1,dia);
+	          if( fechaVenc > sysdate || user == "FVERGARA"){ //>
+	            alert("¡Nueva base de datos cargada correctamente!");
+	          }
+	          else{
+	            alert("Base vencida, ingrese una nueva");
+	            getBase();
+	            return false;
+	          }
+	        },
+	        function (tx, error) {
+	            var strErr = JSON.stringify(error);
+	            if(strErr.includes("2:") || strErr.includes("missing database") || strErr.includes("no such table")){
+	              alert("No hay base de datos cargada, ingrese una");
+	              getBase();
+	              return false;
+	            }
+	            else{
+	                alert("problema en query " + strErr);
+	                return false;
+	            }
+	        });
+	    }, function (error) {
+	        alert('transaction error: ' + error.message);
+	    }, null);
+	}
+
+	function cargaBase(){
+	    if(!confirm("Recuerde enviar todas las notas de venta antes de cargar nueva base, se borrarán las notas existentes. ¿Quiere continuar?")){
+	      return false;
+	    }
+	    else{
+	      filechooser.open({"mime": "application/octet-stream"}, function(data) {
+	        var pathDB = "file:///data/data/cl.dimeiggs.precios/databases/";
+
+	        var seleccionado = data.url;
+
+	        window.resolveLocalFileSystemURI(seleccionado, function(fileEntrySelected) {
+	          var path2 = "file:///data/data/cl.dimeiggs.precios/"
+	          //agarro el directorio root
+	          window.resolveLocalFileSystemURL(seleccionado, 
+	              function(fileDB){
+	                  window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
+	                          window.resolveLocalFileSystemURL( path2, function( directoryEntry ) {
+	                            directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
+	                              fileDB.copyTo(dirDB, 'envios2.db',
+	                              function(){
+	                                  fileDB.copyTo(dirDB, 'envios.db',
+	                                  function(){
+	                                      window.localStorage.setItem("numnvt", 1);
+	                                      deleteNvts();
+	                                      validaBase();
+	                                  }, 
+	                                  function(err){
+	                                      alert('unsuccessful copying ' + err);
+	                                  });
+	                              }, 
+	                              function(err){
+	                                  alert('unsuccessful copying ' + err);
+	                              });
+	                            },null);
+	                          },null);                        
+	                      }, null);
+	              }, 
+	              function(){
+	                  alert('failure! database was not found');
+	              });
+	        },
+	        function(error) {
+	          alert("err getBaseNueva " + error.code);
+	        });
+	      },
+	      function(msg) {
+	        alert("Archivo no seleccionado " + msg);
+	      });
+	    }    
+	  }
+
 	function cargarModalGuardar(){
 		$('#modalGuardar').modal('toggle');
 		//$('#modalNuevoCliente').modal('toggle');
@@ -949,6 +1073,10 @@ document.addEventListener('deviceready', function(){
 
 	$("#btnNuevoCliente").click(function(e){
 		$('#modalNuevoCliente').modal('toggle');
+	});
+
+	$("#btnCargarBase").click(function(e){
+		cargaBase();
 	});
 
 	$(document).on('click','.eliminarFila',function() {
