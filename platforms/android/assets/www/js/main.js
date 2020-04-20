@@ -133,10 +133,17 @@ document.addEventListener('deviceready', function(){
 	function totalizaNota(){
 		var productos = $("#tblProd >tbody >tr");
 		var neto = 0;
+		var facturable = "N";
+		var descuento = $("#txtDescuento").val()/100;
 		productos.each(function(tr,fila) {
 				precio = $(fila).find('td:eq(2)').text();
 				cantid = $(fila).find('td:eq(3) >input').val();
+				facturable = $(fila).find('td:eq(0)').attr("data-facturable");
 				totnet = precio * cantid;
+				if(facturable == "S"){
+					totnet = Math.round(totnet - (totnet * (descuento/100)));
+				}
+
 				neto = neto + totnet;
 			});
 		return neto;
@@ -539,7 +546,7 @@ document.addEventListener('deviceready', function(){
       	  	$("#modalDatosProducto").prop("class","textoVerde");
       	  }
       	  else{
-      	  	$("#modalDatosProducto").prop("class","textoAzul");
+      	  	$("#modalDatosProducto").prop("class","textoRojo");
       	  }
 	      $("#modalTxtCodpro").text(rs.rows.item(0).CODPRO);
 	      $("#modalTxtCodpro").attr("data-costo",rs.rows.item(0).COSTO);
@@ -884,7 +891,30 @@ document.addEventListener('deviceready', function(){
     });
 
     $("#btnCerrarModallpr2").click(function(){
-    	buscarClienteModal($("#txtRutcli").val(), true);
+    	var query = "SELECT DSCMAX FROM MA_USUARIO WHERE CODUSU = '" + window.localStorage.getItem("user")+"'";
+    	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		db.executeSql(query, [], function(rs) {
+		    if(rs.rows.length == 0){
+		    	alert("SIN DESCUENTO CONFIGURADO PARA EL USUARIO");
+		      return false;
+		    }
+		    else{
+	      		var descMax = parseInt(rs.rows.item(0).DSCMAX);
+	      		var descuento = parseInt($("#txtDescuento").val());
+
+	      		if(descMax < descuento){
+	      			alert("DESCUENTO MÁXIMO EXCEDIDO, DESCUENTO AUTORIZADO "+descMax+"%");
+	      			return false;
+	      		}
+	      		else{
+	      			buscarClienteModal($("#txtRutcli").val(), true);
+	      		}
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+    	
     });
 
 	$("#btnZip").click(function(e){
@@ -951,6 +981,46 @@ document.addEventListener('deviceready', function(){
         function(error) {
           alert("err getBaseNueva " + error.code);
         });
+	}
+
+	function cargarDeuda(){
+		var query = "SELECT NUMNVT, FECEMI, TOTGEN, TOTSAL FROM EN_NOTAVTA " +
+				  "WHERE TOTSAL > 0 AND RUTCLI = " + $("#txtRutcli").val();
+		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+		var fecha; 
+        var agno; = parseInt(fecha.substr(0,4));
+        var mes; = parseInt(fecha.substr(4,2));
+        var dia; = parseInt(fecha.substr(6,2));
+		db.executeSql(query, [], function(rs) {
+		    if(rs.rows.length == 0){
+		      alert("Cliente sin deuda");
+		      return false;
+		    }
+		    else{
+		    	$("#tblDeuda").empty();
+		    	var celdas = "<thead>" +
+		    				 	"<tr>" +
+		    				 		"<td>NUMNVT</td>" +
+		    				 		"<td>FECEMI</td>" +
+		    				 		"<td>TOTGEN</td>" +
+		    				 		"<td>TOTSAL</td>" +
+		    				 	"</tr>" +
+		    				 "</thead><tbody>";
+			    for (i=0; i<rs.rows.length; ++i){
+			    	fecha = rs.rows.item(i).FECEMI.toString();
+
+			    	celdas = celdas + "<tr>" +
+			    	"<td>" + rs.rows.item(i).NUMNVT + "</td>" +
+			    	"<td>" + rs.rows.item(i).FECEMI + "</td>" +
+			    	"<td>" + rs.rows.item(i).TOTGEN + "</td>" +
+			    	"<td>" + rs.rows.item(i).TOTSAL + "</td></tr>";
+			    }
+			    celdas = celdas + "</tbody>";
+			    $("#tblDeuda").append(celdas);
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
 	}
 
 	$("#btnBorrarEnviadas").click(function(e){
@@ -1077,6 +1147,15 @@ document.addEventListener('deviceready', function(){
 
 	$("#btnCargarBase").click(function(e){
 		cargaBase();
+	});
+
+	$("#btnVerDeuda").click(function(e){
+		$('#modalDeuda').modal('toggle');
+		cargarDeuda();
+	});
+
+	$("#btnCerrarDeuda").click(function(e){
+		$('#modalDeuda').modal('toggle');
 	});
 
 	$(document).on('click','.eliminarFila',function() {
