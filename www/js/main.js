@@ -133,18 +133,41 @@ document.addEventListener('deviceready', function(){
 	function totalizaNota(){
 		var productos = $("#tblProd >tbody >tr");
 		var neto = 0;
+		var cantid;
+		var totnet;
+		var precio;
+		productos.each(function(tr,fila) {
+				precio = $(fila).find('td:eq(2)').text();
+				cantid = $(fila).find('td:eq(3) >input').val();
+				totnet = precio * cantid;
+				neto = neto + totnet;
+			});
+		return neto;
+	};
+
+	function getDescuentos(){
+		var productos = $("#tblProd >tbody >tr");
+		var neto = 0;
 		var facturable = "N";
-		var descuento = $("#txtDescuento").val()/100;
+		var descuento = 0;
+		var cantid;
+		var totnet;
+		var precio;
+		if($("#txtDescuento").val() != ""){
+			descuento = parseInt($("#txtDescuento").val());
+		}
+		else{
+			return 0;
+		}
 		productos.each(function(tr,fila) {
 				precio = $(fila).find('td:eq(2)').text();
 				cantid = $(fila).find('td:eq(3) >input').val();
 				facturable = $(fila).find('td:eq(0)').attr("data-facturable");
 				totnet = precio * cantid;
 				if(facturable == "S"){
-					totnet = Math.round(totnet - (totnet * (descuento/100)));
+					totnet = Math.round(totnet * (descuento/100));
+					neto = neto + totnet;
 				}
-
-				neto = neto + totnet;
 			});
 		return neto;
 	};
@@ -315,6 +338,7 @@ document.addEventListener('deviceready', function(){
 		var totgen;
 		var dscto;
 		var xmlCab = "";
+		var totDescuentos = getDescuentos();
 		var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
 					"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02, b.facturable "+
 					"from ma_usuario as a, en_cliente as b, de_dominio as c,de_dominio as d " +
@@ -332,10 +356,11 @@ document.addEventListener('deviceready', function(){
 			    	alert("Cliente no configurado");
 			    }
 			    else{
-			    	totneto = subtot - (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
-			    	totiva = Math.round(totneto * 0.19);
-			    	totgen = Math.round(totneto + totiva);
-			    	dscto = rs.rows.item(0).DESCTO01;
+			    	totgen = subtot - totDescuentos;
+			    	totneto = Math.trunc(totgen / 1.19); //- (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
+			    	totiva = totgen - totneto;
+			    	
+			    	dscto = 0;
 			    	if($("#txtDescuento").val() != ""){
 			    		dscto = $("#txtDescuento").val();
 			    	}
@@ -353,8 +378,8 @@ document.addEventListener('deviceready', function(){
 			    			 "<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
 			    			 "<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
 			    			 "<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
-			    			 "<dscto1>" + dscto + "</dscto1>" + String.fromCharCode(13) +
-			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 + "</dscto2>" + String.fromCharCode(13) +
+			    			 "<dscto1>" + totDescuentos + "</dscto1>" + String.fromCharCode(13) +
+			    			 "<dscto2>0</dscto2>" + String.fromCharCode(13) +
 			    			 "<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
 			    			 "<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
 			    			 "<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
@@ -667,6 +692,19 @@ document.addEventListener('deviceready', function(){
 		$("#txtNewObservacion").val("");
 	}
 
+	function validaDescuento(){
+		var descMax = parseInt(window.localStorage.getItem("descuento"));
+  		var descuento = parseInt($("#txtDescuento").val());
+
+  		if(descMax < descuento){
+  			alert("DESCUENTO MÁXIMO EXCEDIDO, DESCUENTO AUTORIZADO "+descMax+"%");
+  			return false;
+  		}
+  		else{
+  			return true;
+  		}
+	}
+
 	limpiar();
 	cargarModalGuardar();
 	cargarCombos();
@@ -710,6 +748,7 @@ document.addEventListener('deviceready', function(){
 		//window.localStorage.setItem("password", "");
 		window.localStorage.removeItem("user");
 		window.localStorage.removeItem("password");
+		window.localStorage.removeItem("descuento");
 		navigator.app.loadUrl("file:///android_asset/www/index.html");
 	});
 
@@ -788,9 +827,12 @@ document.addEventListener('deviceready', function(){
 	$("#btnConfirmarGuardado").click(function(e){
 		var rutcli = $("#txtRutcli").val();
 		var productos = $("#tblProd >tbody >tr");
+		if(!validaDescuento()){
+			return false;
+		}
 		if(productos.length > 0 && rutcli.length > 0){
 			var nombreCliente = $("#nombreCliente").text();
-			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Cliente:"+nombreCliente)){
+			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Descuentos $" + getDescuentos() + ", Cliente:"+nombreCliente)){
 			    var xmlDet = getDetalle(productos);
 				var numnvt = parseInt($("#lblTituloLpr").text());
 				var vendedor = window.localStorage.getItem("user");
@@ -891,30 +933,12 @@ document.addEventListener('deviceready', function(){
     });
 
     $("#btnCerrarModallpr2").click(function(){
-    	var query = "SELECT DSCMAX FROM MA_USUARIO WHERE CODUSU = '" + window.localStorage.getItem("user")+"'";
-    	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-
-		db.executeSql(query, [], function(rs) {
-		    if(rs.rows.length == 0){
-		    	alert("SIN DESCUENTO CONFIGURADO PARA EL USUARIO");
-		      return false;
-		    }
-		    else{
-	      		var descMax = parseInt(rs.rows.item(0).DSCMAX);
-	      		var descuento = parseInt($("#txtDescuento").val());
-
-	      		if(descMax < descuento){
-	      			alert("DESCUENTO MÁXIMO EXCEDIDO, DESCUENTO AUTORIZADO "+descMax+"%");
-	      			return false;
-	      		}
-	      		else{
-	      			buscarClienteModal($("#txtRutcli").val(), true);
-	      		}
-		    }
-		  }, function(error) {
-		    alert('Error en la consulta: ' + error.message);
-		  });
-    	
+  		if(!validaDescuento()){
+  			return false;
+  		}
+  		else{
+  			buscarClienteModal($("#txtRutcli").val(), true);
+  		}
     });
 
 	$("#btnZip").click(function(e){
@@ -988,9 +1012,11 @@ document.addEventListener('deviceready', function(){
 				  "WHERE TOTSAL > 0 AND RUTCLI = " + $("#txtRutcli").val();
 		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 		var fecha; 
-        var agno; = parseInt(fecha.substr(0,4));
-        var mes; = parseInt(fecha.substr(4,2));
-        var dia; = parseInt(fecha.substr(6,2));
+        var agno;
+        var mes;
+        var dia;
+        var totgen;
+        var totsal;
 		db.executeSql(query, [], function(rs) {
 		    if(rs.rows.length == 0){
 		      alert("Cliente sin deuda");
@@ -1008,12 +1034,22 @@ document.addEventListener('deviceready', function(){
 		    				 "</thead><tbody>";
 			    for (i=0; i<rs.rows.length; ++i){
 			    	fecha = rs.rows.item(i).FECEMI.toString();
-
+			    	agno = fecha.substr(2,2);
+			    	mes = fecha.substr(4,2);
+			    	dia = fecha.substr(6,2);
+			    	totgen = rs.rows.item(i).TOTGEN.toLocaleString('es-CL', {
+					  style: 'currency',
+					  currency: 'CLP',
+					});
+					totsal = rs.rows.item(i).TOTSAL.toLocaleString('es-CL', {
+					  style: 'currency',
+					  currency: 'CLP',
+					});
 			    	celdas = celdas + "<tr>" +
-			    	"<td>" + rs.rows.item(i).NUMNVT + "</td>" +
-			    	"<td>" + rs.rows.item(i).FECEMI + "</td>" +
-			    	"<td>" + rs.rows.item(i).TOTGEN + "</td>" +
-			    	"<td>" + rs.rows.item(i).TOTSAL + "</td></tr>";
+			    	"<td>" + Math.trunc(rs.rows.item(i).NUMNVT) + "</td>" +
+			    	"<td>" + dia + "-" + mes + "-" + agno + "</td>" +
+			    	"<td>" + totgen + "</td>" +
+			    	"<td>" + totsal + "</td></tr>";
 			    }
 			    celdas = celdas + "</tbody>";
 			    $("#tblDeuda").append(celdas);

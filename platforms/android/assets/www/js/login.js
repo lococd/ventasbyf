@@ -27,12 +27,13 @@ document.addEventListener('deviceready', function(){
           var sysdate = new Date();
           var fechaVenc = new Date(agno,mes-1,dia);
           if( fechaVenc > sysdate || user == "FVERGARA"){ //>
-            query = "select count(*) as TOTAL, CODVEN from ma_usuario where codusu = '" + user + "' and clave1 = '" + password + "'";
+            query = "select count(*) as TOTAL, CODVEN, DSCMAX from ma_usuario where codusu = '" + user + "' and clave1 = '" + password + "'";
             db.executeSql(query, [], function(rs2) {
               if(rs2.rows.item(0).TOTAL > 0){
                 window.localStorage.setItem("user", user);
                 window.localStorage.setItem("password", password);
                 window.localStorage.setItem("codven", rs2.rows.item(0).CODVEN);
+                window.localStorage.setItem("descuento", rs2.rows.item(0).DSCMAX);
                 window.localStorage.setItem("fecVenBase", dia + "/" + mes + "/" + agno);
                 window.location.replace("main.html");
               }
