@@ -61,6 +61,7 @@ document.addEventListener('deviceready', function(){
 	            var strErr = JSON.stringify(error);
 	            if(strErr.includes("2:") || strErr.includes("missing database") || strErr.includes("no such table")){
 	              alert("No hay base de datos cargada, ingrese una");
+	              alert(strErr);
 	              getBase();
 	              return false;
 	            }
@@ -660,6 +661,8 @@ document.addEventListener('deviceready', function(){
 		$("#totalNota").text("Total nota:$0");
     	$("#totalNota2").text("Total nota:$0");
     	$("#txtDescuento").val("");
+    	$("#lblRazons").text("");
+    	$('#cmbFacturable').val("S");
     	limpiarModal();
 		getNumnvt();
 	};
@@ -952,6 +955,15 @@ document.addEventListener('deviceready', function(){
 	    })
 	});
 
+	$("#btnLimpiarNota").click(function(e){
+		if(confirm("¿Limpiar datos de la nota de venta?")){
+			limpiar();
+		}
+		else{
+			return false;
+		}
+	});
+
 	function moveNotasEnviadas(){
 		var pathDestino = cordova.file.externalRootDirectory+"nvtEnviadas";
 		var pathOrigen = cordova.file.externalRootDirectory;
@@ -1008,7 +1020,7 @@ document.addEventListener('deviceready', function(){
 	}
 
 	function cargarDeuda(){
-		var query = "SELECT NUMNVT, FECEMI, TOTGEN, TOTSAL FROM EN_NOTAVTA " +
+		var query = "SELECT NUMNVT, FECEMI, TOTGEN, TOTSAL, ESTADO FROM EN_NOTAVTA " +
 				  "WHERE TOTSAL > 0 AND RUTCLI = " + $("#txtRutcli").val();
 		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 		var fecha; 
@@ -1032,6 +1044,7 @@ document.addEventListener('deviceready', function(){
 		    				 		"<td>TOTSAL</td>" +
 		    				 	"</tr>" +
 		    				 "</thead><tbody>";
+		    	var clase = "";
 			    for (i=0; i<rs.rows.length; ++i){
 			    	fecha = rs.rows.item(i).FECEMI.toString();
 			    	agno = fecha.substr(2,2);
@@ -1041,11 +1054,20 @@ document.addEventListener('deviceready', function(){
 					  style: 'currency',
 					  currency: 'CLP',
 					});
-					totsal = rs.rows.item(i).TOTSAL.toLocaleString('es-CL', {
-					  style: 'currency',
-					  currency: 'CLP',
-					});
-			    	celdas = celdas + "<tr>" +
+					if(rs.rows.item(i).ESTADO == 5){
+						totsal = "NULA";
+						clase = "textoRojo";
+					}
+					else{
+						totsal = rs.rows.item(i).TOTSAL.toLocaleString('es-CL', {
+					  	style: 'currency',
+					  	currency: 'CLP',
+						});
+						clase = "";
+					}
+					
+
+			    	celdas = celdas + '<tr class = "'+ clase + '">' +
 			    	"<td>" + Math.trunc(rs.rows.item(i).NUMNVT) + "</td>" +
 			    	"<td>" + dia + "-" + mes + "-" + agno + "</td>" +
 			    	"<td>" + totgen + "</td>" +
