@@ -1,6 +1,131 @@
 document.addEventListener('deviceready', function(){
 	var limpiando = true;
 	//funciones auxiliares
+	function deleteNvts(){
+	  //agarro el directorio root
+	  window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
+	    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
+	      // tomo un lector del directorio
+	      var directoryReader = dir.createReader();
+
+	      // listo todos los ficheros
+	      directoryReader.readEntries(function(entries) {
+	                                      var i;
+	                                      for (i=0; i<entries.length; i++) {
+	                                          //tomo archivo por archivo
+	                                          dir.getFile(entries[i].name, {create:false}, function(fileEntry) {
+	                                                      //y borro el archivo
+	                                                      fileEntry.remove(function(){
+	                                                          //alert("archivo removido!");
+	                                                      },function(error){
+	                                                          alert("Problemas al borrar");
+	                                                      },function(){
+	                                                         alert("Archivo no existe");
+	                                                      });
+	                                          });
+	                                      }
+	                                  }
+	      ,function fail(error) {
+	        alert("Failed to list directory contents: " + error.code);
+	    });
+
+	    },
+	    function(error) { 
+	      alert("Error "+error.code); 
+	    });
+	  });
+}
+
+	function validaBase(){
+		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+	      var query = "select fecact from ma_update";
+	      var user = window.localStorage.getItem("user");
+	      db.transaction(function (tx) {
+	        tx.executeSql(query, [], function (tx, rs) {
+	          var fecha = rs.rows.item(0).fecact.toString();
+	          var agno = parseInt(fecha.substr(0,4));
+	          var mes = parseInt(fecha.substr(4,2));
+	          var dia = parseInt(fecha.substr(6,2));
+	          var sysdate = new Date();
+	          var fechaVenc = new Date(agno,mes-1,dia);
+	          if( fechaVenc > sysdate || user == "FVERGARA"){ //>
+	            alert("¡Nueva base de datos cargada correctamente!");
+	          }
+	          else{
+	            alert("Base vencida, ingrese una nueva");
+	            getBase();
+	            return false;
+	          }
+	        },
+	        function (tx, error) {
+	            var strErr = JSON.stringify(error);
+	            if(strErr.includes("2:") || strErr.includes("missing database") || strErr.includes("no such table")){
+	              alert("No hay base de datos cargada, ingrese una");
+	              alert(strErr);
+	              getBase();
+	              return false;
+	            }
+	            else{
+	                alert("problema en query " + strErr);
+	                return false;
+	            }
+	        });
+	    }, function (error) {
+	        alert('transaction error: ' + error.message);
+	    }, null);
+	}
+
+	function cargaBase(){
+	    if(!confirm("Recuerde enviar todas las notas de venta antes de cargar nueva base, se borrarán las notas existentes. ¿Quiere continuar?")){
+	      return false;
+	    }
+	    else{
+	      filechooser.open({"mime": "application/octet-stream"}, function(data) {
+	        var pathDB = "file:///data/data/cl.dimeiggs.precios/databases/";
+
+	        var seleccionado = data.url;
+
+	        window.resolveLocalFileSystemURI(seleccionado, function(fileEntrySelected) {
+	          var path2 = "file:///data/data/cl.dimeiggs.precios/"
+	          //agarro el directorio root
+	          window.resolveLocalFileSystemURL(seleccionado, 
+	              function(fileDB){
+	                  window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
+	                          window.resolveLocalFileSystemURL( path2, function( directoryEntry ) {
+	                            directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
+	                              fileDB.copyTo(dirDB, 'envios2.db',
+	                              function(){
+	                                  fileDB.copyTo(dirDB, 'envios.db',
+	                                  function(){
+	                                      window.localStorage.setItem("numnvt", 1);
+	                                      deleteNvts();
+	                                      validaBase();
+	                                  }, 
+	                                  function(err){
+	                                      alert('unsuccessful copying ' + err);
+	                                  });
+	                              }, 
+	                              function(err){
+	                                  alert('unsuccessful copying ' + err);
+	                              });
+	                            },null);
+	                          },null);                        
+	                      }, null);
+	              }, 
+	              function(){
+	                  alert('failure! database was not found');
+	              });
+	        },
+	        function(error) {
+	          alert("err getBaseNueva " + error.code);
+	        });
+	      },
+	      function(msg) {
+	        alert("Archivo no seleccionado " + msg);
+	      });
+	    }    
+	  }
+
 	function cargarModalGuardar(){
 		$('#modalGuardar').modal('toggle');
 		//$('#modalNuevoCliente').modal('toggle');
@@ -9,11 +134,41 @@ document.addEventListener('deviceready', function(){
 	function totalizaNota(){
 		var productos = $("#tblProd >tbody >tr");
 		var neto = 0;
+		var cantid;
+		var totnet;
+		var precio;
 		productos.each(function(tr,fila) {
 				precio = $(fila).find('td:eq(2)').text();
 				cantid = $(fila).find('td:eq(3) >input').val();
 				totnet = precio * cantid;
 				neto = neto + totnet;
+			});
+		return neto;
+	};
+
+	function getDescuentos(){
+		var productos = $("#tblProd >tbody >tr");
+		var neto = 0;
+		var facturable = "N";
+		var descuento = 0;
+		var cantid;
+		var totnet;
+		var precio;
+		if($("#txtDescuento").val() != ""){
+			descuento = parseInt($("#txtDescuento").val());
+		}
+		else{
+			return 0;
+		}
+		productos.each(function(tr,fila) {
+				precio = $(fila).find('td:eq(2)').text();
+				cantid = $(fila).find('td:eq(3) >input').val();
+				facturable = $(fila).find('td:eq(0)').attr("data-facturable");
+				totnet = precio * cantid;
+				if(facturable == "S"){
+					totnet = Math.round(totnet * (descuento/100));
+					neto = neto + totnet;
+				}
 			});
 		return neto;
 	};
@@ -44,6 +199,23 @@ document.addEventListener('deviceready', function(){
 			return numDia;
 		}
 	}
+
+	function validarRut(numero,dv) {
+	    if(numero.length == 0 || numero.length > 8 ) {
+	        return false;
+	    } else {
+	        if(getDV(numero) == dv) return true;
+	    }
+	    return false;
+	}
+    function getDV(numero) {
+        nuevo_numero = numero.toString().split("").reverse().join("");
+        for(i=0,j=2,suma=0; i < nuevo_numero.length; i++, ((j==7) ? j=2 : j++)) {
+            suma += (parseInt(nuevo_numero.charAt(i)) * j); 
+        }
+        n_dv = 11 - (suma % 11);
+        return ((n_dv == 11) ? 0 : ((n_dv == 10) ? "K" : n_dv));
+    }
 
 	function getTotAtrib(){
 		var cantid = $("#txtCantid").val();
@@ -105,6 +277,36 @@ document.addEventListener('deviceready', function(){
 		return atributos;
 	}
 
+	function buscarClienteModal(rutcli, hideModal){
+		if(rutcli.length > 0){
+    		var sql = "SELECT razons, direccion, comuna from en_cliente " +
+    				  "where rutcli =" + rutcli;
+    		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		   	db.executeSql(sql, [], function(rs) {
+		    if(rs.rows.length == 0){
+		      alert("Rut inválido");
+		    }
+		    else{
+		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
+        		$("#lblRazons").text(rs.rows.item(0).RAZONS);
+		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
+		    	if(hideModal){
+		    		$("#modalGuardar").modal('hide');
+		    		$("#modalCodpro").modal('toggle');
+		    		$("#modalTxtCodpro").focus();
+		    	}
+		    	
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+    	}
+    	else{
+    		alert("Ingrese cliente para continuar");
+    	}
+	}
+
 	function duplicado(codpro){
 		var productos = $("#tblProd >tbody >tr");
 		var codproLista;
@@ -137,6 +339,7 @@ document.addEventListener('deviceready', function(){
 		var totgen;
 		var dscto;
 		var xmlCab = "";
+		var totDescuentos = getDescuentos();
 		var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
 					"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02, b.facturable "+
 					"from ma_usuario as a, en_cliente as b, de_dominio as c,de_dominio as d " +
@@ -154,10 +357,11 @@ document.addEventListener('deviceready', function(){
 			    	alert("Cliente no configurado");
 			    }
 			    else{
-			    	totneto = subtot - (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
-			    	totiva = Math.round(totneto * 0.19);
-			    	totgen = Math.round(totneto + totiva);
-			    	dscto = rs.rows.item(0).DESCTO01;
+			    	totgen = subtot - totDescuentos;
+			    	totneto = Math.trunc(totgen / 1.19); //- (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
+			    	totiva = totgen - totneto;
+			    	
+			    	dscto = 0;
 			    	if($("#txtDescuento").val() != ""){
 			    		dscto = $("#txtDescuento").val();
 			    	}
@@ -175,8 +379,8 @@ document.addEventListener('deviceready', function(){
 			    			 "<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
 			    			 "<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
 			    			 "<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
-			    			 "<dscto1>" + dscto + "</dscto1>" + String.fromCharCode(13) +
-			    			 "<dscto2>" + rs.rows.item(0).DESCTO02 + "</dscto2>" + String.fromCharCode(13) +
+			    			 "<dscto1>" + totDescuentos + "</dscto1>" + String.fromCharCode(13) +
+			    			 "<dscto2>0</dscto2>" + String.fromCharCode(13) +
 			    			 "<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
 			    			 "<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
 			    			 "<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
@@ -368,7 +572,7 @@ document.addEventListener('deviceready', function(){
       	  	$("#modalDatosProducto").prop("class","textoVerde");
       	  }
       	  else{
-      	  	$("#modalDatosProducto").prop("class","textoAzul");
+      	  	$("#modalDatosProducto").prop("class","textoRojo");
       	  }
 	      $("#modalTxtCodpro").text(rs.rows.item(0).CODPRO);
 	      $("#modalTxtCodpro").attr("data-costo",rs.rows.item(0).COSTO);
@@ -395,7 +599,7 @@ document.addEventListener('deviceready', function(){
 	
 	function cargarCombos(){
 		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-		var query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 1";
+		var query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 1 ORDER BY DESVAL ASC";
 		db.executeSql(query, [], function(rs) {
 		    if(rs.rows.length == 0){
 		    	//alert("no items");
@@ -409,7 +613,7 @@ document.addEventListener('deviceready', function(){
 		    		$("#cmbNewCiudad").append(fila);
 			    }
 
-			    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 2";
+			    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 2 ORDER BY DESVAL ASC";
 				db.executeSql(query, [], function(rs) {
 				    if(rs.rows.length == 0){
 				    	//alert("no items");
@@ -420,7 +624,7 @@ document.addEventListener('deviceready', function(){
 				    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
 				    		$("#cmbNewComuna").append(fila);
 					    }
-					    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 8";
+					    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 8 ORDER BY DESVAL ASC";
 						db.executeSql(query, [], function(rs) {
 						    if(rs.rows.length == 0){
 						    	//alert("no items");
@@ -457,6 +661,8 @@ document.addEventListener('deviceready', function(){
 		$("#totalNota").text("Total nota:$0");
     	$("#totalNota2").text("Total nota:$0");
     	$("#txtDescuento").val("");
+    	$("#lblRazons").text("");
+    	$('#cmbFacturable').val("S");
     	limpiarModal();
 		getNumnvt();
 	};
@@ -487,6 +693,19 @@ document.addEventListener('deviceready', function(){
 		$("#txtNewFono").val("");
 		$("#txtNewContacto").val("");
 		$("#txtNewObservacion").val("");
+	}
+
+	function validaDescuento(){
+		var descMax = parseInt(window.localStorage.getItem("descuento"));
+  		var descuento = parseInt($("#txtDescuento").val());
+
+  		if(descMax < descuento){
+  			alert("DESCUENTO MÁXIMO EXCEDIDO, DESCUENTO AUTORIZADO "+descMax+"%");
+  			return false;
+  		}
+  		else{
+  			return true;
+  		}
 	}
 
 	limpiar();
@@ -532,6 +751,7 @@ document.addEventListener('deviceready', function(){
 		//window.localStorage.setItem("password", "");
 		window.localStorage.removeItem("user");
 		window.localStorage.removeItem("password");
+		window.localStorage.removeItem("descuento");
 		navigator.app.loadUrl("file:///android_asset/www/index.html");
 	});
 
@@ -610,9 +830,12 @@ document.addEventListener('deviceready', function(){
 	$("#btnConfirmarGuardado").click(function(e){
 		var rutcli = $("#txtRutcli").val();
 		var productos = $("#tblProd >tbody >tr");
+		if(!validaDescuento()){
+			return false;
+		}
 		if(productos.length > 0 && rutcli.length > 0){
 			var nombreCliente = $("#nombreCliente").text();
-			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Cliente:"+nombreCliente)){
+			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Descuentos $" + getDescuentos() + ", Cliente:"+nombreCliente)){
 			    var xmlDet = getDetalle(productos);
 				var numnvt = parseInt($("#lblTituloLpr").text());
 				var vendedor = window.localStorage.getItem("user");
@@ -713,31 +936,12 @@ document.addEventListener('deviceready', function(){
     });
 
     $("#btnCerrarModallpr2").click(function(){
-    	var rutcli = $("#txtRutcli").val();
-    	if(rutcli.length > 0){
-    		var sql = "SELECT razons, direccion, comuna from en_cliente " +
-    				  "where rutcli =" + rutcli;
-    		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-
-		   	db.executeSql(sql, [], function(rs) {
-		    if(rs.rows.length == 0){
-		      alert("Rut inválido");
-		    }
-		    else{
-		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
-        		$("#lblRazons").text(rs.rows.item(0).RAZONS);
-		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
-		    	$("#modalGuardar").modal('hide');
-		    	$("#modalCodpro").modal('toggle');
-		    	$("#modalTxtCodpro").focus();
-		    }
-		  }, function(error) {
-		    alert('Error en la consulta: ' + error.message);
-		  });
-    	}
-    	else{
-    		alert("Ingrese cliente para continuar");
-    	}
+  		if(!validaDescuento()){
+  			return false;
+  		}
+  		else{
+  			buscarClienteModal($("#txtRutcli").val(), true);
+  		}
     });
 
 	$("#btnZip").click(function(e){
@@ -749,6 +953,15 @@ document.addEventListener('deviceready', function(){
 	    },function(error){
 	        alert("error: " + JSON.stringify(error));
 	    })
+	});
+
+	$("#btnLimpiarNota").click(function(e){
+		if(confirm("¿Limpiar datos de la nota de venta?")){
+			limpiar();
+		}
+		else{
+			return false;
+		}
 	});
 
 	function moveNotasEnviadas(){
@@ -806,6 +1019,68 @@ document.addEventListener('deviceready', function(){
         });
 	}
 
+	function cargarDeuda(){
+		var query = "SELECT NUMNVT, FECEMI, TOTGEN, TOTSAL, ESTADO FROM EN_NOTAVTA " +
+				  "WHERE TOTSAL > 0 AND RUTCLI = " + $("#txtRutcli").val();
+		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+		var fecha; 
+        var agno;
+        var mes;
+        var dia;
+        var totgen;
+        var totsal;
+		db.executeSql(query, [], function(rs) {
+		    if(rs.rows.length == 0){
+		      alert("Cliente sin deuda");
+		      return false;
+		    }
+		    else{
+		    	$("#tblDeuda").empty();
+		    	var celdas = "<thead>" +
+		    				 	"<tr>" +
+		    				 		"<td>NUMNVT</td>" +
+		    				 		"<td>FECEMI</td>" +
+		    				 		"<td>TOTGEN</td>" +
+		    				 		"<td>TOTSAL</td>" +
+		    				 	"</tr>" +
+		    				 "</thead><tbody>";
+		    	var clase = "";
+			    for (i=0; i<rs.rows.length; ++i){
+			    	fecha = rs.rows.item(i).FECEMI.toString();
+			    	agno = fecha.substr(2,2);
+			    	mes = fecha.substr(4,2);
+			    	dia = fecha.substr(6,2);
+			    	totgen = rs.rows.item(i).TOTGEN.toLocaleString('es-CL', {
+					  style: 'currency',
+					  currency: 'CLP',
+					});
+					if(rs.rows.item(i).ESTADO == 5){
+						totsal = "NULA";
+						clase = "textoRojo";
+					}
+					else{
+						totsal = rs.rows.item(i).TOTSAL.toLocaleString('es-CL', {
+					  	style: 'currency',
+					  	currency: 'CLP',
+						});
+						clase = "";
+					}
+					
+
+			    	celdas = celdas + '<tr class = "'+ clase + '">' +
+			    	"<td>" + Math.trunc(rs.rows.item(i).NUMNVT) + "</td>" +
+			    	"<td>" + dia + "-" + mes + "-" + agno + "</td>" +
+			    	"<td>" + totgen + "</td>" +
+			    	"<td>" + totsal + "</td></tr>";
+			    }
+			    celdas = celdas + "</tbody>";
+			    $("#tblDeuda").append(celdas);
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+	}
+
 	$("#btnBorrarEnviadas").click(function(e){
 		//agarro el directorio root
 	  	window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
@@ -841,11 +1116,67 @@ document.addEventListener('deviceready', function(){
 	  });
 	});
 
+	$("#txtNewRut").blur(function(e){
+		var sql = "SELECT razons, direccion, comuna from en_cliente " +
+    				  "where rutcli =" + $("#txtNewRut").val();
+    	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		db.executeSql(sql, [], function(rs){
+		    if(rs.rows.length > 0){
+		      alert("Rut existe");
+		      $("#txtNewRut").focus();
+		      return false;
+			}
+		}, function(error) {
+			alert('Error en la consulta: ' + error.message);
+			return false;
+		});
+
+		if ($("#txtNewDV").val().length>0){
+			if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
+				alert("Rut inválido");
+				return false;
+			}	
+		}
+	});
+
+	$("#txtNewDV").blur(function(e){
+		if ($("#txtNewDV").val().length>0){
+			if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
+				alert("Rut inválido");
+				return false;
+			}	
+		}
+		else{
+			alert("Ingrese DV");
+			return false;
+		}
+	});
+
 	$("#btnConfirmarCliente").click(function(e){
+		if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
+			alert("Rut inválido");
+			return false;
+		}
+
+		var sql = "SELECT razons, direccion, comuna from en_cliente " +
+    				  "where rutcli =" + $("#txtNewRut").val();
+    	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		db.executeSql(sql, [], function(rs){
+		    if(rs.rows.length > 0){
+		      alert("Rut existe");
+		      return false;
+			}
+		}, function(error) {
+			alert('Error en la consulta: ' + error.message);
+			return false;
+		});
+
 		var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
 										   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG) " +
 										   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1)";
-		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+		db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
 		db.executeSql(query, [$("#txtNewRut").val(), $("#txtNewDV").val(),$("#txtNewRazons").val(),
 							  $("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
@@ -860,6 +1191,8 @@ document.addEventListener('deviceready', function(){
 		    	alert("Cliente Ingresado");
 		    	$("#txtRutcli").val($("#txtNewRut").val());
 		    	limpiarFicha();
+		    	$('#btnCancelarCliente').trigger("click");
+		    	buscarClienteModal($("#txtRutcli").val(), false);
 		    }
 		  }, function(error) {
 		    alert('Error en la consulta: ' + error.message);
@@ -868,6 +1201,19 @@ document.addEventListener('deviceready', function(){
 
 	$("#btnNuevoCliente").click(function(e){
 		$('#modalNuevoCliente').modal('toggle');
+	});
+
+	$("#btnCargarBase").click(function(e){
+		cargaBase();
+	});
+
+	$("#btnVerDeuda").click(function(e){
+		$('#modalDeuda').modal('toggle');
+		cargarDeuda();
+	});
+
+	$("#btnCerrarDeuda").click(function(e){
+		$('#modalDeuda').modal('toggle');
 	});
 
 	$(document).on('click','.eliminarFila',function() {
