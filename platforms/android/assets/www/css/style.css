@@ -142,3 +142,15 @@ h3{
 .textoRojo td{
   color: red;
 }
+
+.textoNegro{
+  color:black;
+}
+
+.textoBlanco{
+  color: white !important;
+}
+
+.invisible{
+  display: none;
+}

@@ -20,7 +20,7 @@
             <div class="navbar-header">
               <img class="navbar-brand" src="img/logo.jpg" />
               <h3 class="navbar-brand texto" id="nombreCliente">Cliente Prueba</h2>
-              <a class="btnCerrarSesion texto" href="#">Cerrar Sesión</a>
+              
               <!--h3 class="navbar-brand texto">TOTAL:$</h2-->
               <h3 class="navbar-brand texto" id="totalNota">0</h3>
               <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -37,8 +37,9 @@
                 <li><a href="#" id="btnCodigo">Ingresar Producto</a></li>
                 <li><a id="btnGuardar" href="#">Grabar Nota</a></li>
                 <li><a id="btnBorrarEnviadas" href="#">Borrar Notas Enviadas</a></li>
-                <li><a id="btnCargarBase" href="#">Cargar nueva base de datos</a></li>
+                <li><a class="btnCargarBase" href="#">Cargar nueva base de datos</a></li>
                 <li><a id="btnVerDeuda" href="#">Ver Deuda</a></li>
+                <li><a class="btnCerrarSesion" href="#">Cerrar Sesión</a></li>
               </ul>
             </div><!--/.nav-collapse -->
           </div>
@@ -79,8 +80,26 @@
                   <!-- Modal content-->
                   <div class="modal-content">
                     <div class="modal-header">
+                      <nav class="navbar-default">
+                        <div class="container-fluid">
+                          <div class="navbar-header">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menuModalCodpro" aria-expanded="false">
+                              <span class="sr-only">Toggle navigation</span>
+                              <span class="icon-bar bg-dark"></span>
+                              <span class="icon-bar bg-dark"></span>
+                              <span class="icon-bar bg-dark"></span>
+                            </button>
+                            <a class="navbar-brand textoBlanco" href="#">Ingreso de productos</a>
+                          </div>
+                          <div style="height: 1px;" aria-expanded="false" id="menuModalCodpro" class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav navbar-right">
+                              <li><a class="btnCargarBase" href="#">Cargar nueva base de datos</a></li>
+                            </ul>
+                          </div><!--/.nav-collapse -->
+                        </div>
+                      </nav>
                       <button type="button" class="close" data-dismiss="modal"></button>
-                      <h4 class="modal-title">Ingreso manual de código</h4>
+                      <h4 class="modal-title"></h4>
                     </div>
                     <div class="modal-body">
                       <div class="form-group">
@@ -115,12 +134,18 @@
                                 </table>
                               </div>
                             </div>
-                            <button class="btn btn-default" id="btnLimpiarModal">Limpiar</button>
-                            <button class="btn btn-default disabled" id="insertarProducto" disabled="true">Guardar Producto</button>
                             <h5>Cantidad Mayorista</h5>
                             <input type="number" id="modalTxtCanMay" disabled="true">
                             <input type="number" id="modalTxtMultip" class="invisible">
                             <input type="text" id="modalTxtProdFacturable" class="invisible">
+                            <div class="ui-widget">
+                              <div class="">
+                                <button class="btn btn-default" id="btnLimpiarModal">Limpiar</button>
+                                <button class="btn btn-default pull-right disabled" id="insertarProducto" disabled="true">Guardar Producto</button>
+                              </div>
+                              
+                            </div>
+                            
                         </div>
                       </div>
                     </div>
@@ -136,24 +161,28 @@
                   <div class="modal-content">
                     <div class="modal-header">
                       <!--button type="button" class="close" data-dismiss="modal" id="btnCerrarModallpr">&times;</button-->
-                      <table>
-                        <tr>
-                          <td>
-                            <h4 class="modal-title">V1.6.9 Datos Nota de Venta</h4>
-                          </td>
-                          <td>
-                            <button type="button" class="btn btn-default pull-right btnCerrarSesion">Cerrar Sesión</button>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <h4 class="modal-title" id="lblVendedor2">Ejecutivo: </h4>
-                          </td>
-                          <td>
-                            <button id="btnNuevoCliente" class="btn btn-default pull-right">Nuevo Cliente</button>
-                          </td>
-                        </tr>
-                      </table>
+                      <nav class="navbar-default">
+                        <div class="container-fluid">
+                          <div class="navbar-header">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menuModal" aria-expanded="false">
+                              <span class="sr-only">Toggle navigation</span>
+                              <span class="icon-bar bg-dark"></span>
+                              <span class="icon-bar bg-dark"></span>
+                              <span class="icon-bar bg-dark"></span>
+                            </button>
+                            <a class="navbar-brand textoBlanco" href="#">V1.7.0 Datos Nota</a>
+                          </div>
+                          <div style="height: 1px;" aria-expanded="false" id="menuModal" class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav navbar-right">
+                              <li><a class="btnCerrarSesion" href="#">Cerrar Sesión</a></li>
+                              <li><a id="btnNuevoCliente" href="#">Nuevo Cliente</a></li>
+                              <li><a id="btnZip" href="#">Enviar Notas</a></li>
+                              <li><a class="btnCargarBase" href="#">Cargar nueva base de datos</a></li>
+                            </ul>
+                          </div><!--/.nav-collapse -->
+                        </div>
+                      </nav>
+                      <h4 class="modal-title" id="lblVendedor2">Ejecutivo: </h4>
                       <h4 id="lblTituloLpr" class="modal-title invisible"></h4>
                       <h4 class="modal-title" id="lblRazons">Cliente</h4>
                       <h4 id="lblComuna"></h4>
@@ -165,37 +194,41 @@
                             <div class="ui-widget">
                               <input type="text" id="txtRutcli" class="form-control" placeholder="Rut Cliente">
                             </div>
-                            <input type="text" id="txtObserv" placeholder="Observación" class="form-control">
-                            <table class="container">
-                              <tr class="col-sm-12">
-                                <td class="col-sm-3" style="padding-left: 0px !important;">
-                                  <input type="number" id="txtDescuento" placeholder="% Descuento" class="form-control pull-left">
-                                </td>
-                                <td class="col-sm-6">
-                                  <h4 class="modal-title" id="lblRazons">Facturable</h4>
-                                  <select id="cmbFacturable" class="form-control pull-left">
-                                    <option value="S">S</option>
-                                    <option value="N">N</option>
-                                  </select>
-                                  </td>
-                              </tr>
-                              <tr>
-                                <td class="pull-left">
+                            <div class="ui-widget">
+                              <input type="text" id="txtObserv" placeholder="Observación" class="form-control">
+                            </div>
+                            <div class="row">
+                              <div class="col-xs-6 col-md-6">
+                                <h4 class="modal-title">Descuento</h4>
+                              </div>
+                              <div class="col-xs-6 col-md-6">
+                                <h4 class="modal-title">Facturable</h4>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-xs-6">
+                                <input type="number" id="txtDescuento" placeholder="% Descuento" class="form-control pull-left">
+                              </div>
+                              <div class="col-xs-6">
+                                <select id="cmbFacturable" class="form-control pull-left">
+                                  <option value="S">S</option>
+                                  <option value="N">N</option>
+                                </select>
+                              </div>
+                            </div>
+                            <div class="ui-widget">
+                              <div class="pull-left">
                                   <button type="button" class="btn btn-default pull-left" id="btnLimpiarNota">Limpiar Nota</button>
-                                </td>
-                                <td class="pull-right">
-                                  <td>
-                                    <button type="button" class="btn btn-default pull-right" id="btnCerrarModallpr2">Seguir Nota</button>
-                                  </td>
-                                </td>
-                              </tr>
-                            </table>
+                              </div>
+                              <div class="pull-right">
+                                <button type="button" class="btn btn-default pull-right" id="btnCerrarModallpr2">Seguir Nota</button>
+                              </div>
+                            </div>
                         </div>
                       </div>
                     </div>
                     <div class="modal-footer">
                       <button type="button" id="btnConfirmarGuardado" class="btn btn-default disabled">Grabar Nota</button>
-                      <button id="btnZip" class="btn btn-default pull-left">Enviar Notas</button>
                       <h4 id="lblVigencia"></h4>
                     </div>
                   </div>

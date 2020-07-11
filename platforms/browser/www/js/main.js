@@ -716,6 +716,7 @@ document.addEventListener('deviceready', function(){
   		}
 	}
 	limpiar();
+	//$('#modalCodpro').modal('toggle'); return false;
 	cargarModalGuardar();
 	cargarCombos();
 
@@ -1235,7 +1236,7 @@ document.addEventListener('deviceready', function(){
 		$('#modalNuevoCliente').modal('toggle');
 	});
 
-	$("#btnCargarBase").click(function(e){
+	$(".btnCargarBase").click(function(e){
 		cargaBase();
 	});
 
