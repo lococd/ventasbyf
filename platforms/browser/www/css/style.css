@@ -124,11 +124,12 @@ h3{
     overflow-y: auto;
 }
 
-/*#modalTxtDespro{
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}*/
+#modalTxtDespro{
+  /*white-space: nowrap;
+  overflow: scroll;
+  text-overflow: ellipsis;*/
+  overflow-wrap: break-word;
+}
 
 .textoAzul td{
   color: blue;

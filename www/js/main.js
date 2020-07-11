@@ -279,8 +279,14 @@ document.addEventListener('deviceready', function(){
 
 	function buscarClienteModal(rutcli, hideModal){
 		if(rutcli.length > 0){
-    		var sql = "SELECT razons, direccion, comuna from en_cliente " +
-    				  "where rutcli =" + rutcli;
+    		var sql = /*"SELECT razons, direccion, lincre, comuna, sum(totsal) b from en_cliente a, en_notavta b" +
+    				  "where rutcli =" + rutcli;*/
+    				  "SELECT a.rutcli, a.razons, direccion, lincre - sum(ifnull(totsal,0)) LINCRE, a.comuna " +
+					  "from en_cliente a " +
+					  "left outer join " +
+    				  "en_notavta b " +
+					  "on a.rutcli = b.rutcli " +
+					  "where a.rutcli = " + rutcli;
     		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
 		   	db.executeSql(sql, [], function(rs) {
@@ -291,6 +297,7 @@ document.addEventListener('deviceready', function(){
 		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
         		$("#lblRazons").text(rs.rows.item(0).RAZONS);
 		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
+		    	window.localStorage.setItem("lincre", rs.rows.item(0).LINCRE);
 		    	if(hideModal){
 		    		$("#modalGuardar").modal('hide');
 		    		$("#modalCodpro").modal('toggle');
@@ -663,6 +670,7 @@ document.addEventListener('deviceready', function(){
     	$("#txtDescuento").val("");
     	$("#lblRazons").text("");
     	$('#cmbFacturable').val("S");
+    	window.localStorage.setItem("lincre", 0);
     	limpiarModal();
 		getNumnvt();
 	};
@@ -707,7 +715,6 @@ document.addEventListener('deviceready', function(){
   			return true;
   		}
 	}
-
 	limpiar();
 	cargarModalGuardar();
 	cargarCombos();
@@ -835,6 +842,11 @@ document.addEventListener('deviceready', function(){
 		}
 		if(productos.length > 0 && rutcli.length > 0){
 			var nombreCliente = $("#nombreCliente").text();
+			var lincre = window.localStorage.getItem("lincre");
+			if(lincre<totalizaNota()){
+				alert("Total excede credito");
+				return false;
+			}
 			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Descuentos $" + getDescuentos() + ", Cliente:"+nombreCliente)){
 			    var xmlDet = getDetalle(productos);
 				var numnvt = parseInt($("#lblTituloLpr").text());
@@ -948,10 +960,26 @@ document.addEventListener('deviceready', function(){
 		var PathToFileInString  = cordova.file.externalRootDirectory+"nvt",
 	        PathToResultZip     = cordova.file.externalRootDirectory;
 	    JJzip.zip(PathToFileInString, {target:PathToResultZip,name:"nvt"},function(data){
-	    	moveNotasEnviadas();
-	        window.plugins.socialsharing.share('Notas de Venta', 'BYF', PathToResultZip+"nvt.zip");
+	    	
+	    	var options = {
+				    		message:    'Notas de Venta', // string
+				    		subject:       'BYF',    // string
+				    		files:  [PathToResultZip+"nvt.zip"]
+						};
+	        window.plugins.socialsharing.shareWithOptions(options, function(result){
+	        	if(result.app.length>0){
+	        		if(confirm("Pasar notas actuales a carpeta enviadas?")) {
+	        			moveNotasEnviadas();
+	        			window.localStorage.setItem("numnvt", 1);
+	        			getNumnvt();
+	        			alert("Notas movidas a enviadas");
+	        		}
+	        	}
+	        },function(error){
+	        	alert("no pasa naranja " + error);
+	        });
 	    },function(error){
-	        alert("error: " + JSON.stringify(error));
+	        alert("Hay notas para enviar? error: " + error.message);
 	    })
 	});
 
@@ -1178,7 +1206,11 @@ document.addEventListener('deviceready', function(){
 										   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1)";
 		db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
-		db.executeSql(query, [$("#txtNewRut").val(), $("#txtNewDV").val(),$("#txtNewRazons").val(),
+		var dv = $("#txtNewDV").val();
+		if(dv == "k"){
+			dv = "K";
+		}
+		db.executeSql(query, [$("#txtNewRut").val(), dv,$("#txtNewRazons").val(),
 							  $("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
 							  $("#txtNewFono").val(), window.localStorage.getItem("codven"), $("#txtNewGiro").val(),
 							  $("#txtNewContacto").val(), $("#txtNewObservacion").val(), "S"], function(rs) {
