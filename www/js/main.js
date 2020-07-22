@@ -592,6 +592,7 @@ document.addEventListener('deviceready', function(){
 	      	$("#modalTxtPrecioMay").text(rs.rows.item(0).PREDET);
 	      }
 	      $("#modalTxtCanMay").val(rs.rows.item(0).CANMAY);
+	      $("#modalTxtCanMay").text(rs.rows.item(0).CANMAY);
 	      $("#modalTxtMultip").val(rs.rows.item(0).MULTIP);
 	      $("#modalTxtProdFacturable").val(rs.rows.item(0).FACTUR);
 	      $("#insertarProducto").removeClass("disabled");
@@ -683,6 +684,7 @@ document.addEventListener('deviceready', function(){
 		$("#modalTxtPrecioNor").text("");
 		$("#modalTxtPrecioMay").text("");
 		$("#modalTxtCanMay").val("");
+		$("#modalTxtCanMay").text("");
 		$("#txtCantid").val("");
 		$("#tblAttrib").empty();
     	$("#tabAttrib").addClass("invisible");
@@ -765,9 +767,12 @@ document.addEventListener('deviceready', function(){
 
 	$("#insertarProducto").click(function(e){
 		//$("#txtCantid").trigger("change");
+		var lincre = window.localStorage.getItem("lincre");
+		var totalNota = totalizaNota();
 		var cantid = $("#txtCantid").val();
 		var multip = $("#modalTxtMultip").val();
 		var precio;
+		
 		if(cantid != "" && cantid > 0){
 			if(cantid%multip>0){
 				alert('Debe ingresar múltiplos de ' + multip);
@@ -795,7 +800,11 @@ document.addEventListener('deviceready', function(){
 						netoProd = parseInt($("#modalTxtPrecioNor").text()) * cantid;
 						precio = $("#modalTxtPrecioNor").text();
 					}
-					
+					totalNota = totalNota + netoProd;
+					if(lincre<totalNota){
+						alert("Total excede credito \nCredito: $"+lincre+"\nTotal sin producto a ingresar:$"+(totalNota-netoProd)+"\nTotal con producto a ingresar: $"+totalNota);
+						return false;
+					}
 					var xmlAtrib = getAtributos();
 					var tr = '';
 					if (xmlAtrib != ''){ //si tiene atributos

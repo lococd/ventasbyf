@@ -592,6 +592,7 @@ document.addEventListener('deviceready', function(){
 	      	$("#modalTxtPrecioMay").text(rs.rows.item(0).PREDET);
 	      }
 	      $("#modalTxtCanMay").val(rs.rows.item(0).CANMAY);
+	      $("#modalTxtCanMay").text(rs.rows.item(0).CANMAY);
 	      $("#modalTxtMultip").val(rs.rows.item(0).MULTIP);
 	      $("#modalTxtProdFacturable").val(rs.rows.item(0).FACTUR);
 	      $("#insertarProducto").removeClass("disabled");
@@ -683,6 +684,7 @@ document.addEventListener('deviceready', function(){
 		$("#modalTxtPrecioNor").text("");
 		$("#modalTxtPrecioMay").text("");
 		$("#modalTxtCanMay").val("");
+		$("#modalTxtCanMay").text("");
 		$("#txtCantid").val("");
 		$("#tblAttrib").empty();
     	$("#tabAttrib").addClass("invisible");
