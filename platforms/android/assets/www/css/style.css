@@ -124,6 +124,12 @@ h3{
     overflow-y: auto;
 }
 
+#tabAttrib{
+    height: 100px;
+    width: 100%;
+    overflow-y: scroll;
+}
+
 #modalTxtDespro{
   /*white-space: nowrap;
   overflow: scroll;
