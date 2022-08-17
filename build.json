@@ -1,0 +1,20 @@
+{
+    "android": {
+        "debug": {
+            "keystore": "/src/ventasbyf.jks",
+            "storePassword": "ventasbyf",
+            "alias": "ventasbyf",
+            "password" : "ventasbyf",
+            "keystoreType": "jks",
+            "packageType": "apk"
+        },
+        "release": {
+            "keystore": "/src/ventasbyf.jks",
+            "storePassword": "ventasbyf",
+            "alias": "ventasbyf",
+            "password" : "ventasbyf",
+            "keystoreType": "jks",
+            "packageType": "bundle"
+        }
+    }
+}

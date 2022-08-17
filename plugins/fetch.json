@@ -39,5 +39,53 @@
     },
     "is_top_level": true,
     "variables": {}
+  },
+  "es6-promise-plugin": {
+    "source": {
+      "type": "registry",
+      "id": "es6-promise-plugin@^4.2.2"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-x-socialsharing": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-x-socialsharing@^5.4.0"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-file-transfer": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-file-transfer"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-file": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-file@7.0.0"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-x-socialsharing-android12": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-x-socialsharing-android12"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-filechooser": {
+    "source": {
+      "type": "registry",
+      "id": "https://github.com/ihadeed/cordova-filechooser.git"
+    },
+    "is_top_level": true,
+    "variables": {}
   }
 }
