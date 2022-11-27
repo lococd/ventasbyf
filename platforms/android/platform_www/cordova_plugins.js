@@ -17,6 +17,14 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
       ]
     },
     {
+      "id": "cordova-plugin-chooser.Chooser",
+      "file": "plugins/cordova-plugin-chooser/www/chooser.js",
+      "pluginId": "cordova-plugin-chooser",
+      "clobbers": [
+        "chooser"
+      ]
+    },
+    {
       "id": "cordova-plugin-file.DirectoryEntry",
       "file": "plugins/cordova-plugin-file/www/DirectoryEntry.js",
       "pluginId": "cordova-plugin-file",
@@ -198,25 +206,53 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
       "runs": true
     },
     {
-      "id": "es6-promise-plugin.Promise",
-      "file": "plugins/es6-promise-plugin/www/promise.js",
-      "pluginId": "es6-promise-plugin",
-      "runs": true
-    },
-    {
       "id": "cordova-plugin-filechooser.FileChooser",
       "file": "plugins/cordova-plugin-filechooser/www/fileChooser.js",
       "pluginId": "cordova-plugin-filechooser",
       "clobbers": [
         "fileChooser"
       ]
+    },
+    {
+      "id": "cordova-plugin-filepath.FilePath",
+      "file": "plugins/cordova-plugin-filepath/www/FilePath.js",
+      "pluginId": "cordova-plugin-filepath",
+      "clobbers": [
+        "window.FilePath"
+      ]
+    },
+    {
+      "id": "cordova-plugin-ftp.ftp",
+      "file": "plugins/cordova-plugin-ftp/www/ftp.js",
+      "pluginId": "cordova-plugin-ftp",
+      "clobbers": [
+        "cordova.plugin.ftp"
+      ]
+    },
+    {
+      "id": "es6-promise-plugin.Promise",
+      "file": "plugins/es6-promise-plugin/www/promise.js",
+      "pluginId": "es6-promise-plugin",
+      "runs": true
+    },
+    {
+      "id": "cordova-plugin-x-socialsharing-android12.SocialSharing",
+      "file": "plugins/cordova-plugin-x-socialsharing-android12/www/SocialSharing.js",
+      "pluginId": "cordova-plugin-x-socialsharing-android12",
+      "clobbers": [
+        "window.plugins.socialsharing"
+      ]
     }
   ];
   module.exports.metadata = {
     "com.jjdltc.cordova.plugin.zip": "1.1.0",
     "com.phonegap.plugins.sqlite": "0.7.0",
+    "cordova-plugin-chooser": "1.3.1",
     "cordova-plugin-file": "7.0.0",
+    "cordova-plugin-filechooser": "1.2.0",
+    "cordova-plugin-filepath": "1.6.0",
+    "cordova-plugin-ftp": "1.2.1",
     "es6-promise-plugin": "4.2.2",
-    "cordova-plugin-filechooser": "1.2.0"
+    "cordova-plugin-x-socialsharing-android12": "6.0.5"
   };
 });

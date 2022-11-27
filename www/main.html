@@ -204,6 +204,7 @@
                               <li><a class="btnCerrarSesion" href="#">Cerrar Sesión</a></li>
                               <li><a id="btnNuevoCliente" href="#">Nuevo Cliente</a></li>
                               <li><a id="btnZip" href="#">Enviar Notas</a></li>
+                              <li><a id="btnVerNotas" href="#">Ver y enviar Notas</a></li>
                               <li><a class="btnCargarBase" href="#">Cargar nueva base de datos</a></li>
                             </ul>
                           </div><!--/.nav-collapse -->
@@ -332,6 +333,39 @@
                   </div>
                 </div>
                 <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarDeuda">Cerrar</button>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="modalEnviarNotas" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Enviar notas</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <div class = "ui-front">
+                        <table id="tblNotas" class="table tabla-txt">
+                          <thead>
+                            <tr>
+                              <td>Cliente</td>
+                              <td>Fecha</td>
+                              <td>Total Neto</td>
+                              <td>Incluir</td>
+                            </tr>
+                          </thead>
+                          <tbody id="detalleTblNotas">
+                            
+                          </tbody>
+                        </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" id="btnEnviarNotas">Enviar Notas</button>
                   <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarDeuda">Cerrar</button>
                 </div>
             </div>

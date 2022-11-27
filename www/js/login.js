@@ -26,7 +26,7 @@ document.addEventListener('deviceready', function(){
           var dia = parseInt(fecha.substr(6,2));
           var sysdate = new Date();
           var fechaVenc = new Date(agno,mes-1,dia);
-          if( fechaVenc > sysdate || user == "FVERGARA"){ //>
+          if( fechaVenc > sysdate || user == "FVERGARA"){
             query = "select count(*) as TOTAL, CODVEN, DSCMAX from ma_usuario where codusu = '" + user + "' and clave1 = '" + password + "'";
             db.executeSql(query, [], function(rs2) {
               if(rs2.rows.item(0).TOTAL > 0){
@@ -54,6 +54,7 @@ document.addEventListener('deviceready', function(){
         },
         function (tx, error) {
             var strErr = JSON.stringify(error);
+            //alert(strErr);
             if(strErr.includes("2:") || strErr.includes("missing database") || strErr.includes("no such table")){
               alert("No hay base de datos cargada, ingrese una");
               getBase();
@@ -74,15 +75,15 @@ document.addEventListener('deviceready', function(){
       return false;
     }
     else{
-      fileChooser.open({"mime": "application/octet-stream"}, function(data) {
-        var pathDB = "file:///data/data/cl.dimeiggs.precios/databases/";
+      /*fileChooser.open({"mime": "application/octet-stream"}, function(data) {
+        var pathDB = cordova.file.applicationStorageDirectory;
 
-        var seleccionado = data.url;
+        var seleccionado = data;
 
         window.resolveLocalFileSystemURI(seleccionado, function(fileEntrySelected) {
-          var path2 = "file:///data/data/cl.dimeiggs.precios/"
+          var path2 = cordova.file.applicationStorageDirectory;
           //agarro el directorio root
-          window.resolveLocalFileSystemURL(seleccionado, 
+          window.resolveLocalFileSystemURL(seleccionado,
               function(fileDB){
                   window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
                           window.resolveLocalFileSystemURL( path2, function( directoryEntry ) {
@@ -112,12 +113,55 @@ document.addEventListener('deviceready', function(){
               });
         },
         function(error) {
-          alert("err getBaseNueva " + error.code);
+          alert("err getBaseNueva " + JSON.stringify(error));
         });
       },
       function(msg) {
         alert("Archivo no seleccionado " + msg);
-      });
+      });*/
+      try {
+           cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
+          function(result){
+            cordova.plugin.ftp.download(cordova.file.externalDataDirectory + "/envios.db","/dbtest.db",function(percent){
+                if(percent == 1){
+                  window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "/envios.db",
+                  function(fileDB){
+                      window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
+                              window.resolveLocalFileSystemURL(cordova.file.applicationStorageDirectory, function( directoryEntry ) {
+                                directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
+                                  fileDB.copyTo(dirDB, 'envios2.db',
+                                  function(){
+                                      fileDB.copyTo(dirDB, 'envios.db',
+                                      function(){
+                                          window.localStorage.setItem("numnvt", 1);
+                                          deleteNvts();
+                                          alert("¡Base de datos cargada correctamente!");
+                                          checkLogin();
+                                      }, 
+                                      function(err){
+                                          alert('unsuccessful copying ' + err);
+                                      });
+                                  }, 
+                                  function(err){
+                                      alert('unsuccessful copying ' + err);
+                                  });
+                                },null);
+                              },null);                        
+                          }, null);
+                  }, 
+                  function(){
+                      alert('failure! database was not found');
+                  });
+                }
+              },function(error){
+              alert(JSON.stringify(error));
+            });
+          },function(error){
+            alert(JSON.stringify(error));
+          });
+      } catch(e) {
+         alert(e.name + " , "+ e.message + " , "+ e.stack);
+      }
     }    
   }
 
@@ -140,30 +184,30 @@ document.addEventListener('deviceready', function(){
 
 function createCarpetaNvt(){
   //genero carpeta nvt
-  window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
+  window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
     directoryEntry.getDirectory("nvt", {create: true, exclusive: false}, function(dir) { 
       //alert("Created dir "+dir.name); 
     },
-    function(error) { 
-      alert("Error creando directorio "+error.code); 
+    function(error) {
+      alert("Error creando directorio nvt "+JSON.stringify(error)); 
     });
   });
 }
 
 function createCarpetaNvtEnviadas(){
   //genero carpeta nvt
-  window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
+  window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
     directoryEntry.getDirectory("nvtEnviadas", {create: true, exclusive: false}, function(dir) { 
       //alert("Created dir "+dir.name); 
     },
     function(error) { 
-      alert("Error creando directorio "+error.code); 
+      alert("Error creando directorio nvtenviadas "+error.code); 
     });
   });
 }
 
 function deleteDB() {
-  var path = "file:///data/data/cl.dimeiggs.precios/"
+  var path = cordova.file.externalDataDirectory;
   //agarro el directorio root
   window.resolveLocalFileSystemURL( path, function( directoryEntry ) {
     directoryEntry.getDirectory("databases", {create: false, exclusive: false}, function(dir) {  //tomo el directorio databases

@@ -2,7 +2,7 @@
   "phonegap-plugin-barcodescanner": {
     "source": {
       "type": "registry",
-      "id": "phonegap-plugin-barcodescanner"
+      "id": "phonegap-plugin-barcodescanner@8.1.0"
     },
     "is_top_level": true,
     "variables": {}
@@ -10,7 +10,7 @@
   "cordova-plugin-compat": {
     "source": {
       "type": "registry",
-      "id": "cordova-plugin-compat"
+      "id": "cordova-plugin-compat@^1.0.0"
     },
     "is_top_level": false,
     "variables": {}
@@ -48,14 +48,6 @@
     "is_top_level": true,
     "variables": {}
   },
-  "cordova-plugin-x-socialsharing": {
-    "source": {
-      "type": "registry",
-      "id": "cordova-plugin-x-socialsharing@^5.4.0"
-    },
-    "is_top_level": true,
-    "variables": {}
-  },
   "cordova-plugin-file-transfer": {
     "source": {
       "type": "registry",
@@ -70,12 +62,14 @@
       "id": "cordova-plugin-file@7.0.0"
     },
     "is_top_level": true,
-    "variables": {}
+    "variables": {
+      "ANDROIDX_WEBKIT_VERSION": "1.4.0"
+    }
   },
   "cordova-plugin-x-socialsharing-android12": {
     "source": {
       "type": "registry",
-      "id": "cordova-plugin-x-socialsharing-android12"
+      "id": "cordova-plugin-x-socialsharing-android12@^6.0.5"
     },
     "is_top_level": true,
     "variables": {}
@@ -84,6 +78,30 @@
     "source": {
       "type": "registry",
       "id": "https://github.com/ihadeed/cordova-filechooser.git"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-chooser": {
+    "source": {
+      "type": "registry",
+      "id": "https://github.com/cyph/cordova-plugin-chooser.git"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-filepath": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-filepath@^1.6.0"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-ftp": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-ftp@^1.2.1"
     },
     "is_top_level": true,
     "variables": {}

@@ -6,6 +6,8 @@ keytool -genkey -v -keystore ventasbyf.jks -keyalg RSA -keysize 2048 -validity 1
 export GRADLE_HOME=/opt/gradle/gradle-5.0
 export JAVA_HOME=/usr/lib/jvm/jdk-11
 
+cd /src
+
 cordova build android --debug --buildConfig
 cordova build android --release --buildConfig
 
@@ -14,3 +16,9 @@ cordova build android --release --buildConfig
 export JAVA_HOME=/usr/lib/jvm/jdk-11
 //export PATH=\$PATH:\$JAVA_HOME/bin
 
+en caso que al remover plataforma android y agregandola de nuevo no funcione gradle
+$ export JAVA_HOME=
+$ cordova build android
+$ export JAVA_HOME=/usr/lib/jvm/jdk-11
+
+cordova build android --debug --buildConfig

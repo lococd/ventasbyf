@@ -10,14 +10,26 @@
     "com.phonegap.plugins.sqlite": {
       "PACKAGE_NAME": "cl.oliver.ventasbyf"
     },
+    "cordova-plugin-chooser": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+    },
     "cordova-plugin-file": {
       "ANDROIDX_WEBKIT_VERSION": "1.4.0",
       "PACKAGE_NAME": "cl.oliver.ventasbyf"
     },
-    "es6-promise-plugin": {
+    "cordova-plugin-filechooser": {
       "PACKAGE_NAME": "cl.oliver.ventasbyf"
     },
-    "cordova-plugin-filechooser": {
+    "cordova-plugin-filepath": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+    },
+    "cordova-plugin-ftp": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+    },
+    "cordova-plugin-x-socialsharing-android12": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+    },
+    "es6-promise-plugin": {
       "PACKAGE_NAME": "cl.oliver.ventasbyf"
     }
   },

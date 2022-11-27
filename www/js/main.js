@@ -3,7 +3,7 @@ document.addEventListener('deviceready', function(){
 	//funciones auxiliares
 	function deleteNvts(){
 	  //agarro el directorio root
-	  window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
+	  window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
 	    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
 	      // tomo un lector del directorio
 	      var directoryReader = dir.createReader();
@@ -413,7 +413,7 @@ document.addEventListener('deviceready', function(){
 							  	"</NotaVenta>" + String.fromCharCode(13) +
 							  "</Pedidos>";
 
-							window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory+"/nvt", function( directoryEntry ) {
+							window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory+"/nvt", function( directoryEntry ) {
 								var sysdate = new Date();
 								var mes = sysdate.getMonth() + 1;
 								var fechasalida = (sysdate.getYear() + 1900).toString() + getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString() + sysdate.getSeconds().toString();
@@ -424,7 +424,7 @@ document.addEventListener('deviceready', function(){
 
 							            };
 							            fileWriter.onerror = function( error ) {
-							                alert( error );
+							                alert( JSON.stringify(error) );
 							            };
 							            fileWriter.write( xmlText );
 							        }, function( error ) { alert( error ); } );
@@ -440,7 +440,7 @@ document.addEventListener('deviceready', function(){
 			});
         },
 	   	function(err){
-		alert(err);
+		alert('Error almacenamiento' + err.message);
 	   	},
 	   	function(){
 			window.localStorage.setItem("numnvt",numnvt + 1);
@@ -513,8 +513,10 @@ document.addEventListener('deviceready', function(){
 	   	cantid = 1;
 	   }
 	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip, a.catpro, b.canmay,b.premay, a.factur " +
-	   		 		"from ma_product as a, re_lvenpro as b " +
+	   		 		"from ma_product as a, re_lvenpro as b, en_cliente c " +
 	   				"where a.codpro = b.codpro " +
+	   				"and c.lispre = b.codlis " +
+	   				"and c.rutcli = " + $("#txtRutcli").val() + " " +
 	   				"and a.codpro = '" + codpro + "'";
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
@@ -762,7 +764,8 @@ document.addEventListener('deviceready', function(){
 		window.localStorage.removeItem("user");
 		window.localStorage.removeItem("password");
 		window.localStorage.removeItem("descuento");
-		navigator.app.loadUrl("file:///android_asset/www/index.html");
+		window.location.replace("index.html");
+		//navigator.app.loadUrl("file:///android_asset/www/index.html");
 	});
 
 	$("#insertarProducto").click(function(e){
@@ -967,8 +970,8 @@ document.addEventListener('deviceready', function(){
     });
 
 	$("#btnZip").click(function(e){
-		var PathToFileInString  = cordova.file.externalRootDirectory+"nvt",
-	        PathToResultZip     = cordova.file.externalRootDirectory;
+		var PathToFileInString  = cordova.file.externalDataDirectory+"nvt",
+	        PathToResultZip     = cordova.file.externalDataDirectory;
 	    JJzip.zip(PathToFileInString, {target:PathToResultZip,name:"nvt"},function(data){
 	    	
 	    	var options = {
@@ -1003,8 +1006,8 @@ document.addEventListener('deviceready', function(){
 	});
 
 	function moveNotasEnviadas(){
-		var pathDestino = cordova.file.externalRootDirectory+"nvtEnviadas";
-		var pathOrigen = cordova.file.externalRootDirectory;
+		var pathDestino = cordova.file.externalDataDirectory+"nvtEnviadas";
+		var pathOrigen = cordova.file.externalDataDirectory;
 		  //agarro el directorio root
 	  window.resolveLocalFileSystemURL(pathOrigen, function( directoryEntry ) {
 	    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio nvt
@@ -1029,32 +1032,24 @@ document.addEventListener('deviceready', function(){
 	  });
 	}
 
-	function moveFile(urlFile, name, pathDestino){
-	    window.resolveLocalFileSystemURI(urlFile, function(fileEntrySelected) {
-          //var path2 = "file:///data/data/cl.dimeiggs.precios/"
-          //agarro el directorio root
-          window.resolveLocalFileSystemURL(urlFile, 
-              function(fileDB){
-                  window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-                          window.resolveLocalFileSystemURL( pathDestino, function( directoryEntry ) {
-                            directoryEntry.getDirectory("nvtEnviadas", {create: false, exclusive: false}, function(dirDB) {
-                              fileDB.moveTo(dirDB, name,
-                              function(){
-                              },
-                              function(err){
-                                  alert('unsuccessful copying ' + err);
-                              });
-                            },null);
-                          },null);                        
-                      }, null);
-              }, 
-              function(){
-                  alert('failure! database was not found');
-              });
-        },
-        function(error) {
-          alert("err getBaseNueva " + error.code);
-        });
+	function moveFile(nombreArchivo, pathDestino) {
+	    window.resolveLocalFileSystemURL(
+	          cordova.file.externalDataDirectory + "nvt/"+nombreArchivo,
+	          function(fileEntry){
+	                window.resolveLocalFileSystemURL(pathDestino,
+	                        function(dirEntry) {
+	                            // move the file to a new directory and rename it
+	                            fileEntry.moveTo(dirEntry, nombreArchivo, null, function(error){
+							    	alert("nomovio " + error.code);
+							    });
+	                        },
+	                        function(error){
+					        	alert("noaccedio a path destino " + error.code);
+					        });
+	          },
+	          function(error){
+	          	alert("error " + error.code);
+	          });
 	}
 
 	function cargarDeuda(){
@@ -1119,9 +1114,93 @@ document.addEventListener('deviceready', function(){
 		  });
 	}
 
+	function cargarNotas(){
+		$("#detalleTblNotas").empty();
+		//agarro el directorio root
+	  	window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
+	    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
+	      // tomo un lector del directorio
+      		var directoryReader = dir.createReader();
+
+	    	// listo todos los ficheros
+	    	directoryReader.readEntries(function(entries) {
+	                                    	var i;
+	                                    	var nombreArchivo = "";
+	                                    	var celdas = "";
+	                                    	for (i=0; i<entries.length; i++) {
+	                                    		
+	                                    		nombreArchivo = entries[i].name;
+	                                    		window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "nvt/" + nombreArchivo,
+	                                    		gotFile, fail);
+
+	                                    		function gotFile(fileEntry) {
+													fileEntry.file(function(file) {
+														var reader = new FileReader();
+														reader.onloadend = function(e) {
+															celdas = "";
+															var parser = new DOMParser();
+															var xmlDoc = parser.parseFromString(this.result,"text/xml");
+															var totneto = xmlDoc.getElementsByTagName("toneto")[0].childNodes[0].nodeValue;
+															var razons = xmlDoc.getElementsByTagName("razons")[0].childNodes[0].nodeValue;
+															var fecemi = xmlDoc.getElementsByTagName("fecemi")[0].childNodes[0].nodeValue;
+															celdas = celdas + "<tr><td>" + razons + "</td>" +
+															"<td>" + fecemi + "</td>" +
+															"<td>$" + totneto + "</td>" +
+				                                    		'<td><input class="chk-enviar" type="checkbox" data-filename="'+file.name+'"></td></tr>';
+				                                    		$("#detalleTblNotas").append(celdas);
+														}
+														reader.readAsText(file);
+													});
+												}
+
+												function fail(e) {
+													alert("FileSystem Error" + e.message);
+												}
+	                                      }
+	                                  }
+	      	,function fail(error) {
+	        	alert("Failed to list directory contents: " + error.code);
+	    	});
+	    },
+	    function(error) { 
+	    	alert("Error "+error.code); 
+	    });
+	  });
+	}
+
+	function enviarNotas(){
+		var notasSeleccionadas = $(".chk-enviar");
+		var pathDestino = cordova.file.externalDataDirectory + "nvtEnviadas";
+		for (var i = 0; i < notasSeleccionadas.length; i++) {
+			var nombreArchivo = $(notasSeleccionadas[i]).data("filename");
+			var urlNativa = $(notasSeleccionadas[i]).data("uri");
+			var seleccionada = $(notasSeleccionadas[i]).prop("checked");
+			if(seleccionada){
+				subirArchivo(nombreArchivo, urlNativa, pathDestino);
+			}
+		}
+		$("#modalEnviarNotas").modal("hide");
+	}
+
+	function subirArchivo(nombreArchivo, urlNativa, pathDestino){
+		cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
+          function(result){
+            cordova.plugin.ftp.upload(cordova.file.externalDataDirectory + "/nvt/"+nombreArchivo,"/notasventa/por_procesar/"+nombreArchivo,function(percent){
+                if(percent == 1){
+                  alert("uploaded!");
+                  moveFile(nombreArchivo, pathDestino);
+                }
+              },function(error){
+              alert(JSON.stringify(error));
+            });
+          },function(error){
+            alert(JSON.stringify(error));
+          });
+	}
+
 	$("#btnBorrarEnviadas").click(function(e){
 		//agarro el directorio root
-	  	window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
+	  	window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
 	    directoryEntry.getDirectory("nvtEnviadas", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
 	      // tomo un lector del directorio
 	      var directoryReader = dir.createReader();
@@ -1182,6 +1261,7 @@ document.addEventListener('deviceready', function(){
 		if ($("#txtNewDV").val().length>0){
 			if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
 				alert("Rut inválido");
+				$("#txtNewRut").focus();
 				return false;
 			}	
 		}
@@ -1194,6 +1274,13 @@ document.addEventListener('deviceready', function(){
 	$("#btnConfirmarCliente").click(function(e){
 		if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
 			alert("Rut inválido");
+			$("#txtNewRut").focus();
+			return false;
+		}
+		var direccion = $("#txtNewDireccion").val();
+		if(direccion.length >=50){
+			alert("Dirección puede tener máximo 50 caracteres");
+			$("#txtNewDireccion").focus();
 			return false;
 		}
 
@@ -1256,6 +1343,15 @@ document.addEventListener('deviceready', function(){
 
 	$("#btnCerrarDeuda").click(function(e){
 		$('#modalDeuda').modal('toggle');
+	});
+
+	$("#btnVerNotas").click(function(e){
+		$("#modalEnviarNotas").modal('toggle');
+		cargarNotas();
+	});
+
+	$("#btnEnviarNotas").click(function(e){
+		enviarNotas();
 	});
 
 	$(document).on('click','.eliminarFila',function() {
