@@ -7,37 +7,35 @@
     "files": {}
   },
   "installed_plugins": {
-    "phonegap-plugin-barcodescanner": {
-      "PACKAGE_NAME": "cl.dimeiggs.precios"
-    },
     "com.phonegap.plugins.sqlite": {
-      "PACKAGE_NAME": "cl.dimeiggs.precios"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
     },
-    "cordova-plugin-whitelist": {
-      "PACKAGE_NAME": "cl.dimeiggs.precios"
+    "cordova-plugin-chooser": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
     },
-    "cordova-plugin-file-transfer": {
-      "PACKAGE_NAME": "cl.dimeiggs.precios"
+    "cordova-plugin-file": {
+      "ANDROIDX_WEBKIT_VERSION": "1.4.0",
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
     },
-    "com.cesidiodibenedetto.filechooser": {
-      "PACKAGE_NAME": "cl.dimeiggs.precios"
+    "cordova-plugin-filechooser": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
     },
-    "com.jjdltc.cordova.plugin.zip": {
-      "PACKAGE_NAME": "cl.dimeiggs.precios"
+    "cordova-plugin-filepath": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+    },
+    "cordova-plugin-ftp": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+    },
+    "cordova-plugin-x-socialsharing-android12": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
     },
     "es6-promise-plugin": {
-      "PACKAGE_NAME": "cl.dimeiggs.precios"
-    },
-    "cordova-plugin-x-socialsharing": {
-      "PACKAGE_NAME": "cl.dimeiggs.precios"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
     }
   },
   "dependent_plugins": {
-    "cordova-plugin-compat": {
-      "PACKAGE_NAME": "cl.dimeiggs.precios"
-    },
-    "cordova-plugin-file": {
-      "PACKAGE_NAME": "cl.dimeiggs.precios"
+    "com.jjdltc.cordova.plugin.zip": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf"
     }
   }
 }
