@@ -1,6 +1,10 @@
 document.addEventListener('deviceready', function(){
 	var limpiando = true;
 	//funciones auxiliares
+	function limpiarModalCrearCliente(){
+
+	}
+
 	function deleteNvts(){
 	  //agarro el directorio root
 	  window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
@@ -1302,6 +1306,10 @@ document.addEventListener('deviceready', function(){
 	$("#btnCerrarDeuda").click(function(e){
 		$('#modalDeuda').modal('toggle');
 	});
+
+	$("#btnCancelarCliente").click(function(e){
+		limpiarFicha();
+	})
 
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');
