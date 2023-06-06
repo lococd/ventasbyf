@@ -10,6 +10,7 @@
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/jquery.js"></script>
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/enviarnotas.js"></script>
         <script type="text/javascript" src="js/login.js"></script>
     </head>
     <body>
@@ -27,9 +28,43 @@
                   <input type="text" class="form-control" id="txtUser" placeholder="Usuario" required="" autofocus="" />
                   <input type="password" class="form-control" id="txtPassword" placeholder="Contraseña" required=""/>
                   <button class="btn btn-lg btn-primary btn-block" id="btnLogin">Ingresar</button>
+                  <button type="button" class="btn btn-lg btn-primary btn-block" id="btnVerNotas">Listar y enviar Notas</button>
                   <h3 class="text-center" id="lblTexto"></h3>
                 </fieldset>
               </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="modalEnviarNotas" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Enviar notas</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <div class = "ui-front">
+                        <table id="tblNotas" class="table tabla-txt">
+                          <thead>
+                            <tr>
+                              <td>Cliente</td>
+                              <td>Fecha</td>
+                              <td>Total Neto</td>
+                              <td>Incluir</td>
+                            </tr>
+                          </thead>
+                          <tbody id="detalleTblNotas">
+                            
+                          </tbody>
+                        </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" id="btnEnviarNotas">Enviar Notas</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarDeuda">Cerrar</button>
+                </div>
             </div>
           </div>
         </div>

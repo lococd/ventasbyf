@@ -34,7 +34,7 @@ document.addEventListener('deviceready', function(){
 	      alert("Error "+error.code); 
 	    });
 	  });
-}
+	}
 
 	function validaBase(){
 		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
@@ -76,55 +76,55 @@ document.addEventListener('deviceready', function(){
 	}
 
 	function cargaBase(){
-	    if(!confirm("Recuerde enviar todas las notas de venta antes de cargar nueva base, se borrarán las notas existentes. ¿Quiere continuar?")){
-	      return false;
-	    }
-	    else{
-	      filechooser.open({"mime": "application/octet-stream"}, function(data) {
-	        var pathDB = "file:///data/data/cl.dimeiggs.precios/databases/";
-
-	        var seleccionado = data.url;
-
-	        window.resolveLocalFileSystemURI(seleccionado, function(fileEntrySelected) {
-	          var path2 = "file:///data/data/cl.dimeiggs.precios/"
-	          //agarro el directorio root
-	          window.resolveLocalFileSystemURL(seleccionado, 
-	              function(fileDB){
-	                  window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-	                          window.resolveLocalFileSystemURL( path2, function( directoryEntry ) {
-	                            directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
-	                              fileDB.copyTo(dirDB, 'envios2.db',
-	                              function(){
-	                                  fileDB.copyTo(dirDB, 'envios.db',
-	                                  function(){
-	                                      window.localStorage.setItem("numnvt", 1);
-	                                      deleteNvts();
-	                                      validaBase();
-	                                  }, 
-	                                  function(err){
-	                                      alert('unsuccessful copying ' + err);
-	                                  });
-	                              }, 
-	                              function(err){
-	                                  alert('unsuccessful copying ' + err);
-	                              });
-	                            },null);
-	                          },null);                        
-	                      }, null);
-	              }, 
-	              function(){
-	                  alert('failure! database was not found');
-	              });
-	        },
-	        function(error) {
-	          alert("err getBaseNueva " + error.code);
-	        });
-	      },
-	      function(msg) {
-	        alert("Archivo no seleccionado " + msg);
-	      });
-	    }    
-	  }
+    if(!confirm("Recuerde enviar todas las notas de venta antes de cargar nueva base, se borrarán las notas existentes. ¿Quiere continuar?")){
+      return false;
+    }
+    else{
+      try {
+           cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
+          function(result){
+            cordova.plugin.ftp.download(cordova.file.externalDataDirectory + "/envios.db","/dbtest.db",function(percent){
+                if(percent == 1){
+                  window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "/envios.db",
+                  function(fileDB){
+                      window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
+                              window.resolveLocalFileSystemURL(cordova.file.applicationStorageDirectory, function( directoryEntry ) {
+                                directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
+                                  fileDB.copyTo(dirDB, 'envios2.db',
+                                  function(){
+                                      fileDB.copyTo(dirDB, 'envios.db',
+                                      function(){
+                                          window.localStorage.setItem("numnvt", 1);
+                                          deleteNvts();
+                                          alert("¡Base de datos cargada correctamente! Se reiniciará la aplicación");
+                                          window.location.replace("index.html");
+                                      }, 
+                                      function(err){
+                                          alert('unsuccessful copying ' + err);
+                                      });
+                                  }, 
+                                  function(err){
+                                      alert('unsuccessful copying ' + err);
+                                  });
+                                },null);
+                              },null);                        
+                          }, null);
+                  }, 
+                  function(){
+                      alert('failure! database was not found');
+                  });
+                }
+              },function(error){
+              alert(JSON.stringify(error));
+            });
+          },function(error){
+            alert(JSON.stringify(error));
+          });
+      } catch(e) {
+         alert(e.name + " , "+ e.message + " , "+ e.stack);
+      }
+    }   
+  }
 
 	function cargarModalGuardar(){
 		$('#modalGuardar').modal('toggle');
@@ -618,10 +618,10 @@ document.addEventListener('deviceready', function(){
 		    else{
 		    	var fila;
 		    	//alert(JSON.stringify(rs));
-		    	for (i=0; i<rs.rows.length; ++i){
+		    	/*for (i=0; i<rs.rows.length; ++i){
 		    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
 		    		$("#cmbNewCiudad").append(fila);
-			    }
+			    }*/
 
 			    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 2 ORDER BY DESVAL ASC";
 				db.executeSql(query, [], function(rs) {
@@ -630,10 +630,10 @@ document.addEventListener('deviceready', function(){
 				      return false;
 				    }
 				    else{
-				    	for (i=0; i<rs.rows.length; ++i){
+				    	/*for (i=0; i<rs.rows.length; ++i){
 				    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
 				    		$("#cmbNewComuna").append(fila);
-					    }
+					    }*/
 					    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 8 ORDER BY DESVAL ASC";
 						db.executeSql(query, [], function(rs) {
 						    if(rs.rows.length == 0){
@@ -719,6 +719,7 @@ document.addEventListener('deviceready', function(){
   			return true;
   		}
 	}
+
 	limpiar();
 	//$('#modalCodpro').modal('toggle'); return false;
 	cargarModalGuardar();
@@ -960,6 +961,46 @@ document.addEventListener('deviceready', function(){
       }
     });
 
+    $("#cmbNewComuna").autocomplete({
+      source: function( request, response ) {
+      	var buscarPor = request.term;
+      	var query = "";
+      	query = `select a.desval as value, b.desval as ciudad
+				from de_dominio a,
+				de_dominio b
+				where a.codref = b.codval
+				and a.coddom = 2
+				and b.coddom = 1
+   				and upper(a.desval) like '%` + buscarPor.toUpperCase() + `%'`;
+
+
+      	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		db.executeSql(query, [], function(rs) {
+		    if(rs.rows.length == 0){
+		    	//alert("no items");
+		      return false;
+		    }
+		    else{
+		    	var data = [];
+			    for (i=0; i<rs.rows.length; ++i){
+			        data.push(rs.rows.item(i));
+			    }
+	      		response(data);
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+      	
+      },
+      minLength: 4,
+      select: function( event, ui ) {
+        $("#cmbNewComuna").val(ui.item.value);
+        $("#cmbNewCiudad").val(ui.item.ciudad);
+        return false;
+      }
+    });
+
     $("#btnCerrarModallpr2").click(function(){
   		if(!validaDescuento()){
   			return false;
@@ -1114,89 +1155,6 @@ document.addEventListener('deviceready', function(){
 		  });
 	}
 
-	function cargarNotas(){
-		$("#detalleTblNotas").empty();
-		//agarro el directorio root
-	  	window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
-	    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
-	      // tomo un lector del directorio
-      		var directoryReader = dir.createReader();
-
-	    	// listo todos los ficheros
-	    	directoryReader.readEntries(function(entries) {
-	                                    	var i;
-	                                    	var nombreArchivo = "";
-	                                    	var celdas = "";
-	                                    	for (i=0; i<entries.length; i++) {
-	                                    		
-	                                    		nombreArchivo = entries[i].name;
-	                                    		window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "nvt/" + nombreArchivo,
-	                                    		gotFile, fail);
-
-	                                    		function gotFile(fileEntry) {
-													fileEntry.file(function(file) {
-														var reader = new FileReader();
-														reader.onloadend = function(e) {
-															celdas = "";
-															var parser = new DOMParser();
-															var xmlDoc = parser.parseFromString(this.result,"text/xml");
-															var totneto = xmlDoc.getElementsByTagName("toneto")[0].childNodes[0].nodeValue;
-															var razons = xmlDoc.getElementsByTagName("razons")[0].childNodes[0].nodeValue;
-															var fecemi = xmlDoc.getElementsByTagName("fecemi")[0].childNodes[0].nodeValue;
-															celdas = celdas + "<tr><td>" + razons + "</td>" +
-															"<td>" + fecemi + "</td>" +
-															"<td>$" + totneto + "</td>" +
-				                                    		'<td><input class="chk-enviar" type="checkbox" data-filename="'+file.name+'"></td></tr>';
-				                                    		$("#detalleTblNotas").append(celdas);
-														}
-														reader.readAsText(file);
-													});
-												}
-
-												function fail(e) {
-													alert("FileSystem Error" + e.message);
-												}
-	                                      }
-	                                  }
-	      	,function fail(error) {
-	        	alert("Failed to list directory contents: " + error.code);
-	    	});
-	    },
-	    function(error) { 
-	    	alert("Error "+error.code); 
-	    });
-	  });
-	}
-
-	function enviarNotas(){
-		var notasSeleccionadas = $(".chk-enviar");
-		var pathDestino = cordova.file.externalDataDirectory + "nvtEnviadas";
-		for (var i = 0; i < notasSeleccionadas.length; i++) {
-			var nombreArchivo = $(notasSeleccionadas[i]).data("filename");
-			var urlNativa = $(notasSeleccionadas[i]).data("uri");
-			var seleccionada = $(notasSeleccionadas[i]).prop("checked");
-			if(seleccionada){
-				subirArchivo(nombreArchivo, urlNativa, pathDestino);
-			}
-		}
-		$("#modalEnviarNotas").modal("hide");
-	}
-
-	function subirArchivo(nombreArchivo, urlNativa, pathDestino){
-		cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
-          function(result){
-            cordova.plugin.ftp.upload(cordova.file.externalDataDirectory + "/nvt/"+nombreArchivo,"/notasventa/por_procesar/"+nombreArchivo,function(percent){
-                if(percent == 1){
-                  alert("uploaded!");
-                  moveFile(nombreArchivo, pathDestino);
-                }
-              },function(error){
-              alert(JSON.stringify(error));
-            });
-          },function(error){
-            alert(JSON.stringify(error));
-          });
-	}
 
 	$("#btnBorrarEnviadas").click(function(e){
 		//agarro el directorio root
@@ -1343,15 +1301,6 @@ document.addEventListener('deviceready', function(){
 
 	$("#btnCerrarDeuda").click(function(e){
 		$('#modalDeuda').modal('toggle');
-	});
-
-	$("#btnVerNotas").click(function(e){
-		$("#modalEnviarNotas").modal('toggle');
-		cargarNotas();
-	});
-
-	$("#btnEnviarNotas").click(function(e){
-		enviarNotas();
 	});
 
 	$(document).on('click','.eliminarFila',function() {

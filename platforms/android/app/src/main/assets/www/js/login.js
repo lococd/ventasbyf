@@ -9,48 +9,87 @@ document.addEventListener('deviceready', function(){
     }
   }
 
+  function validarUsuario(user, password, dia, mes, agno, db){
+    var query = "select count(*) as TOTAL, CODVEN, DSCMAX from ma_usuario where codusu = '" + user + "' and clave1 = '" + password + "'";
+    db.executeSql(query, [], function(rs2) {
+      if(rs2.rows.item(0).TOTAL > 0){
+        window.localStorage.setItem("user", user);
+        window.localStorage.setItem("password", password);
+        window.localStorage.setItem("codven", rs2.rows.item(0).CODVEN);
+        window.localStorage.setItem("descuento", rs2.rows.item(0).DSCMAX);
+        window.localStorage.setItem("fecVenBase", dia + "/" + mes + "/" + agno);
+        window.location.replace("main.html");
+      }
+      else{
+        alert("logueado incorrecto");
+        return false;
+      }
+    }, function(error) {
+        alert("logueado incorrecto " + JSON.stringify(error));
+        return false;
+    });
+  }
+
   function login(user, password){
     var baseOK = false;
     //compruebo validez de la base
     createCarpetaNvt();
     createCarpetaNvtEnviadas();
       var db = window.sqlitePlugin.openDatabase({name: "envios2.db"});
-      var query = "select fecact from ma_update";
+      var query = "select fecact, fecact - 1 as fecaviso from ma_update";
 
       db.transaction(function (tx) {
 
         tx.executeSql(query, [], function (tx, rs) {
           var fecha = rs.rows.item(0).fecact.toString();
+          var fechaAviso = rs.rows.item(0).fecaviso.toString();
           var agno = parseInt(fecha.substr(0,4));
           var mes = parseInt(fecha.substr(4,2));
           var dia = parseInt(fecha.substr(6,2));
           var sysdate = new Date();
           var fechaVenc = new Date(agno,mes-1,dia);
-          if( fechaVenc > sysdate || user == "FVERGARA"){
-            query = "select count(*) as TOTAL, CODVEN, DSCMAX from ma_usuario where codusu = '" + user + "' and clave1 = '" + password + "'";
-            db.executeSql(query, [], function(rs2) {
-              if(rs2.rows.item(0).TOTAL > 0){
-                window.localStorage.setItem("user", user);
-                window.localStorage.setItem("password", password);
-                window.localStorage.setItem("codven", rs2.rows.item(0).CODVEN);
-                window.localStorage.setItem("descuento", rs2.rows.item(0).DSCMAX);
-                window.localStorage.setItem("fecVenBase", dia + "/" + mes + "/" + agno);
-                window.location.replace("main.html");
-              }
-              else{
-                alert("logueado incorrecto");
-                return false;
-              }
-            }, function(error) {
-                //alert("logueado incorrecto " + JSON.stringify(error));
-                return false;
-            });
+          var agnoAviso = parseInt(fechaAviso.substr(0,4));
+          var mesAviso = parseInt(fechaAviso.substr(4,2));
+          var diaAviso = parseInt(fechaAviso.substr(6,2));
+          var fechaAviso = new Date(agnoAviso,mesAviso-1,diaAviso);
+
+          if( fechaVenc > sysdate || user == "FVERGARA"){ //si la base esta vigente, reviso si es necesario subir notas
+            if(fechaAviso <= sysdate){ //si la fecha de aviso es menor o igual a hoy
+              //primero determino si hay notas de venta por subir
+              window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
+                directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
+                  // tomo un lector del directorio
+                    var directoryReader = dir.createReader();
+
+                  // listo todos los ficheros
+                  directoryReader.readEntries(function(entries) {
+                      if(entries.length>0){
+                        alert("La base de datos vence mañana, se deben subir todas las notas de venta");
+                        $("#btnVerNotas").trigger('click');
+                      }
+                      else{
+                        validarUsuario(user, password, dia, mes, agno, db);
+                      }
+                    }
+                    ,function fail(error) {
+                      return false;
+                  });
+                },
+                function(error) { 
+                  return false;
+                });
+              });
+            }
+            else{
+              validarUsuario(user, password, dia, mes, agno, db);
+            }  
           }
           else{
             alert("Base vencida, ingrese una nueva");
             getBase();
             return false;
           }
+          
         },
         function (tx, error) {
             var strErr = JSON.stringify(error);
@@ -75,50 +114,6 @@ document.addEventListener('deviceready', function(){
       return false;
     }
     else{
-      /*fileChooser.open({"mime": "application/octet-stream"}, function(data) {
-        var pathDB = cordova.file.applicationStorageDirectory;
-
-        var seleccionado = data;
-
-        window.resolveLocalFileSystemURI(seleccionado, function(fileEntrySelected) {
-          var path2 = cordova.file.applicationStorageDirectory;
-          //agarro el directorio root
-          window.resolveLocalFileSystemURL(seleccionado,
-              function(fileDB){
-                  window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-                          window.resolveLocalFileSystemURL( path2, function( directoryEntry ) {
-                            directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
-                              fileDB.copyTo(dirDB, 'envios2.db',
-                              function(){
-                                  fileDB.copyTo(dirDB, 'envios.db',
-                                  function(){
-                                      window.localStorage.setItem("numnvt", 1);
-                                      deleteNvts();
-                                      alert("¡Base de datos cargada correctamente!");
-                                      checkLogin();
-                                  }, 
-                                  function(err){
-                                      alert('unsuccessful copying ' + err);
-                                  });
-                              }, 
-                              function(err){
-                                  alert('unsuccessful copying ' + err);
-                              });
-                            },null);
-                          },null);                        
-                      }, null);
-              }, 
-              function(){
-                  alert('failure! database was not found');
-              });
-        },
-        function(error) {
-          alert("err getBaseNueva " + JSON.stringify(error));
-        });
-      },
-      function(msg) {
-        alert("Archivo no seleccionado " + msg);
-      });*/
       try {
            cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
           function(result){
@@ -162,7 +157,7 @@ document.addEventListener('deviceready', function(){
       } catch(e) {
          alert(e.name + " , "+ e.message + " , "+ e.stack);
       }
-    }    
+    }   
   }
 
   $("#btnLogin").click(function(e){
