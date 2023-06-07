@@ -638,21 +638,7 @@ document.addEventListener('deviceready', function(){
 				    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
 				    		$("#cmbNewComuna").append(fila);
 					    }*/
-					    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 8 ORDER BY DESVAL ASC";
-						db.executeSql(query, [], function(rs) {
-						    if(rs.rows.length == 0){
-						    	//alert("no items");
-						      return false;
-						    }
-						    else{
-						    	for (i=0; i<rs.rows.length; ++i){
-						    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
-						    		$("#cmbNewGiro").append(fila);
-							    }
-						    }
-						  }, function(error) {
-						    alert('Error en la consulta: ' + error.message);
-						  });
+					    
 				    }
 				  }, function(error) {
 				    alert('Error en la consulta: ' + error.message);
@@ -1001,6 +987,43 @@ document.addEventListener('deviceready', function(){
       select: function( event, ui ) {
         $("#cmbNewComuna").val(ui.item.value);
         $("#cmbNewCiudad").val(ui.item.ciudad);
+        return false;
+      }
+    });
+
+
+    $("#cmbNewGiro").autocomplete({
+      source: function( request, response ) {
+      	var buscarPor = request.term;
+      	var query = "";
+      	query = `select a.codval, a.desval as value
+      			 from de_dominio a
+      			 where coddom = 8
+   				 and upper(a.desval) like '%` + buscarPor.toUpperCase() + `%'`;
+
+
+      	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		db.executeSql(query, [], function(rs) {
+		    if(rs.rows.length == 0){
+		    	//alert("no items");
+		      return false;
+		    }
+		    else{
+		    	var data = [];
+			    for (i=0; i<rs.rows.length; ++i){
+			        data.push(rs.rows.item(i));
+			    }
+	      		response(data);
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+      	
+      },
+      minLength: 3,
+      select: function( event, ui ) {
+        $("#cmbNewGiro").val(ui.item.codval);
         return false;
       }
     });
