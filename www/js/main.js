@@ -1023,7 +1023,7 @@ document.addEventListener('deviceready', function(){
       },
       minLength: 3,
       select: function( event, ui ) {
-        $("#cmbNewGiro").val(ui.item.codval);
+        $("#cmbNewGiro").val(ui.item.value);
         return false;
       }
     });
@@ -1252,6 +1252,24 @@ document.addEventListener('deviceready', function(){
 		}
 		else{
 			alert("Ingrese DV");
+			return false;
+		}
+	});
+
+	$(".validarut").on("focus",function(){
+		if($("#txtNewRut").val().length==0){
+			alert("Ingrese RUT");
+			$("#txtNewRut").focus();
+			return false;
+		}
+		if($("#txtNewDV").val().length==0){
+			alert("Ingrese Digito Verificador");
+			$("#txtNewDV").focus();
+			return false;
+		}
+		if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
+			alert("Rut inválido");
+			$("#txtNewRut").focus();
 			return false;
 		}
 	});
