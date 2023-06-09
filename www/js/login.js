@@ -18,6 +18,7 @@ document.addEventListener('deviceready', function(){
         window.localStorage.setItem("codven", rs2.rows.item(0).CODVEN);
         window.localStorage.setItem("descuento", rs2.rows.item(0).DSCMAX);
         window.localStorage.setItem("fecVenBase", dia + "/" + mes + "/" + agno);
+        db.close();
         window.location.replace("main.html");
       }
       else{
@@ -35,12 +36,9 @@ document.addEventListener('deviceready', function(){
     //compruebo validez de la base
     createCarpetaNvt();
     createCarpetaNvtEnviadas();
-      var db = window.sqlitePlugin.openDatabase({name: "envios2.db"});
-      var query = "select fecact, fecact - 1 as fecaviso from ma_update";
-
-      db.transaction(function (tx) {
-
-        tx.executeSql(query, [], function (tx, rs) {
+    var db = window.sqlitePlugin.openDatabase({name: "envios2.db"});
+    var query = "select fecact, fecact - 1 as fecaviso from ma_update";
+    db.executeSql(query, [], function (rs) {
           var fecha = rs.rows.item(0).fecact.toString();
           var fechaAviso = rs.rows.item(0).fecaviso.toString();
           var agno = parseInt(fecha.substr(0,4));
@@ -91,9 +89,9 @@ document.addEventListener('deviceready', function(){
           }
           
         },
-        function (tx, error) {
+        function (error) {
             var strErr = JSON.stringify(error);
-            //alert(strErr);
+            alert(strErr);
             if(strErr.includes("2:") || strErr.includes("missing database") || strErr.includes("no such table")){
               alert("No hay base de datos cargada, ingrese una");
               getBase();
@@ -104,9 +102,6 @@ document.addEventListener('deviceready', function(){
                 return false;
             }
         });
-    }, function (error) {
-        console.log('transaction error: ' + error.message);
-    }, null);
   }
 
     function getBase(){
@@ -164,6 +159,7 @@ document.addEventListener('deviceready', function(){
     window.localStorage.setItem("user", "");
     window.localStorage.setItem("password", "");
     window.localStorage.setItem("codven", "");
+
     var user = $("#txtUser").val().toUpperCase();
     var password = $("#txtPassword").val().toUpperCase();
     if(user.length>0 && password.length>0){

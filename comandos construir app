@@ -2,7 +2,7 @@ keytool -genkey -v -keystore ventasbyf.keystore -alias ventasbyf -validity 10000
 
 keytool -genkey -v -keystore ventasbyf.jks -keyalg RSA -keysize 2048 -validity 10000 -alias ventasbyf
 
-
+#para construir una vez listo
 export GRADLE_HOME=/opt/gradle/gradle-5.0
 export JAVA_HOME=/usr/lib/jvm/jdk-11
 
@@ -22,3 +22,21 @@ $ cordova build android
 $ export JAVA_HOME=/usr/lib/jvm/jdk-11
 
 cordova build android --debug --buildConfig
+
+
+#para construir una vez listo en debug
+export GRADLE_HOME=/opt/gradle/gradle-5.0
+export JAVA_HOME=/usr/lib/jvm/jdk-11
+
+cd /src
+
+cordova build android --debug --buildConfig
+
+#para construir para prod
+#para construir una vez listo
+export GRADLE_HOME=/opt/gradle/gradle-5.0
+export JAVA_HOME=/usr/lib/jvm/jdk-11
+
+cd /src
+
+cordova build android --release --buildConfig
