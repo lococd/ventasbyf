@@ -1,5 +1,7 @@
 document.addEventListener('deviceready', function(){
 
+var qNotasAenviar = 0;
+
 	function cargarNotas(){
 		$("#detalleTblNotas").empty();
 		//agarro el directorio root
@@ -55,7 +57,37 @@ document.addEventListener('deviceready', function(){
 	}
 
 	async function enviarNotas(){
-		var notasSeleccionadas = $(".chk-enviar");
+		var progressbar = $( "#porcentajeAvance" ),
+      progressLabel = $( ".progress-label" );
+ 
+    progressbar.progressbar({
+      value: 0,
+      open: function(){
+      	progressLabel.text("Cargando...");
+      	setTimeout( lala, 1000 );
+      }
+      change: function() {
+        progressLabel.text( progressbar.progressbar( "value" ) + "%" );
+      },
+      complete: function() {
+        progressLabel.text( "Notas subidas!" );
+      }
+    });
+
+    function lala(){
+
+    }
+ 
+    var notasSeleccionadas = $(".chk-enviar");
+
+    //vamos a tener que hacer un primer for para saber cuantas notas se seleccionaron
+    for (var i = 0; i < notasSeleccionadas.length; i++) {
+			var seleccionada = $(notasSeleccionadas[i]).prop("checked");
+			if(seleccionada){
+				qNotasAenviar++;
+			}
+		}
+		
 		var pathDestino = cordova.file.externalDataDirectory + "nvtEnviadas";
 		for (var i = 0; i < notasSeleccionadas.length; i++) {
 			var nombreArchivo = $(notasSeleccionadas[i]).data("filename");
@@ -65,7 +97,14 @@ document.addEventListener('deviceready', function(){
 				await subirArchivo(nombreArchivo, urlNativa, pathDestino);
 			}
 		}
+		$("#porcentajeAvance" ).progressbar({
+      value: 100
+    });
 		alert("Notas subidas!");
+		qNotasAenviar = 0;
+		$("#porcentajeAvance" ).progressbar({
+      value: 0
+    });
 		$("#modalEnviarNotas").modal("hide");
 	}
 
@@ -75,6 +114,10 @@ document.addEventListener('deviceready', function(){
             cordova.plugin.ftp.upload(cordova.file.externalDataDirectory + "/nvt/"+nombreArchivo,"/notasventa/por_procesar/"+nombreArchivo,function(percent){
                 if(percent == 1){
                   //alert("uploaded!");
+                  //una vez termina cada archivo
+									//seteamos en la progressbar el porcentaje de notas enviadas
+                  var progreso = $("#porcentajeAvance").val();
+                  $("#porcentajeAvance").progressbar("value", progreso + ((1/qNotasAenviar)*100));
                   moveFile(nombreArchivo, pathDestino);
                   return true;
                 }
@@ -110,6 +153,10 @@ document.addEventListener('deviceready', function(){
 
 	$("#btnVerNotas").click(function(e){
 		$("#modalEnviarNotas").modal('toggle');
+		qNotasAenviar = 0;
+		$("#porcentajeAvance" ).progressbar({
+      value: 0
+    });
 		cargarNotas();
 	});
 

@@ -4,11 +4,13 @@
         <meta charset="utf-8">
         <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
         <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
         <link rel="stylesheet" type="text/css" href="css/style.css">
         <title>Ventas OOLIVA</title>
 
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/jquery-ui.js"></script>
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
         <script type="text/javascript" src="js/enviarnotas.js"></script>
         <script type="text/javascript" src="js/login.js"></script>
@@ -58,10 +60,14 @@
                             
                           </tbody>
                         </table>
+                        
                     </div>
                   </div>
                 </div>
                 <div class="modal-footer">
+                  <div class="row">
+                    <div id="porcentajeAvance"><div class="progress-label"></div></div>
+                  </div>
                   <button type="button" class="btn btn-default" id="btnEnviarNotas">Enviar Notas</button>
                   <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarDeuda">Cerrar</button>
                 </div>
