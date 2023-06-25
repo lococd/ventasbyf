@@ -12,6 +12,7 @@
         <script type="text/javascript" src="js/jquery.js"></script>
         <script type="text/javascript" src="js/jquery-ui.js"></script>
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/cargabase.js"></script>
         <script type="text/javascript" src="js/enviarnotas.js"></script>
         <script type="text/javascript" src="js/login.js"></script>
     </head>
@@ -21,7 +22,7 @@
               <div class="form-signin">       
                 <div class="form-signin-heading text-center">
                   <img class="img-responsive" src="img/logo.jpg">
-                  <p>V1.7.3</p>
+                  <p>V1.7.4</p>
                 </div>
                 <div id="cargarArchivo">
                 </div>
@@ -70,6 +71,21 @@
                   </div>
                   <button type="button" class="btn btn-default" id="btnEnviarNotas">Enviar Notas</button>
                   <button type="button" class="btn btn-default" id="btnCerrarEnviarNotas">Cerrar</button>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="modalDescargarBD" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Descargar Base</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div id="porcentajeAvanceBD"><div class="progress-label-bd"></div></div>
+                  </div>
                 </div>
             </div>
           </div>

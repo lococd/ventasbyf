@@ -5,41 +5,6 @@ document.addEventListener('deviceready', function(){
 
 	}
 
-	function deleteNvts(){
-	  //agarro el directorio root
-	  window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
-	    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
-	      // tomo un lector del directorio
-	      var directoryReader = dir.createReader();
-
-	      // listo todos los ficheros
-	      directoryReader.readEntries(function(entries) {
-	                                      var i;
-	                                      for (i=0; i<entries.length; i++) {
-	                                          //tomo archivo por archivo
-	                                          dir.getFile(entries[i].name, {create:false}, function(fileEntry) {
-	                                                      //y borro el archivo
-	                                                      fileEntry.remove(function(){
-	                                                          //alert("archivo removido!");
-	                                                      },function(error){
-	                                                          alert("Problemas al borrar");
-	                                                      },function(){
-	                                                         alert("Archivo no existe");
-	                                                      });
-	                                          });
-	                                      }
-	                                  }
-	      ,function fail(error) {
-	        alert("Failed to list directory contents: " + error.code);
-	    });
-
-	    },
-	    function(error) { 
-	      alert("Error "+error.code); 
-	    });
-	  });
-	}
-
 	function validaBase(){
 		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 	      var query = "select fecact from ma_update";
@@ -80,54 +45,7 @@ document.addEventListener('deviceready', function(){
 	}
 
 	function cargaBase(){
-    if(!confirm("Recuerde enviar todas las notas de venta antes de cargar nueva base, se borrarán las notas existentes. ¿Quiere continuar?")){
-      return false;
-    }
-    else{
-      try {
-           cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
-          function(result){
-            cordova.plugin.ftp.download(cordova.file.externalDataDirectory + "/envios.db","/dbtest.db",function(percent){
-                if(percent == 1){
-                  window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "/envios.db",
-                  function(fileDB){
-                      window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-                              window.resolveLocalFileSystemURL(cordova.file.applicationStorageDirectory, function( directoryEntry ) {
-                                directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
-                                  fileDB.copyTo(dirDB, 'envios2.db',
-                                  function(){
-                                      fileDB.copyTo(dirDB, 'envios.db',
-                                      function(){
-                                          window.localStorage.setItem("numnvt", 1);
-                                          deleteNvts();
-                                          alert("¡Base de datos cargada correctamente! Se reiniciará la aplicación");
-                                          window.location.replace("index.html");
-                                      }, 
-                                      function(err){
-                                          alert('unsuccessful copying ' + err);
-                                      });
-                                  }, 
-                                  function(err){
-                                      alert('unsuccessful copying ' + err);
-                                  });
-                                },null);
-                              },null);                        
-                          }, null);
-                  }, 
-                  function(){
-                      alert('failure! database was not found');
-                  });
-                }
-              },function(error){
-              alert(JSON.stringify(error));
-            });
-          },function(error){
-            alert(JSON.stringify(error));
-          });
-      } catch(e) {
-         alert(e.name + " , "+ e.message + " , "+ e.stack);
-      }
-    }   
+		getBase("main");
   }
 
 	function cargarModalGuardar(){
@@ -1302,8 +1220,8 @@ document.addEventListener('deviceready', function(){
 		});
 
 		var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
-										   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG) " +
-										   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1)";
+										   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, CODLIS) " +
+										   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1)";
 		db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
 		var dv = $("#txtNewDV").val();

@@ -11,6 +11,7 @@
         <script type="text/javascript" src="js/jquery.js"></script>
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
         <script type="text/javascript" src="js/jquery-ui.js"></script>
+        <script type="text/javascript" src="js/cargabase.js"></script>
         <script type="text/javascript" src="js/enviarnotas.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
     </head>
@@ -198,7 +199,7 @@
                               <span class="icon-bar bg-dark"></span>
                               <span class="icon-bar bg-dark"></span>
                             </button>
-                            <a class="navbar-brand textoBlanco" href="#">V1.7.3 Datos Nota</a>
+                            <a class="navbar-brand textoBlanco" href="#">V1.7.4 Datos Nota</a>
                           </div>
                           <div style="height: 1px;" aria-expanded="false" id="menuModal" class="navbar-collapse collapse">
                             <ul class="nav navbar-nav navbar-right">
@@ -376,6 +377,21 @@
                   </div>
                   <button type="button" class="btn btn-default" id="btnEnviarNotas">Enviar Notas</button>
                   <button type="button" class="btn btn-default" id="btnCerrarEnviarNotas">Cerrar</button>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="modalDescargarBD" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Descargar Base</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div id="porcentajeAvanceBD"><div class="progress-label-bd"></div></div>
+                  </div>
                 </div>
             </div>
           </div>

@@ -91,7 +91,7 @@ document.addEventListener('deviceready', function(){
         },
         function (error) {
             var strErr = JSON.stringify(error);
-            alert(strErr);
+            //alert(strErr);
             if(strErr.includes("2:") || strErr.includes("missing database") || strErr.includes("no such table")){
               alert("No hay base de datos cargada, ingrese una");
               getBase();
@@ -102,57 +102,6 @@ document.addEventListener('deviceready', function(){
                 return false;
             }
         });
-  }
-
-    function getBase(){
-    if(!confirm("Recuerde enviar todas las notas de venta antes de cargar nueva base, se borrarán las notas existentes. ¿Quiere continuar?")){
-      return false;
-    }
-    else{
-      try {
-           cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
-          function(result){
-            cordova.plugin.ftp.download(cordova.file.externalDataDirectory + "/envios.db","/dbtest.db",function(percent){
-                if(percent == 1){
-                  window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "/envios.db",
-                  function(fileDB){
-                      window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-                              window.resolveLocalFileSystemURL(cordova.file.applicationStorageDirectory, function( directoryEntry ) {
-                                directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
-                                  fileDB.copyTo(dirDB, 'envios2.db',
-                                  function(){
-                                      fileDB.copyTo(dirDB, 'envios.db',
-                                      function(){
-                                          window.localStorage.setItem("numnvt", 1);
-                                          deleteNvts();
-                                          alert("¡Base de datos cargada correctamente!");
-                                          checkLogin();
-                                      }, 
-                                      function(err){
-                                          alert('unsuccessful copying ' + err);
-                                      });
-                                  }, 
-                                  function(err){
-                                      alert('unsuccessful copying ' + err);
-                                  });
-                                },null);
-                              },null);                        
-                          }, null);
-                  }, 
-                  function(){
-                      alert('failure! database was not found');
-                  });
-                }
-              },function(error){
-              alert(JSON.stringify(error));
-            });
-          },function(error){
-            alert(JSON.stringify(error));
-          });
-      } catch(e) {
-         alert(e.name + " , "+ e.message + " , "+ e.stack);
-      }
-    }   
   }
 
   $("#btnLogin").click(function(e){
@@ -214,41 +163,6 @@ function deleteDB() {
                                                       //y borro el archivo
                                                       fileEntry.remove(function(){
                                                           //alert("archivo removido! " + entries[i].name);
-                                                      },function(error){
-                                                          alert("Problemas al borrar");
-                                                      },function(){
-                                                         alert("Archivo no existe");
-                                                      });
-                                          });
-                                      }
-                                  }
-      ,function fail(error) {
-        alert("Failed to list directory contents: " + error.code);
-    });
-
-    },
-    function(error) { 
-      alert("Error "+error.code); 
-    });
-  });
-}
-
-function deleteNvts(){
-  //agarro el directorio root
-  window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
-    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
-      // tomo un lector del directorio
-      var directoryReader = dir.createReader();
-
-      // listo todos los ficheros
-      directoryReader.readEntries(function(entries) {
-                                      var i;
-                                      for (i=0; i<entries.length; i++) {
-                                          //tomo archivo por archivo
-                                          dir.getFile(entries[i].name, {create:false}, function(fileEntry) {
-                                                      //y borro el archivo
-                                                      fileEntry.remove(function(){
-                                                          //alert("archivo removido!");
                                                       },function(error){
                                                           alert("Problemas al borrar");
                                                       },function(){
