@@ -18,6 +18,7 @@ document.addEventListener('deviceready', function(){
         window.localStorage.setItem("codven", rs2.rows.item(0).CODVEN);
         window.localStorage.setItem("descuento", rs2.rows.item(0).DSCMAX);
         window.localStorage.setItem("fecVenBase", dia + "/" + mes + "/" + agno);
+        db.close();
         window.location.replace("main.html");
       }
       else{
@@ -35,12 +36,9 @@ document.addEventListener('deviceready', function(){
     //compruebo validez de la base
     createCarpetaNvt();
     createCarpetaNvtEnviadas();
-      var db = window.sqlitePlugin.openDatabase({name: "envios2.db"});
-      var query = "select fecact, fecact - 1 as fecaviso from ma_update";
-
-      db.transaction(function (tx) {
-
-        tx.executeSql(query, [], function (tx, rs) {
+    var db = window.sqlitePlugin.openDatabase({name: "envios2.db"});
+    var query = "select fecact, fecact - 1 as fecaviso from ma_update";
+    db.executeSql(query, [], function (rs) {
           var fecha = rs.rows.item(0).fecact.toString();
           var fechaAviso = rs.rows.item(0).fecaviso.toString();
           var agno = parseInt(fecha.substr(0,4));
@@ -91,7 +89,7 @@ document.addEventListener('deviceready', function(){
           }
           
         },
-        function (tx, error) {
+        function (error) {
             var strErr = JSON.stringify(error);
             //alert(strErr);
             if(strErr.includes("2:") || strErr.includes("missing database") || strErr.includes("no such table")){
@@ -104,66 +102,13 @@ document.addEventListener('deviceready', function(){
                 return false;
             }
         });
-    }, function (error) {
-        console.log('transaction error: ' + error.message);
-    }, null);
-  }
-
-    function getBase(){
-    if(!confirm("Recuerde enviar todas las notas de venta antes de cargar nueva base, se borrarán las notas existentes. ¿Quiere continuar?")){
-      return false;
-    }
-    else{
-      try {
-           cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
-          function(result){
-            cordova.plugin.ftp.download(cordova.file.externalDataDirectory + "/envios.db","/dbtest.db",function(percent){
-                if(percent == 1){
-                  window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "/envios.db",
-                  function(fileDB){
-                      window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-                              window.resolveLocalFileSystemURL(cordova.file.applicationStorageDirectory, function( directoryEntry ) {
-                                directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
-                                  fileDB.copyTo(dirDB, 'envios2.db',
-                                  function(){
-                                      fileDB.copyTo(dirDB, 'envios.db',
-                                      function(){
-                                          window.localStorage.setItem("numnvt", 1);
-                                          deleteNvts();
-                                          alert("¡Base de datos cargada correctamente!");
-                                          checkLogin();
-                                      }, 
-                                      function(err){
-                                          alert('unsuccessful copying ' + err);
-                                      });
-                                  }, 
-                                  function(err){
-                                      alert('unsuccessful copying ' + err);
-                                  });
-                                },null);
-                              },null);                        
-                          }, null);
-                  }, 
-                  function(){
-                      alert('failure! database was not found');
-                  });
-                }
-              },function(error){
-              alert(JSON.stringify(error));
-            });
-          },function(error){
-            alert(JSON.stringify(error));
-          });
-      } catch(e) {
-         alert(e.name + " , "+ e.message + " , "+ e.stack);
-      }
-    }   
   }
 
   $("#btnLogin").click(function(e){
     window.localStorage.setItem("user", "");
     window.localStorage.setItem("password", "");
     window.localStorage.setItem("codven", "");
+
     var user = $("#txtUser").val().toUpperCase();
     var password = $("#txtPassword").val().toUpperCase();
     if(user.length>0 && password.length>0){
@@ -218,41 +163,6 @@ function deleteDB() {
                                                       //y borro el archivo
                                                       fileEntry.remove(function(){
                                                           //alert("archivo removido! " + entries[i].name);
-                                                      },function(error){
-                                                          alert("Problemas al borrar");
-                                                      },function(){
-                                                         alert("Archivo no existe");
-                                                      });
-                                          });
-                                      }
-                                  }
-      ,function fail(error) {
-        alert("Failed to list directory contents: " + error.code);
-    });
-
-    },
-    function(error) { 
-      alert("Error "+error.code); 
-    });
-  });
-}
-
-function deleteNvts(){
-  //agarro el directorio root
-  window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
-    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
-      // tomo un lector del directorio
-      var directoryReader = dir.createReader();
-
-      // listo todos los ficheros
-      directoryReader.readEntries(function(entries) {
-                                      var i;
-                                      for (i=0; i<entries.length; i++) {
-                                          //tomo archivo por archivo
-                                          dir.getFile(entries[i].name, {create:false}, function(fileEntry) {
-                                                      //y borro el archivo
-                                                      fileEntry.remove(function(){
-                                                          //alert("archivo removido!");
                                                       },function(error){
                                                           alert("Problemas al borrar");
                                                       },function(){

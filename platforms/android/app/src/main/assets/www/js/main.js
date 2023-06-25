@@ -1,39 +1,8 @@
 document.addEventListener('deviceready', function(){
 	var limpiando = true;
 	//funciones auxiliares
-	function deleteNvts(){
-	  //agarro el directorio root
-	  window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
-	    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
-	      // tomo un lector del directorio
-	      var directoryReader = dir.createReader();
+	function limpiarModalCrearCliente(){
 
-	      // listo todos los ficheros
-	      directoryReader.readEntries(function(entries) {
-	                                      var i;
-	                                      for (i=0; i<entries.length; i++) {
-	                                          //tomo archivo por archivo
-	                                          dir.getFile(entries[i].name, {create:false}, function(fileEntry) {
-	                                                      //y borro el archivo
-	                                                      fileEntry.remove(function(){
-	                                                          //alert("archivo removido!");
-	                                                      },function(error){
-	                                                          alert("Problemas al borrar");
-	                                                      },function(){
-	                                                         alert("Archivo no existe");
-	                                                      });
-	                                          });
-	                                      }
-	                                  }
-	      ,function fail(error) {
-	        alert("Failed to list directory contents: " + error.code);
-	    });
-
-	    },
-	    function(error) { 
-	      alert("Error "+error.code); 
-	    });
-	  });
 	}
 
 	function validaBase(){
@@ -76,54 +45,7 @@ document.addEventListener('deviceready', function(){
 	}
 
 	function cargaBase(){
-    if(!confirm("Recuerde enviar todas las notas de venta antes de cargar nueva base, se borrarán las notas existentes. ¿Quiere continuar?")){
-      return false;
-    }
-    else{
-      try {
-           cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
-          function(result){
-            cordova.plugin.ftp.download(cordova.file.externalDataDirectory + "/envios.db","/dbtest.db",function(percent){
-                if(percent == 1){
-                  window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "/envios.db",
-                  function(fileDB){
-                      window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-                              window.resolveLocalFileSystemURL(cordova.file.applicationStorageDirectory, function( directoryEntry ) {
-                                directoryEntry.getDirectory("databases", {create: true, exclusive: false}, function(dirDB) {
-                                  fileDB.copyTo(dirDB, 'envios2.db',
-                                  function(){
-                                      fileDB.copyTo(dirDB, 'envios.db',
-                                      function(){
-                                          window.localStorage.setItem("numnvt", 1);
-                                          deleteNvts();
-                                          alert("¡Base de datos cargada correctamente! Se reiniciará la aplicación");
-                                          window.location.replace("index.html");
-                                      }, 
-                                      function(err){
-                                          alert('unsuccessful copying ' + err);
-                                      });
-                                  }, 
-                                  function(err){
-                                      alert('unsuccessful copying ' + err);
-                                  });
-                                },null);
-                              },null);                        
-                          }, null);
-                  }, 
-                  function(){
-                      alert('failure! database was not found');
-                  });
-                }
-              },function(error){
-              alert(JSON.stringify(error));
-            });
-          },function(error){
-            alert(JSON.stringify(error));
-          });
-      } catch(e) {
-         alert(e.name + " , "+ e.message + " , "+ e.stack);
-      }
-    }   
+		getBase("main");
   }
 
 	function cargarModalGuardar(){
@@ -634,21 +556,7 @@ document.addEventListener('deviceready', function(){
 				    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
 				    		$("#cmbNewComuna").append(fila);
 					    }*/
-					    query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 8 ORDER BY DESVAL ASC";
-						db.executeSql(query, [], function(rs) {
-						    if(rs.rows.length == 0){
-						    	//alert("no items");
-						      return false;
-						    }
-						    else{
-						    	for (i=0; i<rs.rows.length; ++i){
-						    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
-						    		$("#cmbNewGiro").append(fila);
-							    }
-						    }
-						  }, function(error) {
-						    alert('Error en la consulta: ' + error.message);
-						  });
+					    
 				    }
 				  }, function(error) {
 				    alert('Error en la consulta: ' + error.message);
@@ -1001,6 +909,43 @@ document.addEventListener('deviceready', function(){
       }
     });
 
+
+    $("#cmbNewGiro").autocomplete({
+      source: function( request, response ) {
+      	var buscarPor = request.term;
+      	var query = "";
+      	query = `select a.codval, a.desval as value
+      			 from de_dominio a
+      			 where coddom = 8
+   				 and upper(a.desval) like '%` + buscarPor.toUpperCase() + `%'`;
+
+
+      	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+		db.executeSql(query, [], function(rs) {
+		    if(rs.rows.length == 0){
+		    	//alert("no items");
+		      return false;
+		    }
+		    else{
+		    	var data = [];
+			    for (i=0; i<rs.rows.length; ++i){
+			        data.push(rs.rows.item(i));
+			    }
+	      		response(data);
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+      	
+      },
+      minLength: 3,
+      select: function( event, ui ) {
+        $("#cmbNewGiro").val(ui.item.value);
+        return false;
+      }
+    });
+
     $("#btnCerrarModallpr2").click(function(){
   		if(!validaDescuento()){
   			return false;
@@ -1229,6 +1174,24 @@ document.addEventListener('deviceready', function(){
 		}
 	});
 
+	$(".validarut").on("focus",function(){
+		if($("#txtNewRut").val().length==0){
+			alert("Ingrese RUT");
+			$("#txtNewRut").focus();
+			return false;
+		}
+		if($("#txtNewDV").val().length==0){
+			alert("Ingrese Digito Verificador");
+			$("#txtNewDV").focus();
+			return false;
+		}
+		if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
+			alert("Rut inválido");
+			$("#txtNewRut").focus();
+			return false;
+		}
+	});
+
 	$("#btnConfirmarCliente").click(function(e){
 		if (!validarRut($("#txtNewRut").val(), $("#txtNewDV").val())){
 			alert("Rut inválido");
@@ -1242,6 +1205,8 @@ document.addEventListener('deviceready', function(){
 			return false;
 		}
 
+
+		//valido que rut no exista
 		var sql = "SELECT razons, direccion, comuna from en_cliente " +
     				  "where rutcli =" + $("#txtNewRut").val();
     	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
@@ -1251,39 +1216,58 @@ document.addEventListener('deviceready', function(){
 		      alert("Rut existe");
 		      return false;
 			}
+			else{
+				//valido que el giro ingresado exista
+				var sql = "SELECT desval from de_dominio " +
+							  "where coddom = 8 " +
+		    				  "and desval ='" + $("#cmbNewGiro").val() + "'";
+		    	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+				db.executeSql(sql, [], function(rs){
+				    if(rs.rows.length == 0){
+				      alert("Giro no existe");
+				      return false;
+					}
+					else{
+						//inserto cliente
+						var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
+														   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, LISPRE) " +
+														   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1)";
+						db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+						var dv = $("#txtNewDV").val();
+						if(dv == "k"){
+							dv = "K";
+						}
+						db.executeSql(query, [$("#txtNewRut").val(), dv,$("#txtNewRazons").val(),
+											  $("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
+											  $("#txtNewFono").val(), window.localStorage.getItem("codven"), $("#cmbNewGiro").val(),
+											  $("#txtNewContacto").val(), $("#txtNewObservacion").val(), "S"], function(rs) {
+							//alert(JSON.stringify(rs));
+						    if(rs.rowsAffected == 0){
+						      alert("Error al ingresar Cliente");
+						      return false;
+						    }
+						    else{
+						    	alert("Cliente Ingresado");
+						    	$("#txtRutcli").val($("#txtNewRut").val());
+						    	limpiarFicha();
+						    	$('#btnCancelarCliente').trigger("click");
+						    	buscarClienteModal($("#txtRutcli").val(), false);
+						    }
+						  }, function(error) {
+						    alert('Error en la consulta: ' + error.message);
+						  });
+					}
+				}, function(error) {
+					alert('Error en la consulta: ' + error.message);
+					return false;
+				});
+			}
 		}, function(error) {
 			alert('Error en la consulta: ' + error.message);
 			return false;
 		});
-
-		var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
-										   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG) " +
-										   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1)";
-		db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-
-		var dv = $("#txtNewDV").val();
-		if(dv == "k"){
-			dv = "K";
-		}
-		db.executeSql(query, [$("#txtNewRut").val(), dv,$("#txtNewRazons").val(),
-							  $("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
-							  $("#txtNewFono").val(), window.localStorage.getItem("codven"), $("#txtNewGiro").val(),
-							  $("#txtNewContacto").val(), $("#txtNewObservacion").val(), "S"], function(rs) {
-			//alert(JSON.stringify(rs));
-		    if(rs.rowsAffected == 0){
-		      alert("Error al ingresar Cliente");
-		      return false;
-		    }
-		    else{
-		    	alert("Cliente Ingresado");
-		    	$("#txtRutcli").val($("#txtNewRut").val());
-		    	limpiarFicha();
-		    	$('#btnCancelarCliente').trigger("click");
-		    	buscarClienteModal($("#txtRutcli").val(), false);
-		    }
-		  }, function(error) {
-		    alert('Error en la consulta: ' + error.message);
-		  });
 	});
 
 	$("#btnNuevoCliente").click(function(e){
@@ -1302,6 +1286,10 @@ document.addEventListener('deviceready', function(){
 	$("#btnCerrarDeuda").click(function(e){
 		$('#modalDeuda').modal('toggle');
 	});
+
+	$("#btnCancelarCliente").click(function(e){
+		limpiarFicha();
+	})
 
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');

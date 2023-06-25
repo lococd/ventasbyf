@@ -4,12 +4,15 @@
         <meta charset="utf-8">
         <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
         <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
         <link rel="stylesheet" type="text/css" href="css/style.css">
         <title>Ventas OOLIVA</title>
 
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/jquery-ui.js"></script>
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/cargabase.js"></script>
         <script type="text/javascript" src="js/enviarnotas.js"></script>
         <script type="text/javascript" src="js/login.js"></script>
     </head>
@@ -19,7 +22,7 @@
               <div class="form-signin">       
                 <div class="form-signin-heading text-center">
                   <img class="img-responsive" src="img/logo.jpg">
-                  <p>V1.7.2</p>
+                  <p>V1.7.5</p>
                 </div>
                 <div id="cargarArchivo">
                 </div>
@@ -58,12 +61,31 @@
                             
                           </tbody>
                         </table>
+                        
                     </div>
                   </div>
                 </div>
                 <div class="modal-footer">
+                  <div class="row">
+                    <div id="porcentajeAvance"><div class="progress-label"></div></div>
+                  </div>
                   <button type="button" class="btn btn-default" id="btnEnviarNotas">Enviar Notas</button>
-                  <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarDeuda">Cerrar</button>
+                  <button type="button" class="btn btn-default" id="btnCerrarEnviarNotas">Cerrar</button>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="modalDescargarBD" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Descargar Base</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div id="porcentajeAvanceBD"><div class="progress-label-bd"></div></div>
+                  </div>
                 </div>
             </div>
           </div>

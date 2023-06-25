@@ -54,20 +54,67 @@ document.addEventListener('deviceready', function(){
 	  });
 	}
 
-	async function enviarNotas(){
-		var notasSeleccionadas = $(".chk-enviar");
+	function subirArchivoSync(nombreArchivo, urlNativa, pathDestino){
+		return (async () => await subirArchivo(nombreArchivo, urlNativa, pathDestino))();
+	}
+
+	function enviarNotas(){
+    var notasSeleccionadas = $(".chk-enviar");
+    var qNotasAenviar = 0;
+    //vamos a tener que hacer un primer for para saber cuantas notas se seleccionaron
+    for (var i = 0; i < notasSeleccionadas.length; i++) {
+			var seleccionada = $(notasSeleccionadas[i]).prop("checked");
+			if(seleccionada){
+				qNotasAenviar++;
+			}
+		}
+		
+		//alert("notaselegidas" + qNotasAenviar);
 		var pathDestino = cordova.file.externalDataDirectory + "nvtEnviadas";
 		for (var i = 0; i < notasSeleccionadas.length; i++) {
 			var nombreArchivo = $(notasSeleccionadas[i]).data("filename");
 			var urlNativa = $(notasSeleccionadas[i]).data("uri");
 			var seleccionada = $(notasSeleccionadas[i]).prop("checked");
 			if(seleccionada){
-				await subirArchivo(nombreArchivo, urlNativa, pathDestino);
+				const subida = subirArchivoSync(nombreArchivo, urlNativa, pathDestino);
+				//alert(JSON.stringify(subida));
+        //alert("uploaded!" + (((1/qNotasAenviar)*100)));
 			}
 		}
-		alert("Notas subidas!");
-		$("#modalEnviarNotas").modal("hide");
+		var progressbar = $( "#porcentajeAvance" ),
+      progressLabel = $( ".progress-label" );
+ 
+    progressbar.progressbar({
+      value: false,
+      change: function() {
+        progressLabel.text( progressbar.progressbar( "value" ) + "%" );
+      },
+      complete: function() {
+      	alert("Notas subidas!");
+        progressLabel.text("Notas subidas!");
+        $("#btnCerrarEnviarNotas").click();
+      }
+    });
+ 
+    function progress() {
+      var val = progressbar.progressbar( "value" ) || 0;
+ 			if(val < 100){
+ 				progressbar.progressbar( "value", val + 2 );
+ 
+	      if ( val < 99 ) {
+	        setTimeout( progress, (20 * qNotasAenviar) );
+	      }
+ 			}
+ 			else{
+ 				return false;
+ 			}
+      
+    }
+    //funcion para completar progreso
+    progress();
 	}
+
+	
 
 	async function subirArchivo(nombreArchivo, urlNativa, pathDestino){
 		cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
@@ -75,16 +122,23 @@ document.addEventListener('deviceready', function(){
             cordova.plugin.ftp.upload(cordova.file.externalDataDirectory + "/nvt/"+nombreArchivo,"/notasventa/por_procesar/"+nombreArchivo,function(percent){
                 if(percent == 1){
                   //alert("uploaded!");
+                  
                   moveFile(nombreArchivo, pathDestino);
-                  return true;
+                  return new Promise(function(resolve, reject) {
+														   resolve(true);
+														});
                 }
               },function(error){
               alert(JSON.stringify(error));
-              return false;
+              return new Promise(function(resolve, reject) {
+														   resolve(false);
+														});
             });
           },function(error){
             alert(JSON.stringify(error));
-            return false;
+            return new Promise(function(resolve, reject) {
+														   resolve(false);
+														});
           });
 	}
 
@@ -114,7 +168,20 @@ document.addEventListener('deviceready', function(){
 	});
 
 	$("#btnEnviarNotas").click(function(e){
-		enviarNotas();
+		$( "#porcentajeAvance" ).progressbar({
+      value: false
+    });
+    $(".progress-label").text("Cargando...");
+    setTimeout(enviarNotas,1000);
 	});
+
+	$("#btnCerrarEnviarNotas").click(function(e){
+		var esBarraPorcentaje = ($("#porcentajeAvance").progressbar("instance") !== undefined);
+		if(esBarraPorcentaje){
+			$("#porcentajeAvance" ).progressbar("destroy");
+		}
+    $( ".progress-label" ).text("");
+		$("#modalEnviarNotas").modal("hide");
+	})
 
 });

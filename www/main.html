@@ -11,6 +11,7 @@
         <script type="text/javascript" src="js/jquery.js"></script>
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
         <script type="text/javascript" src="js/jquery-ui.js"></script>
+        <script type="text/javascript" src="js/cargabase.js"></script>
         <script type="text/javascript" src="js/enviarnotas.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
     </head>
@@ -198,7 +199,7 @@
                               <span class="icon-bar bg-dark"></span>
                               <span class="icon-bar bg-dark"></span>
                             </button>
-                            <a class="navbar-brand textoBlanco" href="#">V1.7.2 Datos Nota</a>
+                            <a class="navbar-brand textoBlanco" href="#">V1.7.5 Datos Nota</a>
                           </div>
                           <div style="height: 1px;" aria-expanded="false" id="menuModal" class="navbar-collapse collapse">
                             <ul class="nav navbar-nav navbar-right">
@@ -273,37 +274,43 @@
                 <div class="modal-body ui-front">
                   <div class="form-group">
                     <div class = "ui-front">
-                        <div class="ui-widget">
-                          <input type="number" id="txtNewRut" class="form-control" placeholder="Rut Cliente">
+                        <div class="row">
+                            <div class="col-xs-8">
+                              <div class="ui-widget">
+                                <input type="number" id="txtNewRut" class="form-control" placeholder="Rut Cliente">
+                              </div>
+                            </div>
+                            <div class="col-xs-4">
+                              <div class="ui-widget">
+                                <input type="text" id="txtNewDV" class="form-control pull-right" placeholder="Dígito Verificador">
+                              </div>
+                            </div>
                         </div>
                         <div class="ui-widget">
-                          <input type="text" id="txtNewDV" class="form-control" placeholder="Dígito Verificador">
+                          <input type="text" id="txtNewRazons" class="form-control validarut" placeholder="Razón Social">
                         </div>
                         <div class="ui-widget">
-                          <input type="text" id="txtNewRazons" class="form-control" placeholder="Razón Social">
+                          <input type="text" id="txtNewDireccion" class="form-control validarut" placeholder="Dirección">
                         </div>
                         <div class="ui-widget">
-                          <input type="text" id="txtNewDireccion" class="form-control" placeholder="Dirección">
+                          <input type="text" id="cmbNewComuna" class="form-control validarut" placeholder="Comuna">
                         </div>
                         <div class="ui-widget">
-                          <input type="text" id="cmbNewComuna" class="form-control" placeholder="Comuna">
+                          <input type="text" id="cmbNewCiudad" class="form-control validarut" disabled>
                         </div>
                         <div class="ui-widget">
-                          <input type="text" id="cmbNewCiudad" class="form-control" disabled>
+                          <input type="number" id="txtNewFono" class="form-control validarut" placeholder="Fono">
                         </div>
                         <div class="ui-widget">
-                          <input type="number" id="txtNewFono" class="form-control" placeholder="Fono">
-                        </div>
-                        <div class="ui-widget">
-                          <select id="cmbNewGiro" class="form-control">
+                          <input type="text" id="cmbNewGiro" class="form-control validarut" placeholder="Giro">
                             <!--option>VENTA</option-->
-                          </select>
+                          <!--select-->
                         </div>
                         <div class="ui-widget">
-                          <input type="text" id="txtNewContacto" class="form-control" placeholder="Contacto">
+                          <input type="text" id="txtNewContacto" class="form-control validarut" placeholder="Contacto">
                         </div>
                         <div class="ui-widget">
-                          <input type="text" id="txtNewObservacion" class="form-control" placeholder="Observación">
+                          <input type="text" id="txtNewObservacion" class="form-control validarut" placeholder="Observación">
                         </div>
                     </div>
                   </div>
@@ -360,12 +367,31 @@
                             
                           </tbody>
                         </table>
+                        
                     </div>
                   </div>
                 </div>
                 <div class="modal-footer">
+                  <div class="row">
+                    <div id="porcentajeAvance"><div class="progress-label"></div></div>
+                  </div>
                   <button type="button" class="btn btn-default" id="btnEnviarNotas">Enviar Notas</button>
-                  <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCerrarDeuda">Cerrar</button>
+                  <button type="button" class="btn btn-default" id="btnCerrarEnviarNotas">Cerrar</button>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="modalDescargarBD" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Descargar Base</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div id="porcentajeAvanceBD"><div class="progress-label-bd"></div></div>
+                  </div>
                 </div>
             </div>
           </div>
