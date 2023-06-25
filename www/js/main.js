@@ -1205,6 +1205,8 @@ document.addEventListener('deviceready', function(){
 			return false;
 		}
 
+
+		//valido que rut no exista
 		var sql = "SELECT razons, direccion, comuna from en_cliente " +
     				  "where rutcli =" + $("#txtNewRut").val();
     	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
@@ -1214,39 +1216,58 @@ document.addEventListener('deviceready', function(){
 		      alert("Rut existe");
 		      return false;
 			}
+			else{
+				//valido que el giro ingresado exista
+				var sql = "SELECT desval from de_dominio " +
+							  "where coddom = 8 " +
+		    				  "and desval ='" + $("#cmbNewGiro").val() + "'";
+		    	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+				db.executeSql(sql, [], function(rs){
+				    if(rs.rows.length == 0){
+				      alert("Giro no existe");
+				      return false;
+					}
+					else{
+						//inserto cliente
+						var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
+														   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, LISPRE) " +
+														   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1)";
+						db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+
+						var dv = $("#txtNewDV").val();
+						if(dv == "k"){
+							dv = "K";
+						}
+						db.executeSql(query, [$("#txtNewRut").val(), dv,$("#txtNewRazons").val(),
+											  $("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
+											  $("#txtNewFono").val(), window.localStorage.getItem("codven"), $("#cmbNewGiro").val(),
+											  $("#txtNewContacto").val(), $("#txtNewObservacion").val(), "S"], function(rs) {
+							//alert(JSON.stringify(rs));
+						    if(rs.rowsAffected == 0){
+						      alert("Error al ingresar Cliente");
+						      return false;
+						    }
+						    else{
+						    	alert("Cliente Ingresado");
+						    	$("#txtRutcli").val($("#txtNewRut").val());
+						    	limpiarFicha();
+						    	$('#btnCancelarCliente').trigger("click");
+						    	buscarClienteModal($("#txtRutcli").val(), false);
+						    }
+						  }, function(error) {
+						    alert('Error en la consulta: ' + error.message);
+						  });
+					}
+				}, function(error) {
+					alert('Error en la consulta: ' + error.message);
+					return false;
+				});
+			}
 		}, function(error) {
 			alert('Error en la consulta: ' + error.message);
 			return false;
 		});
-
-		var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
-										   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, CODLIS) " +
-										   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1)";
-		db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-
-		var dv = $("#txtNewDV").val();
-		if(dv == "k"){
-			dv = "K";
-		}
-		db.executeSql(query, [$("#txtNewRut").val(), dv,$("#txtNewRazons").val(),
-							  $("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
-							  $("#txtNewFono").val(), window.localStorage.getItem("codven"), $("#txtNewGiro").val(),
-							  $("#txtNewContacto").val(), $("#txtNewObservacion").val(), "S"], function(rs) {
-			//alert(JSON.stringify(rs));
-		    if(rs.rowsAffected == 0){
-		      alert("Error al ingresar Cliente");
-		      return false;
-		    }
-		    else{
-		    	alert("Cliente Ingresado");
-		    	$("#txtRutcli").val($("#txtNewRut").val());
-		    	limpiarFicha();
-		    	$('#btnCancelarCliente').trigger("click");
-		    	buscarClienteModal($("#txtRutcli").val(), false);
-		    }
-		  }, function(error) {
-		    alert('Error en la consulta: ' + error.message);
-		  });
 	});
 
 	$("#btnNuevoCliente").click(function(e){

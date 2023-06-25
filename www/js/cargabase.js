@@ -28,7 +28,8 @@ function deleteNvts(){
 
     },
     function(error) { 
-      alert("Error "+error.code); 
+      //descomentar para debug
+      //alert("Error "+error.code); 
     });
   });
 }
