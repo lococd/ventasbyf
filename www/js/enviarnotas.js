@@ -54,10 +54,6 @@ document.addEventListener('deviceready', function(){
 	  });
 	}
 
-	function subirArchivoSync(nombreArchivo, urlNativa, pathDestino){
-		return (async () => await subirArchivo(nombreArchivo, urlNativa, pathDestino))();
-	}
-
 	function enviarNotas(){
     var notasSeleccionadas = $(".chk-enviar");
     var qNotasAenviar = 0;
@@ -76,7 +72,13 @@ document.addEventListener('deviceready', function(){
 			var urlNativa = $(notasSeleccionadas[i]).data("uri");
 			var seleccionada = $(notasSeleccionadas[i]).prop("checked");
 			if(seleccionada){
-				const subida = subirArchivoSync(nombreArchivo, urlNativa, pathDestino);
+				subirArchivo(nombreArchivo, urlNativa, pathDestino).then(function(subida){
+					if(subida == false){
+						alert("Problema al subir archivo, favor compruebe su conexión y reintente");
+						$("#btnCerrarEnviarNotas").click();
+						return false;
+					}
+				});
 				//alert(JSON.stringify(subida));
         //alert("uploaded!" + (((1/qNotasAenviar)*100)));
 			}
@@ -114,32 +116,26 @@ document.addEventListener('deviceready', function(){
     progress();
 	}
 
-	
-
 	async function subirArchivo(nombreArchivo, urlNativa, pathDestino){
-		cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
-          function(result){
-            cordova.plugin.ftp.upload(cordova.file.externalDataDirectory + "/nvt/"+nombreArchivo,"/notasventa/por_procesar/"+nombreArchivo,function(percent){
-                if(percent == 1){
-                  //alert("uploaded!");
-                  
-                  moveFile(nombreArchivo, pathDestino);
-                  return new Promise(function(resolve, reject) {
-														   resolve(true);
-														});
-                }
-              },function(error){
-              alert(JSON.stringify(error));
-              return new Promise(function(resolve, reject) {
-														   resolve(false);
-														});
-            });
-          },function(error){
-            alert(JSON.stringify(error));
-            return new Promise(function(resolve, reject) {
-														   resolve(false);
-														});
-          });
+		return new Promise(function(resolve, reject) {
+			cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
+		    function(result){
+		      cordova.plugin.ftp.upload(cordova.file.externalDataDirectory + "/nvt/"+nombreArchivo,"/notasventa/por_procesar/"+nombreArchivo,function(percent){
+		          if(percent == 1){
+		            //alert("uploaded!");
+		            
+		            moveFile(nombreArchivo, pathDestino);
+		            resolve(true);
+		          }
+		        },function(error){
+		        //alert(JSON.stringify(error));
+		        resolve(false);
+		      });
+		    },function(error){
+		      //alert(JSON.stringify(error));
+		      resolve(false);
+		  	});
+		});
 	}
 
 	function moveFile(nombreArchivo, pathDestino) {
