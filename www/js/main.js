@@ -17,6 +17,7 @@ document.addEventListener('deviceready', function(){
 	          var dia = parseInt(fecha.substr(6,2));
 	          var sysdate = new Date();
 	          var fechaVenc = new Date(agno,mes-1,dia);
+	          db.close();
 	          if( fechaVenc > sysdate || user == "FVERGARA"){ //>
 	            alert("¡Nueva base de datos cargada correctamente!");
 	          }
@@ -535,7 +536,8 @@ document.addEventListener('deviceready', function(){
 		db.executeSql(query, [], function(rs) {
 		    if(rs.rows.length == 0){
 		    	//alert("no items");
-		      return false;
+		    	db.close();
+		      	return false;
 		    }
 		    else{
 		    	var fila;
@@ -549,9 +551,11 @@ document.addEventListener('deviceready', function(){
 				db.executeSql(query, [], function(rs) {
 				    if(rs.rows.length == 0){
 				    	//alert("no items");
-				      return false;
+				    	db.close();
+				      	return false;
 				    }
 				    else{
+				    	db.close();
 				    	/*for (i=0; i<rs.rows.length; ++i){
 				    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
 				    		$("#cmbNewComuna").append(fila);
@@ -581,6 +585,7 @@ document.addEventListener('deviceready', function(){
     	$("#txtDescuento").val("");
     	$("#lblRazons").text("");
     	$('#cmbFacturable').val("S");
+    	$("#btnCerrarModallpr2").show();
     	window.localStorage.setItem("lincre", 0);
     	limpiarModal();
 		getNumnvt();
@@ -664,6 +669,10 @@ document.addEventListener('deviceready', function(){
 	});
 
 	$("#btnGuardar").click(function(e){
+		confirmarGuardado();
+	});
+
+	$("#btnCabecera").click(function(e){
 		cargarModalGuardar();
 	});
 
@@ -756,7 +765,8 @@ document.addEventListener('deviceready', function(){
 		}
 	});
 
-	$("#btnConfirmarGuardado").click(function(e){
+
+	function confirmarGuardado(){
 		var rutcli = $("#txtRutcli").val();
 		var productos = $("#tblProd >tbody >tr");
 		if(!validaDescuento()){
@@ -781,12 +791,25 @@ document.addEventListener('deviceready', function(){
 		}
 		else{
 			alert("Debe ingresar rut y al menos un producto");
-			return;
+			return false;
 		}
+	}
+
+	function iniciarNota(){
+		if(!validaDescuento()){
+  			return false;
+  		}
+  		else{
+  			buscarClienteModal($("#txtRutcli").val(), true);
+  		}
+	}
+
+	$("#btnConfirmarGuardado").click(function(e){
+		
 	});
 
 
-    $("#txtRutcli" ).autocomplete({
+    $("#txtRutcli").autocomplete({
       source: function( request, response ) {
       	var buscarPor = request.term;
       	var query = "";
@@ -947,12 +970,7 @@ document.addEventListener('deviceready', function(){
     });
 
     $("#btnCerrarModallpr2").click(function(){
-  		if(!validaDescuento()){
-  			return false;
-  		}
-  		else{
-  			buscarClienteModal($("#txtRutcli").val(), true);
-  		}
+
     });
 
 	$("#btnZip").click(function(e){
@@ -1290,6 +1308,10 @@ document.addEventListener('deviceready', function(){
 	$("#btnCancelarCliente").click(function(e){
 		limpiarFicha();
 	})
+
+	$("#btnProductos").click(function(e){
+		iniciarNota();
+	});
 
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');
