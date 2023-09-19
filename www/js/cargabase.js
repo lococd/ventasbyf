@@ -51,6 +51,7 @@ function getBase(fromMain){
 
       function bajarBase(fromMain){
         try {
+           
            cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
             function(result){
               cordova.plugin.ftp.download(cordova.file.externalDataDirectory + "/envios.db","/dbtest.db",function(percent){
