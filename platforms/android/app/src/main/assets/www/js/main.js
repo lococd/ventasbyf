@@ -668,11 +668,11 @@ document.addEventListener('deviceready', function(){
 		limpiarModal();
 	});
 
-	$("#btnGuardar").click(function(e){
+	$(".btnGuardar").click(function(e){
 		confirmarGuardado();
 	});
 
-	$("#btnCabecera").click(function(e){
+	$(".btnCabecera").click(function(e){
 		cargarModalGuardar();
 	});
 

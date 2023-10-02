@@ -158,7 +158,7 @@ document.addEventListener('deviceready', function(){
 	      });
 	}
 
-	$("#btnVerNotas").click(function(e){
+	$(".btnVerNotas").click(function(e){
 		$("#modalEnviarNotas").modal('toggle');
 		cargarNotas();
 	});
