@@ -779,7 +779,8 @@ document.addEventListener('deviceready', function(){
 				alert("Total excede credito");
 				return false;
 			}
-			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Descuentos $" + getDescuentos() + ", Cliente:"+nombreCliente)){
+			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Descuentos $" + getDescuentos() + 
+				", Total neto: $"+ (totalizaNota() - getDescuentos()) +",Cliente:"+nombreCliente)){
 			    var xmlDet = getDetalle(productos);
 				var numnvt = parseInt($("#lblTituloLpr").text());
 				var vendedor = window.localStorage.getItem("user");

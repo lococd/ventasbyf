@@ -54,6 +54,30 @@ document.addEventListener('deviceready', function(){
 	  });
 	}
 
+	function seleccionarTodas(){
+		var notasSeleccionadas = $(".chk-enviar");
+		for (var i = 0; i < notasSeleccionadas.length; i++) {
+			$(notasSeleccionadas[i]).prop("checked", true);
+		}
+	}
+
+	function deseleccionarTodas(){
+		var notasSeleccionadas = $(".chk-enviar");
+		for (var i = 0; i < notasSeleccionadas.length; i++) {
+			$(notasSeleccionadas[i]).prop("checked", false);
+		}
+	}
+
+	function toggleAll(){
+		var togglear = $("#toggleMarcarNotas").prop("checked");
+		if(togglear){
+			seleccionarTodas();
+		}
+		else{
+			deseleccionarTodas();
+		}
+	}
+
 	function enviarNotas(){
     var notasSeleccionadas = $(".chk-enviar");
     var qNotasAenviar = 0;
@@ -64,7 +88,11 @@ document.addEventListener('deviceready', function(){
 				qNotasAenviar++;
 			}
 		}
-		
+		//si no hay notas a enviar, entonces se termina la función
+		if(qNotasAenviar == 0){
+			alert("Seleccione al menos una nota para enviar");
+			return false;
+		}
 		//alert("notaselegidas" + qNotasAenviar);
 		var pathDestino = cordova.file.externalDataDirectory + "nvtEnviadas";
 		for (var i = 0; i < notasSeleccionadas.length; i++) {
@@ -164,6 +192,20 @@ document.addEventListener('deviceready', function(){
 	});
 
 	$("#btnEnviarNotas").click(function(e){
+		var notasSeleccionadas = $(".chk-enviar");
+    var qNotasAenviar = 0;
+    //vamos a tener que hacer un primer for para saber cuantas notas se seleccionaron
+    for (var i = 0; i < notasSeleccionadas.length; i++) {
+			var seleccionada = $(notasSeleccionadas[i]).prop("checked");
+			if(seleccionada){
+				qNotasAenviar++;
+			}
+		}
+		//si no hay notas a enviar, entonces se termina la función
+		if(qNotasAenviar == 0){
+			alert("Seleccione al menos una nota para enviar");
+			return false;
+		}
 		$( "#porcentajeAvance" ).progressbar({
       value: false
     });
@@ -178,6 +220,9 @@ document.addEventListener('deviceready', function(){
 		}
     $( ".progress-label" ).text("");
 		$("#modalEnviarNotas").modal("hide");
-	})
+	});
 
+	$("#toggleMarcarNotas").click(function(e){
+		toggleAll();
+	});
 });
