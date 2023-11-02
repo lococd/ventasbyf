@@ -146,7 +146,7 @@ document.addEventListener('deviceready', function(){
 
 	async function subirArchivo(nombreArchivo, urlNativa, pathDestino){
 		return new Promise(function(resolve, reject) {
-			cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
+			cordova.plugin.ftp.connect("66.228.61.234","app@byf.cl","ventasbyf_",
 		    function(result){
 		      cordova.plugin.ftp.upload(cordova.file.externalDataDirectory + "/nvt/"+nombreArchivo,"/notasventa/por_procesar/"+nombreArchivo,function(percent){
 		          if(percent == 1){

@@ -585,6 +585,7 @@ document.addEventListener('deviceready', function(){
     	$("#txtDescuento").val("");
     	$("#lblRazons").text("");
     	$('#cmbFacturable').val("S");
+    	$("#btnCabecera").text("Nueva nota de venta");
     	$("#btnCerrarModallpr2").show();
     	window.localStorage.setItem("lincre", 0);
     	limpiarModal();
@@ -644,6 +645,13 @@ document.addEventListener('deviceready', function(){
 
 	//eventos de botones
 	function buscarProducto(){
+		var nombreCliente = $("#nombreCliente").text();
+		if(nombreCliente.length == 0){
+			alert("Debe ingresar datos de cliente para nueva nota");
+			$("#modalCodpro").modal("hide");
+			$("#modalGuardar").modal("show");
+			return false;
+		}
 		var txtPro =  $("#txtPro").val();
 		var txtCantid =  $("#txtCantid").val();
 	    if(txtPro!=''){
@@ -754,6 +762,11 @@ document.addEventListener('deviceready', function(){
 					}
 					$("#tblProd").append(tr);
 					$("#btnConfirmarGuardado").removeClass("disabled");
+					//se cambia el boton nueva nota de venta por cambiar datos de nota
+					var productos = $("#tblProd >tbody >tr");
+					if(productos.length == 1){
+						$("#btnCabecera").text("Editar Datos de Nota");
+					}
 					limpiarModal();
 					$("#totalNota").text("Total nota:$"+totalizaNota());
 					$("#totalNota2").text("Total nota:$"+totalizaNota());
