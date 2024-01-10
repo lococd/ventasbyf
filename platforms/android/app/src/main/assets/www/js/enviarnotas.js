@@ -32,7 +32,8 @@ document.addEventListener('deviceready', function(){
 															celdas = celdas + "<tr><td>" + razons + "</td>" +
 															"<td>" + fecemi + "</td>" +
 															"<td>$" + totneto + "</td>" +
-				                                    		'<td><input class="chk-enviar" type="checkbox" data-filename="'+file.name+'"></td></tr>';
+				                                    		'<td><input class="chk-enviar" type="checkbox" data-filename="'+file.name+'" data-contenido="'+
+				                                    		this.result.replaceAll("\"","'")+'"></td></tr>';
 				                                    		$("#detalleTblNotas").append(celdas);
 														}
 														reader.readAsText(file);
@@ -97,16 +98,17 @@ document.addEventListener('deviceready', function(){
 		var pathDestino = cordova.file.externalDataDirectory + "nvtEnviadas";
 		for (var i = 0; i < notasSeleccionadas.length; i++) {
 			var nombreArchivo = $(notasSeleccionadas[i]).data("filename");
-			var urlNativa = $(notasSeleccionadas[i]).data("uri");
+			var contenidoXML = $(notasSeleccionadas[i]).data("contenido").replace("<?xml version='1.0' encoding='utf-8'?>", "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 			var seleccionada = $(notasSeleccionadas[i]).prop("checked");
 			if(seleccionada){
-				subirArchivo(nombreArchivo, urlNativa, pathDestino).then(function(subida){
-					if(subida == false){
-						alert("Problema al subir archivo, favor compruebe su conexión y reintente");
-						$("#btnCerrarEnviarNotas").click();
-						return false;
-					}
-				});
+        subirArchivo(nombreArchivo, contenidoXML, pathDestino).then(function(subida){
+            if(subida == false){
+                alert("Problema al subir archivo, favor compruebe su conexión y reintente");
+                $("#btnCerrarEnviarNotas").click();
+                return false;
+            }
+        });
+				
 				//alert(JSON.stringify(subida));
         //alert("uploaded!" + (((1/qNotasAenviar)*100)));
 			}
@@ -144,25 +146,49 @@ document.addEventListener('deviceready', function(){
     progress();
 	}
 
-	async function subirArchivo(nombreArchivo, urlNativa, pathDestino){
+	async function subirArchivo(nombreArchivo, contenido, pathDestino){
 		return new Promise(function(resolve, reject) {
-			cordova.plugin.ftp.connect("66.228.61.234","app@byf.cl","ventasbyf_",
-		    function(result){
-		      cordova.plugin.ftp.upload(cordova.file.externalDataDirectory + "/nvt/"+nombreArchivo,"/notasventa/por_procesar/"+nombreArchivo,function(percent){
-		          if(percent == 1){
-		            //alert("uploaded!");
-		            
-		            moveFile(nombreArchivo, pathDestino);
-		            resolve(true);
-		          }
-		        },function(error){
-		        //alert(JSON.stringify(error));
-		        resolve(false);
-		      });
-		    },function(error){
-		      //alert(JSON.stringify(error));
-		      resolve(false);
-		  	});
+			var form = new FormData();
+			form.append("nombre", nombreArchivo);
+			form.append("contenido", contenido);
+			form.append("password", "ventasbyf_");
+
+			var settings = {
+			  "url": "https://traspasoxml.byf.cl/",
+			  "method": "POST",
+			  "timeout": 0,
+			  "processData": false,
+			  "mimeType": "multipart/form-data",
+			  "contentType": false,
+			  "data": form,
+			  "async": true
+			};
+
+			$.ajax(settings).done(function (response) {
+				//se mueve archivo
+				window.resolveLocalFileSystemURL(
+	      cordova.file.externalDataDirectory + "nvt/"+nombreArchivo,
+	      function(fileEntry){
+	            window.resolveLocalFileSystemURL(pathDestino,
+	                    function(dirEntry) {
+	                        // move the file to a new directory and rename it
+	                        fileEntry.moveTo(dirEntry, nombreArchivo, null, function(error){
+						    	alert("nomovio " + error.code);
+						    });
+	                    },
+	                    function(error){
+				        	alert("noaccedio a path destino " + error.code);
+				        });
+	      },
+	      function(error){
+	      	alert("error al mover "+ pathDestino + " " + error.code);
+	      });
+	      //resolvemos archivo
+			  resolve(true);
+			})
+			.fail(function (jqXHR, textStatus) {
+    		resolve(false);
+			});
 		});
 	}
 
@@ -182,7 +208,7 @@ document.addEventListener('deviceready', function(){
 				        });
 	      },
 	      function(error){
-	      	alert("error " + error.code);
+	      	alert("error al mover "+ pathDestino + " " + error.code);
 	      });
 	}
 
