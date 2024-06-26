@@ -1236,15 +1236,11 @@ document.addEventListener('deviceready', function(){
 			$("#txtNewDireccion").focus();
 			return false;
 		}
-
-
 		//valido que rut no exista
 		var sql = "SELECT razons, direccion, comuna from en_cliente " +
-    				  "where rutcli =" + $("#txtNewRut").val();
+    				  "where rutcli = " + $("#txtNewRut").val();
     	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-
 		db.executeSql(sql, [], function(rs){
-			db.close();
 		    if(rs.rows.length > 0){
 		      alert("Rut existe");
 		      return false;
@@ -1253,11 +1249,9 @@ document.addEventListener('deviceready', function(){
 				//valido que el giro ingresado exista
 				var sql = "SELECT desval from de_dominio " +
 							  "where coddom = 8 " +
-		    				  "and desval ='" + $("#cmbNewGiro").val() + "'";
+		    				  "and desval = '" + $("#cmbNewGiro").val() + "'";
 		    	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-
 				db.executeSql(sql, [], function(rs){
-					db.close();
 				    if(rs.rows.length == 0){
 				      alert("Giro no existe");
 				      return false;
@@ -1277,7 +1271,6 @@ document.addEventListener('deviceready', function(){
 											  $("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
 											  $("#txtNewFono").val(), window.localStorage.getItem("codven"), $("#cmbNewGiro").val(),
 											  $("#txtNewContacto").val(), $("#txtNewObservacion").val(), "S"], function(rs) {
-							db.close();
 							//alert(JSON.stringify(rs));
 						    if(rs.rowsAffected == 0){
 						      alert("Error al ingresar Cliente");

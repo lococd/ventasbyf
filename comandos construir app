@@ -25,8 +25,8 @@ cordova build android --debug --buildConfig
 
 
 #para construir una vez listo en debug
-export GRADLE_HOME=/opt/gradle/gradle-5.0
-export JAVA_HOME=/usr/lib/jvm/jdk-11
+#export GRADLE_HOME=/opt/gradle/gradle-5.0
+#export JAVA_HOME=/usr/lib/jvm/jdk-11
 
 cd /src
 
@@ -34,8 +34,8 @@ cordova build android --debug --buildConfig
 
 #para construir para prod
 #para construir una vez listo
-export GRADLE_HOME=/opt/gradle/gradle-5.0
-export JAVA_HOME=/usr/lib/jvm/jdk-11
+#export GRADLE_HOME=/opt/gradle/gradle-5.0
+#export JAVA_HOME=/usr/lib/jvm/jdk-11
 
 cd /src
 
