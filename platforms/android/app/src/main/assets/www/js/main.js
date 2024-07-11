@@ -217,10 +217,12 @@ document.addEventListener('deviceready', function(){
 		      alert("Rut inválido");
 		    }
 		    else{
+				
 		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
         		$("#lblRazons").text(rs.rows.item(0).RAZONS);
 		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
 		    	window.localStorage.setItem("lincre", rs.rows.item(0).LINCRE);
+
 		    	if(hideModal){
 		    		$("#modalGuardar").modal('hide');
 		    		$("#modalCodpro").modal('toggle');

@@ -49,8 +49,9 @@
                     <li><a class="texto" id="btnVerDeuda" href="#">Ver Deuda</a></li>
                   </ul>
                 </li>
-                
-                <li><a class="btnCerrarSesion" href="#">Cerrar Sesión</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a class="btnCerrarSesion pull-right" href="#">Cerrar Sesión</a></li>
+                <li role="separator" class="divider"></li>
               </ul>
             </div><!--/.nav-collapse -->
           </div>
@@ -208,11 +209,13 @@
                               <span class="icon-bar bg-dark"></span>
                               <span class="icon-bar bg-dark"></span>
                             </button>
-                            <a class="navbar-brand textoBlanco" href="#">V1.8.6 Datos Nota</a>
+                            <a class="navbar-brand textoBlanco" href="#">V1.8.7 Datos Nota</a>
                           </div>
                           <div style="height: 1px;" aria-expanded="false" id="menuModal" class="navbar-collapse collapse">
                             <ul class="nav navbar-nav navbar-right">
+                              <li role="separator" class="divider"></li>
                               <li><a class="btnCerrarSesion" href="#">Cerrar Sesión</a></li>
+                              <li role="separator" class="divider"></li>
                               <li><a id="btnNuevoCliente" href="#">Nuevo Cliente</a></li>
                               <!--li><a id="btnZip" href="#">Enviar Notas</a></li-->
                               <li><a class="btnVerNotas" href="#">Listar y enviar Notas</a></li>
@@ -405,6 +408,16 @@
                     <div id="porcentajeAvanceBD"><div class="progress-label-bd"></div></div>
                   </div>
                 </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="modalCargando" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="spinner-border" role="status">
+                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                Cargando...
+              </div>
             </div>
           </div>
         </div>

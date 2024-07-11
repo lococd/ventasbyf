@@ -18,8 +18,12 @@ document.addEventListener('deviceready', function(){
         window.localStorage.setItem("codven", rs2.rows.item(0).CODVEN);
         window.localStorage.setItem("descuento", rs2.rows.item(0).DSCMAX);
         window.localStorage.setItem("fecVenBase", dia + "/" + mes + "/" + agno);
+        $("#modalCargando").modal("toggle");
         db.close();
-        window.location.replace("main.html");
+        setTimeout(function(){
+          $("#modalCargando").modal("toggle");
+          window.location.replace("main.html");
+        },1000);
       }
       else{
         alert("logueado incorrecto");
