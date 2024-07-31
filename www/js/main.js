@@ -692,7 +692,11 @@ document.addEventListener('deviceready', function(){
 		window.localStorage.removeItem("user");
 		window.localStorage.removeItem("password");
 		window.localStorage.removeItem("descuento");
-		window.location.replace("index.html");
+		$("#modalCargando").modal("toggle");
+		setTimeout(function(){
+			$("#modalCargando").modal("toggle");
+			window.location.replace("index.html");
+		  },1000);
 		//navigator.app.loadUrl("file:///android_asset/www/index.html");
 	});
 
@@ -851,6 +855,7 @@ document.addEventListener('deviceready', function(){
 			        data.push(rs.rows.item(i));
 			        //alert(JSON.stringify(rs.rows.item(i)));
 			    }
+				db.close();
 	      		response(data);
 		    }
 		  }, function(error) {
