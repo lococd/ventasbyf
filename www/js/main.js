@@ -694,9 +694,11 @@ document.addEventListener('deviceready', function(){
 		window.localStorage.removeItem("descuento");
 		$("#modalCargando").modal("toggle");
 		setTimeout(function(){
+			var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+			db.close();
 			$("#modalCargando").modal("toggle");
 			window.location.replace("index.html");
-		  },1000);
+		  },2000);
 		//navigator.app.loadUrl("file:///android_asset/www/index.html");
 	});
 
@@ -855,7 +857,9 @@ document.addEventListener('deviceready', function(){
 			        data.push(rs.rows.item(i));
 			        //alert(JSON.stringify(rs.rows.item(i)));
 			    }
-				db.close();
+				if(db !== undefined && db !== null){
+					db.close();
+				}
 	      		response(data);
 		    }
 		  }, function(error) {
@@ -897,6 +901,9 @@ document.addEventListener('deviceready', function(){
 			    for (i=0; i<rs.rows.length; ++i){
 			        data.push(rs.rows.item(i));
 			    }
+				if(db !== undefined && db !== null){
+					db.close();
+				}
 	      		response(data);
 		    }
 		  }, function(error) {
@@ -938,6 +945,9 @@ document.addEventListener('deviceready', function(){
 			    for (i=0; i<rs.rows.length; ++i){
 			        data.push(rs.rows.item(i));
 			    }
+				if(db !== undefined && db !== null){
+					db.close();
+				}
 	      		response(data);
 		    }
 		  }, function(error) {
@@ -976,6 +986,9 @@ document.addEventListener('deviceready', function(){
 			    for (i=0; i<rs.rows.length; ++i){
 			        data.push(rs.rows.item(i));
 			    }
+				if(db !== undefined && db !== null){
+					db.close();
+				}
 	      		response(data);
 		    }
 		  }, function(error) {
