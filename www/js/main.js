@@ -223,6 +223,10 @@ document.addEventListener('deviceready', function(){
 		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
 		    	window.localStorage.setItem("lincre", rs.rows.item(0).LINCRE);
 
+				if(rs.rows.item(0).LINCRE <=0){
+					alert("Cliente sin crédito disponible");
+				}
+
 		    	if(hideModal){
 		    		$("#modalGuardar").modal('hide');
 		    		$("#modalCodpro").modal('toggle');
@@ -440,7 +444,7 @@ document.addEventListener('deviceready', function(){
 	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip, a.catpro, b.canmay,b.premay, a.factur " +
 	   		 		"from ma_product as a, re_lvenpro as b, en_cliente c " +
 	   				"where a.codpro = b.codpro " +
-	   				"and c.lispre = b.codlis " +
+	   				"and c.codlis = b.codlis " +
 	   				"and c.rutcli = " + $("#txtRutcli").val() + " " +
 	   				"and a.codpro = '" + codpro + "'";
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
