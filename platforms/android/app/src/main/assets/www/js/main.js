@@ -204,7 +204,8 @@ document.addEventListener('deviceready', function(){
 		if(rutcli.length > 0){
     		var sql = /*"SELECT razons, direccion, lincre, comuna, sum(totsal) b from en_cliente a, en_notavta b" +
     				  "where rutcli =" + rutcli;*/
-    				  "SELECT a.rutcli, a.razons, direccion, lincre - sum(ifnull(totsal,0)) LINCRE, a.comuna " +
+    				  "SELECT a.rutcli, a.razons, direccion, lincre - sum(ifnull(totsal,0)) LINCRE, a.comuna, " +
+					  "sum(ifnull(totsal,0)) as TOTSAL " +
 					  "from en_cliente a " +
 					  "left outer join " +
     				  "en_notavta b " +
@@ -217,7 +218,6 @@ document.addEventListener('deviceready', function(){
 		      alert("Rut inválido");
 		    }
 		    else{
-				
 		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
         		$("#lblRazons").text(rs.rows.item(0).RAZONS);
 		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
@@ -227,12 +227,15 @@ document.addEventListener('deviceready', function(){
 					alert("Cliente sin crédito disponible");
 				}
 
-		    	if(hideModal){
-		    		$("#modalGuardar").modal('hide');
-		    		$("#modalCodpro").modal('toggle');
-		    		$("#modalTxtCodpro").focus();
-		    	}
-		    	
+				if(parseInt(rs.rows.item(0).TOTSAL) > 0){
+					alert("Cliente con deuda pendiente de $"+rs.rows.item(0).TOTSAL);
+					cargarDeuda();
+				}
+				if(hideModal){
+					$("#modalGuardar").modal('hide');
+					$("#modalCodpro").modal('toggle');
+					$("#modalTxtCodpro").focus();
+				}
 		    }
 		  }, function(error) {
 		    alert('Error en la consulta: ' + error.message);
