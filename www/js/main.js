@@ -228,14 +228,16 @@ document.addEventListener('deviceready', function(){
 				}
 
 				if(parseInt(rs.rows.item(0).TOTSAL) > 0){
-					alert("Cliente con deuda pendiente de $"+rs.rows.item(0).TOTSAL);
-					cargarDeuda();
+					mostrarMensaje("Cliente con deuda pendiente de $"+rs.rows.item(0).TOTSAL);
+					//cargarDeuda();
+				}else{
+					if(hideModal){
+						$("#modalGuardar").modal('hide');
+						$("#modalCodpro").modal('toggle');
+						$("#modalTxtCodpro").focus();
+					}
 				}
-				if(hideModal){
-					$("#modalGuardar").modal('hide');
-					$("#modalCodpro").modal('toggle');
-					$("#modalTxtCodpro").focus();
-				}
+				
 		    }
 		  }, function(error) {
 		    alert('Error en la consulta: ' + error.message);
@@ -1349,6 +1351,18 @@ document.addEventListener('deviceready', function(){
 	$("#btnProductos").click(function(e){
 		iniciarNota();
 	});
+
+	$("#btnCerrarMensaje").click(function(e){
+		$("#modalMensaje").modal("hide");
+		$("#modalGuardar").modal('hide');
+		$("#modalCodpro").modal('toggle');
+		$("#modalTxtCodpro").focus();
+	});
+
+	function mostrarMensaje(mensaje){
+		$("#modalMensaje").modal("show");
+		$("#lblMensaje").text(mensaje);
+	}
 
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');
