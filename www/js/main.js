@@ -1288,8 +1288,9 @@ document.addEventListener('deviceready', function(){
 					else{
 						//inserto cliente
 						var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
-														   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, LISPRE) " +
-														   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1)";
+														   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, LISPRE, CODLIS, LINCRE) " +
+														   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1,1, (select codref from de_dominio " +
+															"where coddom = 4))";
 						db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
 						var dv = $("#txtNewDV").val();
