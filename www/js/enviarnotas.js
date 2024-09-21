@@ -1,5 +1,59 @@
-document.addEventListener('deviceready', function(){
+function visualizarNota(nombreArchivo){
+	$("#detalleTblNota").empty();
+	try {
+		//agarro el directorio root
+		var celdas = "";
+		window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "nvt/" + nombreArchivo,
+		gotFile, fail);
 
+		function gotFile(fileEntry) {
+			fileEntry.file(function(file) {
+				var reader = new FileReader();
+				reader.onloadend = function(e) {
+					celdas = "";
+					var parser = new DOMParser();
+					var xmlDoc = parser.parseFromString(this.result,"text/xml");
+					var numnvt = xmlDoc.getElementsByTagName("numnvt")[0].childNodes[0].nodeValue;
+					var detalle = xmlDoc.getElementsByTagName("Producto");
+					var codpro = "";
+					var descripcion = "";
+					var precio = 0;
+					var cantid = 0;
+					var total = 0;
+					for (let i = 0; i < detalle.length; i++) {
+						const producto = detalle[i];
+						
+						codpro = producto.getElementsByTagName("codpro")[0].childNodes[0].nodeValue;
+						descripcion = producto.getElementsByTagName("despro")[0].childNodes[0].nodeValue;
+						precio = producto.getElementsByTagName("prefin")[0].childNodes[0].nodeValue;
+						cantid = producto.getElementsByTagName("cantid")[0].childNodes[0].nodeValue;
+						total = producto.getElementsByTagName("totnet")[0].childNodes[0].nodeValue;;
+						celdas = celdas + "<tr>" +
+						"<td>" + codpro + "</td>" +
+						"<td>" + descripcion + "</td>" +
+						"<td>" + precio.toString() + "</td>" + 
+						"<td>" + cantid.toString() + "</td>" +
+						"<td>" + total.toString() + "</td>" +
+						"</tr>";
+					}
+					$("#detalleTblNota").append(celdas);
+					$("#numeroNota").text(numnvt);
+					$("#modalVerNota").modal("show");
+				}
+				reader.readAsText(file);
+			});
+		}
+
+		function fail(e) {
+			alert("FileSystem Error" + e.message);
+		}
+	} catch (error) {
+		alert(error);
+	}
+	
+}
+
+document.addEventListener('deviceready', function(){
 	function cargarNotas(){
 		$("#detalleTblNotas").empty();
 		//agarro el directorio root
@@ -33,7 +87,9 @@ document.addEventListener('deviceready', function(){
 															"<td>" + fecemi + "</td>" +
 															"<td>$" + totneto + "</td>" +
 				                                    		'<td><input class="chk-enviar" type="checkbox" data-filename="'+file.name+'" data-contenido="'+
-				                                    		this.result.replaceAll("\"","'")+'"></td></tr>';
+				                                    		this.result.replaceAll("\"","'")+'"></td>' +
+															'<td><a href="#" class="btn btn-primary" onclick="visualizarNota(\''+ file.name +'\')">Ver</a></td>' +
+															'</tr>';
 				                                    		$("#detalleTblNotas").append(celdas);
 														}
 														reader.readAsText(file);
@@ -211,6 +267,8 @@ document.addEventListener('deviceready', function(){
 	      	alert("error al mover "+ pathDestino + " " + error.code);
 	      });
 	}
+
+	
 
 	$(".btnVerNotas").click(function(e){
 		$("#modalEnviarNotas").modal('toggle');
