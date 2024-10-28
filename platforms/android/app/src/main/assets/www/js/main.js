@@ -274,112 +274,120 @@ document.addEventListener('deviceready', function(){
 	};
 
 	function grabaXML(rutcli,numnvt,vendedor,observ,xmlDet){
-		var subtot = totalizaNota();
-		var totneto;
-		var totiva;
-		var totgen;
-		var dscto;
-		var xmlCab = "";
-		var totDescuentos = getDescuentos();
-		var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
-					"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02, b.facturable "+
-					"from ma_usuario as a, en_cliente as b, de_dominio as c,de_dominio as d " +
-					"where b.forpag = c.codval " +
-					"and c.coddom = 5 " +
-					"and b.plapag = d.codval " +
-					"and d.coddom = 6 " +
-	   				"and a.codusu = '" + vendedor + "' " +
-	   				"and b.rutcli = " + rutcli;
-	   	window.sqlitePlugin.importPrepopulatedDatabase({file: "envios.db", "importIfExists": false});
-      	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-		db.transaction(function(tx){
-			tx.executeSql(query, [], function(tx,rs) {
-			    if(rs.rows.length == 0){
-			    	alert("Cliente no configurado");
-			    }
-			    else{
-			    	totgen = subtot - totDescuentos;
-			    	totneto = Math.trunc(totgen / 1.19); //- (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
-			    	totiva = totgen - totneto;
-			    	
-			    	dscto = 0;
-			    	if($("#txtDescuento").val() != ""){
-			    		dscto = $("#txtDescuento").val();
-			    	}
-			    	var fecemi = getAgno().toString() + getMes().toString() + getDia().toString();
-			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>" + String.fromCharCode(13) +
-			    			 "<codven>" + rs.rows.item(0).CODVEN +"</codven>" + String.fromCharCode(13) +
-			    			 "<fecemi>" + fecemi +"</fecemi>" + String.fromCharCode(13) +
-			    			 "<vendedor>" + vendedor +"</vendedor>" + String.fromCharCode(13) +
-			    			 "<rutcli>" + rutcli +"</rutcli>" + String.fromCharCode(13) +
-			    			 "<razons>" + rs.rows.item(0).RAZONS + "</razons>" + String.fromCharCode(13) +
-			    			 "<direcc>" + rs.rows.item(0).DIRECC + "</direcc>" + String.fromCharCode(13) +
-			    			 "<comuna>" + rs.rows.item(0).COMUNA + "</comuna>" + String.fromCharCode(13) +
-			    			 "<ciudad>" + rs.rows.item(0).CIUDAD + "</ciudad>" + String.fromCharCode(13) +
-			    			 "<forpag>" + rs.rows.item(0).FORPAG + "</forpag>" + String.fromCharCode(13) +
-			    			 "<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
-			    			 "<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
-			    			 "<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
-			    			 "<dscto1>" + totDescuentos + "</dscto1>" + String.fromCharCode(13) +
-			    			 "<dscto2>0</dscto2>" + String.fromCharCode(13) +
-			    			 "<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
-			    			 "<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
-			    			 "<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
-			    			 "<totsal>" + totgen +"</totsal>" + String.fromCharCode(13) +
-			      			 "<numbul>0</numbul>" + String.fromCharCode(13)+
-				             "<codban>30</codban>" + String.fromCharCode(13) +
-				             "<origen>REM</origen>" + String.fromCharCode(13) +
-				             "<estado>0</estado>" + String.fromCharCode(13) +
-				             "<pagada>0</pagada>" + String.fromCharCode(13)+
-				             //"<factura>N</factura>" + String.fromCharCode(13)+
-				             "<observ>"+ observ + "</observ>" + String.fromCharCode(13)+
-				             "<factura>" + $("#cmbFacturable option:selected").text() + "</factura>" + String.fromCharCode(13);
-
-				            var xmlText = '<?xml version="1.0" encoding="utf-8"?>' + String.fromCharCode(13) +
-							  "<Pedidos>" + String.fromCharCode(13) +
-							  	"<NotaVenta>" + String.fromCharCode(13) +
-							  		"<Cabecera>" + String.fromCharCode(13) +
-							  			xmlCab +
-							  		"</Cabecera>" + String.fromCharCode(13) +
-							  		"<Detalle>" + String.fromCharCode(13)+
-							  			xmlDet+
-							  		"</Detalle>" + String.fromCharCode(13) +
-							  	"</NotaVenta>" + String.fromCharCode(13) +
-							  "</Pedidos>";
-
-							window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory+"/nvt", function( directoryEntry ) {
-								var sysdate = new Date();
-								var mes = sysdate.getMonth() + 1;
-								var fechasalida = (sysdate.getYear() + 1900).toString() + getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString() + sysdate.getSeconds().toString();
-							    directoryEntry.getFile(fechasalida + window.localStorage.getItem("user") + numnvt + ".xml", { create: true }, function( fileEntry ) {
-							        fileEntry.createWriter( function( fileWriter ) {
-							            fileWriter.onwriteend = function( result ) {
-							            	alert( 'Nota de venta grabada con éxito! Numero '+ numnvt );
-
-							            };
-							            fileWriter.onerror = function( error ) {
-							                alert( JSON.stringify(error) );
-							            };
-							            fileWriter.write( xmlText );
-							        }, function( error ) { alert( error ); } );
-							    }, function( error ) { alert( error ); } );
-							}, function( error ) { alert( error ); } );
-
-
-
-				}
+		getNotaActual(rutcli).then(function(nombreArchivo){
+			if(nombreArchivo){
+				concatenaNota(nombreArchivo, xmlDet);
 			}
-			,function(error) {
-				alert('Error en la consulta: ' + error.message);
-			});
-        },
-	   	function(err){
-		alert('Error almacenamiento' + err.message);
-	   	},
-	   	function(){
-			window.localStorage.setItem("numnvt",numnvt + 1);
-			limpiar();
-        });	
+			else{
+				var subtot = totalizaNota();
+				var totneto;
+				var totiva;
+				var totgen;
+				var dscto;
+				var xmlCab = "";
+				var totDescuentos = getDescuentos();
+				var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
+							"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02, b.facturable "+
+							"from ma_usuario as a, en_cliente as b, de_dominio as c,de_dominio as d " +
+							"where b.forpag = c.codval " +
+							"and c.coddom = 5 " +
+							"and b.plapag = d.codval " +
+							"and d.coddom = 6 " +
+							"and a.codusu = '" + vendedor + "' " +
+							"and b.rutcli = " + rutcli;
+				window.sqlitePlugin.importPrepopulatedDatabase({file: "envios.db", "importIfExists": false});
+				var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+				db.transaction(function(tx){
+					tx.executeSql(query, [], function(tx,rs) {
+						if(rs.rows.length == 0){
+							alert("Cliente no configurado");
+						}
+						else{
+							totgen = subtot - totDescuentos;
+							totneto = Math.trunc(totgen / 1.19); //- (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
+							totiva = totgen - totneto;
+							
+							dscto = 0;
+							if($("#txtDescuento").val() != ""){
+								dscto = $("#txtDescuento").val();
+							}
+							var fecemi = getAgno().toString() + getMes().toString() + getDia().toString();
+							xmlCab = "<numnvt>" + numnvt +"</numnvt>" + String.fromCharCode(13) +
+									"<codven>" + rs.rows.item(0).CODVEN +"</codven>" + String.fromCharCode(13) +
+									"<fecemi>" + fecemi +"</fecemi>" + String.fromCharCode(13) +
+									"<vendedor>" + vendedor +"</vendedor>" + String.fromCharCode(13) +
+									"<rutcli>" + rutcli +"</rutcli>" + String.fromCharCode(13) +
+									"<razons>" + rs.rows.item(0).RAZONS + "</razons>" + String.fromCharCode(13) +
+									"<direcc>" + rs.rows.item(0).DIRECC + "</direcc>" + String.fromCharCode(13) +
+									"<comuna>" + rs.rows.item(0).COMUNA + "</comuna>" + String.fromCharCode(13) +
+									"<ciudad>" + rs.rows.item(0).CIUDAD + "</ciudad>" + String.fromCharCode(13) +
+									"<forpag>" + rs.rows.item(0).FORPAG + "</forpag>" + String.fromCharCode(13) +
+									"<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
+									"<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
+									"<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
+									"<dscto1>" + totDescuentos + "</dscto1>" + String.fromCharCode(13) +
+									"<dscto2>0</dscto2>" + String.fromCharCode(13) +
+									"<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
+									"<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
+									"<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
+									"<totsal>" + totgen +"</totsal>" + String.fromCharCode(13) +
+									"<numbul>0</numbul>" + String.fromCharCode(13)+
+									"<codban>30</codban>" + String.fromCharCode(13) +
+									"<origen>REM</origen>" + String.fromCharCode(13) +
+									"<estado>0</estado>" + String.fromCharCode(13) +
+									"<pagada>0</pagada>" + String.fromCharCode(13)+
+									//"<factura>N</factura>" + String.fromCharCode(13)+
+									"<observ>"+ observ + "</observ>" + String.fromCharCode(13)+
+									"<factura>" + $("#cmbFacturable option:selected").text() + "</factura>" + String.fromCharCode(13);
+
+									var xmlText = '<?xml version="1.0" encoding="utf-8"?>' + String.fromCharCode(13) +
+									"<Pedidos>" + String.fromCharCode(13) +
+										"<NotaVenta>" + String.fromCharCode(13) +
+											"<Cabecera>" + String.fromCharCode(13) +
+												xmlCab +
+											"</Cabecera>" + String.fromCharCode(13) +
+											"<Detalle>" + String.fromCharCode(13)+
+												xmlDet+
+											"</Detalle>" + String.fromCharCode(13) +
+										"</NotaVenta>" + String.fromCharCode(13) +
+									"</Pedidos>";
+
+									window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory+"/nvt", function( directoryEntry ) {
+										var sysdate = new Date();
+										var mes = sysdate.getMonth() + 1;
+										var fechasalida = (sysdate.getYear() + 1900).toString() + getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString() + sysdate.getSeconds().toString();
+										directoryEntry.getFile(fechasalida + window.localStorage.getItem("user") + numnvt + ".xml", { create: true }, function( fileEntry ) {
+											fileEntry.createWriter( function( fileWriter ) {
+												fileWriter.onwriteend = function( result ) {
+													alert( 'Nota de venta grabada con éxito! Numero '+ numnvt );
+
+												};
+												fileWriter.onerror = function( error ) {
+													alert( JSON.stringify(error) );
+												};
+												fileWriter.write( xmlText );
+											}, function( error ) { alert( error ); } );
+										}, function( error ) { alert( error ); } );
+									}, function( error ) { alert( error ); } );
+
+
+
+						}
+					}
+					,function(error) {
+						alert('Error en la consulta: ' + error.message);
+					});
+				},
+				function(err){
+				alert('Error almacenamiento' + err.message);
+				},
+				function(){
+					window.localStorage.setItem("numnvt",numnvt + 1);
+					limpiar();
+				});	
+			}
+		});
+		
 	}
 
 	function getDetalle(productos){
