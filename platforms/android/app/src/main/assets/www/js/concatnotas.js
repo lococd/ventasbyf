@@ -77,15 +77,42 @@ function concatenaNota(nombreArchivo, xmlDet){
 				var reader = new FileReader();
 				reader.onloadend = function(e) {
 					celdas = "";
-                    alert(xmlDet);
+                    xmlDet = '<root xmlns:foo="http://www.foo.org/" xmlns:bar="http://www.bar.org">'+
+                                xmlDet +
+                            '</root>';
 					var xmlDoc = new DOMParser().parseFromString(this.result,"text/xml");
                     var xmlDetalle = new DOMParser().parseFromString(xmlDet, 'text/xml');
                     let sources = xmlDetalle.evaluate("//Producto", xmlDetalle, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
                     let destination = xmlDoc.querySelector("Detalle");
+                    let cantidDestino = 0;
+                    let codproDestino = "";
+                    let cantidOrigen = 0;
+                    let codproOrigen = "";
+                    let sumarCantidades = false;
+                    var detalle = xmlDoc.getElementsByTagName("Producto");
+                    //variable sources es el array de productos nuevos a ingresar a la nota
                     for(var i = 0; i < sources.snapshotLength; i++) {
+                        cantidDestino = 0;
+                        codproDestino = "";
+                        sumarCantidades = false;
                         let node = sources.snapshotItem(i);
-                        let n_node = node.cloneNode(true);
-                        destination.append(n_node);
+                        //consiguiendo productos a ingresar
+                        cantidDestino = parseInt(node.getElementsByTagName("cantid")[0].childNodes[0].nodeValue);
+                        codproDestino = node.getElementsByTagName("codpro")[0].childNodes[0].nodeValue;
+                        //consiguiendo productos de origen y buscando coincidencia
+                        for (let j = 0; j < detalle.length; j++) {
+                            const productoOrigen = detalle[j];
+                            codproOrigen = productoOrigen.getElementsByTagName("codpro")[0].childNodes[0].nodeValue;
+                            if(codproOrigen == codproDestino){
+                                cantidOrigen = parseInt(productoOrigen.getElementsByTagName("cantid")[0].childNodes[0].nodeValue);
+                                productoOrigen.getElementsByTagName("cantid")[0].childNodes[0].nodeValue = cantidOrigen + cantidDestino;
+                                sumarCantidades = true;
+                            }
+                        }
+                        if(sumarCantidades == false){
+                            let n_node = node.cloneNode(true);
+                            destination.append(n_node);
+                        }
                     }
                     var strEditado = new XMLSerializer().serializeToString(xmlDoc);
                     fileEntry.createWriter(function(fileWriter){

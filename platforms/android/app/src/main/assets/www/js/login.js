@@ -65,7 +65,7 @@ document.addEventListener('deviceready', function(){
 
                   // listo todos los ficheros
                   directoryReader.readEntries(function(entries) {
-                      if(entries.length>0){
+                      if(entries.length>0 && user != "FVERGARA"){
                         alert("La base de datos vence mañana, se deben subir todas las notas de venta");
                         $("#btnVerNotas").trigger('click');
                       }

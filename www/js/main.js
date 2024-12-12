@@ -277,6 +277,7 @@ document.addEventListener('deviceready', function(){
 		getNotaActual(rutcli).then(function(nombreArchivo){
 			if(nombreArchivo){
 				concatenaNota(nombreArchivo, xmlDet);
+				limpiar();
 			}
 			else{
 				var subtot = totalizaNota();
@@ -899,12 +900,24 @@ document.addEventListener('deviceready', function(){
       	var buscarPor = request.term;
       	var query = "";
       	if (!$.isNumeric(buscarPor)){
-      		query = "select a.codpro, a.despro as value from ma_product as a " +
-	   				"where upper(a.despro) like '%" + buscarPor.toUpperCase() + "%'";
+      		/*query = "select a.codpro, a.despro as value from ma_product as a " +
+	   				"where upper(a.despro) like '%" + buscarPor.toUpperCase() + "%'";*/
+			query = "select a.codpro, a.despro || ' D:' || b.predet || ',M:' || b.premay as value " +
+	   		 		"from ma_product as a, re_lvenpro as b, en_cliente c " +
+	   				"where a.codpro = b.codpro " +
+	   				"and c.codlis = b.codlis " +
+	   				"and c.rutcli = " + $("#txtRutcli").val() + " " +
+					"and upper(a.despro) like '%" + buscarPor.toUpperCase() + "%'";
       	}
       	else{
-      		query = "select a.codpro, a.despro as value from ma_product as a " +
-	   				"where codpro like '%" + buscarPor.toUpperCase() + "%'";
+      		/*query = "select a.codpro, a.despro as value from ma_product as a " +
+	   				"where codpro like '%" + buscarPor.toUpperCase() + "%'";*/
+			query = "select a.codpro, a.despro || ' D:' || b.predet || ',M:' || b.premay as value " +
+					   "from ma_product as a, re_lvenpro as b, en_cliente c " +
+					  "where a.codpro = b.codpro " +
+					  "and c.codlis = b.codlis " +
+					  "and c.rutcli = " + $("#txtRutcli").val() + " " +
+				   "and a.codpro like '%" + buscarPor.toUpperCase() + "%'";
       	}
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 

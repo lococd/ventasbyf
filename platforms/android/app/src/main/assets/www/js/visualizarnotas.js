@@ -32,7 +32,7 @@ document.addEventListener('deviceready', function(){
                                                                 descripcion = producto.getElementsByTagName("despro")[0].childNodes[0].nodeValue;
                                                                 precio = producto.getElementsByTagName("prefin")[0].childNodes[0].nodeValue;
                                                                 cantid = producto.getElementsByTagName("cantid")[0].childNodes[0].nodeValue;
-                                                                total = producto.getElementsByTagName("totnet")[0].childNodes[0].nodeValue;;
+                                                                total = producto.getElementsByTagName("totnet")[0].childNodes[0].nodeValue;
                                                                 celdas = celdas + "<tr>" +
                                                                 "<td>" + codpro + "</td>" +
                                                                 "<td>" + descripcion + "</td>" +
