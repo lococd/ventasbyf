@@ -1,4 +1,5 @@
 function visualizarNota(nombreArchivo){
+	//este es el que sirve, nunca pude separar en visualizarnotas.js :c
 	$("#detalleTblNota").empty();
 	try {
 		//agarro el directorio root
@@ -25,9 +26,9 @@ function visualizarNota(nombreArchivo){
 						
 						codpro = producto.getElementsByTagName("codpro")[0].childNodes[0].nodeValue;
 						descripcion = producto.getElementsByTagName("despro")[0].childNodes[0].nodeValue;
-						precio = producto.getElementsByTagName("prefin")[0].childNodes[0].nodeValue;
-						cantid = producto.getElementsByTagName("cantid")[0].childNodes[0].nodeValue;
-						total = producto.getElementsByTagName("totnet")[0].childNodes[0].nodeValue;;
+						precio = Math.round(parseInt(producto.getElementsByTagName("prefin")[0].childNodes[0].nodeValue) * 1.19);
+						cantid = parseInt(producto.getElementsByTagName("cantid")[0].childNodes[0].nodeValue);
+						total = precio * cantid;
 						celdas = celdas + "<tr>" +
 						"<td>" + codpro + "</td>" +
 						"<td>" + descripcion + "</td>" +

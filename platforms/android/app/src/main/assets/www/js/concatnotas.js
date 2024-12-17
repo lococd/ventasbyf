@@ -88,12 +88,16 @@ function concatenaNota(nombreArchivo, xmlDet){
                     let codproDestino = "";
                     let cantidOrigen = 0;
                     let codproOrigen = "";
+                    let precioOrigen = 0;
+                    let nuevoNeto = 0;
                     let sumarCantidades = false;
                     var detalle = xmlDoc.getElementsByTagName("Producto");
                     //variable sources es el array de productos nuevos a ingresar a la nota
                     for(var i = 0; i < sources.snapshotLength; i++) {
                         cantidDestino = 0;
+                        precioOrigen = 0;
                         codproDestino = "";
+                        nuevoNeto = 0;
                         sumarCantidades = false;
                         let node = sources.snapshotItem(i);
                         //consiguiendo productos a ingresar
@@ -104,8 +108,13 @@ function concatenaNota(nombreArchivo, xmlDet){
                             const productoOrigen = detalle[j];
                             codproOrigen = productoOrigen.getElementsByTagName("codpro")[0].childNodes[0].nodeValue;
                             if(codproOrigen == codproDestino){
+                                precioOrigen = parseInt(productoOrigen.getElementsByTagName("prefin")[0].childNodes[0].nodeValue);
                                 cantidOrigen = parseInt(productoOrigen.getElementsByTagName("cantid")[0].childNodes[0].nodeValue);
+                                nuevoNeto = (cantidOrigen + cantidDestino) * precioOrigen;
+                                //actualizamos cantidad
                                 productoOrigen.getElementsByTagName("cantid")[0].childNodes[0].nodeValue = cantidOrigen + cantidDestino;
+                                //actualizamos totalizado
+                                productoOrigen.getElementsByTagName("totnet")[0].childNodes[0].nodeValue = nuevoNeto;
                                 sumarCantidades = true;
                             }
                         }
@@ -114,6 +123,22 @@ function concatenaNota(nombreArchivo, xmlDet){
                             destination.append(n_node);
                         }
                     }
+                    //retotalizamos
+                    var detalle = xmlDoc.getElementsByTagName("Producto");
+                    var totgen = 0;
+                    var totneto = 0;
+                    var totiva = 0;
+                    for (let i = 0; i < detalle.length; i++) {
+                        const producto = detalle[i];
+                        totgen = totgen + parseInt(producto.getElementsByTagName("totnet")[0].childNodes[0].nodeValue);
+                    }
+                    totneto = Math.trunc(totgen / 1.19);
+                    totiva = totgen - totneto;
+                    xmlDoc.getElementsByTagName("subtot")[0].childNodes[0].nodeValue = totgen;
+                    xmlDoc.getElementsByTagName("toneto")[0].childNodes[0].nodeValue = totneto;
+                    xmlDoc.getElementsByTagName("totiva")[0].childNodes[0].nodeValue = totiva;
+                    xmlDoc.getElementsByTagName("totgen")[0].childNodes[0].nodeValue = totgen;
+                    xmlDoc.getElementsByTagName("totsal")[0].childNodes[0].nodeValue = totgen;
                     var strEditado = new XMLSerializer().serializeToString(xmlDoc);
                     fileEntry.createWriter(function(fileWriter){
                         fileWriter.onwriteend = function( result ) {
