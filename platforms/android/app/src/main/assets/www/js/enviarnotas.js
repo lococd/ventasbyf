@@ -26,9 +26,9 @@ function visualizarNota(nombreArchivo){
 						
 						codpro = producto.getElementsByTagName("codpro")[0].childNodes[0].nodeValue;
 						descripcion = producto.getElementsByTagName("despro")[0].childNodes[0].nodeValue;
-						precio = Math.round(parseInt(producto.getElementsByTagName("prefin")[0].childNodes[0].nodeValue) * 1.19);
-						cantid = parseInt(producto.getElementsByTagName("cantid")[0].childNodes[0].nodeValue);
-						total = precio * cantid;
+						precio = producto.getElementsByTagName("prefin")[0].childNodes[0].nodeValue;
+                        cantid = producto.getElementsByTagName("cantid")[0].childNodes[0].nodeValue;
+                        total = producto.getElementsByTagName("totnet")[0].childNodes[0].nodeValue;
 						celdas = celdas + "<tr>" +
 						"<td>" + codpro + "</td>" +
 						"<td>" + descripcion + "</td>" +
@@ -81,7 +81,7 @@ document.addEventListener('deviceready', function(){
 															celdas = "";
 															var parser = new DOMParser();
 															var xmlDoc = parser.parseFromString(this.result,"text/xml");
-															var totneto = xmlDoc.getElementsByTagName("toneto")[0].childNodes[0].nodeValue;
+															var totneto = xmlDoc.getElementsByTagName("totgen")[0].childNodes[0].nodeValue;
 															var razons = xmlDoc.getElementsByTagName("razons")[0].childNodes[0].nodeValue;
 															var fecemi = xmlDoc.getElementsByTagName("fecemi")[0].childNodes[0].nodeValue;
 															celdas = celdas + "<tr><td>" + razons + "</td>" +
