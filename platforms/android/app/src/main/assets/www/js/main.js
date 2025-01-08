@@ -17,6 +17,7 @@ document.addEventListener('deviceready', function(){
 	          var dia = parseInt(fecha.substr(6,2));
 	          var sysdate = new Date();
 	          var fechaVenc = new Date(agno,mes-1,dia);
+	          db.close();
 	          if( fechaVenc > sysdate || user == "FVERGARA"){ //>
 	            alert("¡Nueva base de datos cargada correctamente!");
 	          }
@@ -203,7 +204,8 @@ document.addEventListener('deviceready', function(){
 		if(rutcli.length > 0){
     		var sql = /*"SELECT razons, direccion, lincre, comuna, sum(totsal) b from en_cliente a, en_notavta b" +
     				  "where rutcli =" + rutcli;*/
-    				  "SELECT a.rutcli, a.razons, direccion, lincre - sum(ifnull(totsal,0)) LINCRE, a.comuna " +
+    				  "SELECT a.rutcli, a.razons, direccion, lincre - sum(ifnull(totsal,0)) LINCRE, a.comuna, " +
+					  "sum(ifnull(totsal,0)) as TOTSAL " +
 					  "from en_cliente a " +
 					  "left outer join " +
     				  "en_notavta b " +
@@ -220,12 +222,22 @@ document.addEventListener('deviceready', function(){
         		$("#lblRazons").text(rs.rows.item(0).RAZONS);
 		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
 		    	window.localStorage.setItem("lincre", rs.rows.item(0).LINCRE);
-		    	if(hideModal){
-		    		$("#modalGuardar").modal('hide');
-		    		$("#modalCodpro").modal('toggle');
-		    		$("#modalTxtCodpro").focus();
-		    	}
-		    	
+
+				if(rs.rows.item(0).LINCRE <=0){
+					alert("Cliente sin crédito disponible");
+				}
+
+				if(parseInt(rs.rows.item(0).TOTSAL) > 0){
+					mostrarMensaje("Cliente con deuda pendiente de $"+rs.rows.item(0).TOTSAL);
+					//cargarDeuda();
+				}else{
+					if(hideModal){
+						$("#modalGuardar").modal('hide');
+						$("#modalCodpro").modal('toggle');
+						$("#modalTxtCodpro").focus();
+					}
+				}
+				
 		    }
 		  }, function(error) {
 		    alert('Error en la consulta: ' + error.message);
@@ -262,112 +274,121 @@ document.addEventListener('deviceready', function(){
 	};
 
 	function grabaXML(rutcli,numnvt,vendedor,observ,xmlDet){
-		var subtot = totalizaNota();
-		var totneto;
-		var totiva;
-		var totgen;
-		var dscto;
-		var xmlCab = "";
-		var totDescuentos = getDescuentos();
-		var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
-					"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02, b.facturable "+
-					"from ma_usuario as a, en_cliente as b, de_dominio as c,de_dominio as d " +
-					"where b.forpag = c.codval " +
-					"and c.coddom = 5 " +
-					"and b.plapag = d.codval " +
-					"and d.coddom = 6 " +
-	   				"and a.codusu = '" + vendedor + "' " +
-	   				"and b.rutcli = " + rutcli;
-	   	window.sqlitePlugin.importPrepopulatedDatabase({file: "envios.db", "importIfExists": false});
-      	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-		db.transaction(function(tx){
-			tx.executeSql(query, [], function(tx,rs) {
-			    if(rs.rows.length == 0){
-			    	alert("Cliente no configurado");
-			    }
-			    else{
-			    	totgen = subtot - totDescuentos;
-			    	totneto = Math.trunc(totgen / 1.19); //- (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
-			    	totiva = totgen - totneto;
-			    	
-			    	dscto = 0;
-			    	if($("#txtDescuento").val() != ""){
-			    		dscto = $("#txtDescuento").val();
-			    	}
-			    	var fecemi = getAgno().toString() + getMes().toString() + getDia().toString();
-			    	xmlCab = "<numnvt>" + numnvt +"</numnvt>" + String.fromCharCode(13) +
-			    			 "<codven>" + rs.rows.item(0).CODVEN +"</codven>" + String.fromCharCode(13) +
-			    			 "<fecemi>" + fecemi +"</fecemi>" + String.fromCharCode(13) +
-			    			 "<vendedor>" + vendedor +"</vendedor>" + String.fromCharCode(13) +
-			    			 "<rutcli>" + rutcli +"</rutcli>" + String.fromCharCode(13) +
-			    			 "<razons>" + rs.rows.item(0).RAZONS + "</razons>" + String.fromCharCode(13) +
-			    			 "<direcc>" + rs.rows.item(0).DIRECC + "</direcc>" + String.fromCharCode(13) +
-			    			 "<comuna>" + rs.rows.item(0).COMUNA + "</comuna>" + String.fromCharCode(13) +
-			    			 "<ciudad>" + rs.rows.item(0).CIUDAD + "</ciudad>" + String.fromCharCode(13) +
-			    			 "<forpag>" + rs.rows.item(0).FORPAG + "</forpag>" + String.fromCharCode(13) +
-			    			 "<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
-			    			 "<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
-			    			 "<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
-			    			 "<dscto1>" + totDescuentos + "</dscto1>" + String.fromCharCode(13) +
-			    			 "<dscto2>0</dscto2>" + String.fromCharCode(13) +
-			    			 "<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
-			    			 "<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
-			    			 "<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
-			    			 "<totsal>" + totgen +"</totsal>" + String.fromCharCode(13) +
-			      			 "<numbul>0</numbul>" + String.fromCharCode(13)+
-				             "<codban>30</codban>" + String.fromCharCode(13) +
-				             "<origen>REM</origen>" + String.fromCharCode(13) +
-				             "<estado>0</estado>" + String.fromCharCode(13) +
-				             "<pagada>0</pagada>" + String.fromCharCode(13)+
-				             //"<factura>N</factura>" + String.fromCharCode(13)+
-				             "<observ>"+ observ + "</observ>" + String.fromCharCode(13)+
-				             "<factura>" + $("#cmbFacturable option:selected").text() + "</factura>" + String.fromCharCode(13);
-
-				            var xmlText = '<?xml version="1.0" encoding="utf-8"?>' + String.fromCharCode(13) +
-							  "<Pedidos>" + String.fromCharCode(13) +
-							  	"<NotaVenta>" + String.fromCharCode(13) +
-							  		"<Cabecera>" + String.fromCharCode(13) +
-							  			xmlCab +
-							  		"</Cabecera>" + String.fromCharCode(13) +
-							  		"<Detalle>" + String.fromCharCode(13)+
-							  			xmlDet+
-							  		"</Detalle>" + String.fromCharCode(13) +
-							  	"</NotaVenta>" + String.fromCharCode(13) +
-							  "</Pedidos>";
-
-							window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory+"/nvt", function( directoryEntry ) {
-								var sysdate = new Date();
-								var mes = sysdate.getMonth() + 1;
-								var fechasalida = (sysdate.getYear() + 1900).toString() + getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString() + sysdate.getSeconds().toString();
-							    directoryEntry.getFile(fechasalida + window.localStorage.getItem("user") + numnvt + ".xml", { create: true }, function( fileEntry ) {
-							        fileEntry.createWriter( function( fileWriter ) {
-							            fileWriter.onwriteend = function( result ) {
-							            	alert( 'Nota de venta grabada con éxito! Numero '+ numnvt );
-
-							            };
-							            fileWriter.onerror = function( error ) {
-							                alert( JSON.stringify(error) );
-							            };
-							            fileWriter.write( xmlText );
-							        }, function( error ) { alert( error ); } );
-							    }, function( error ) { alert( error ); } );
-							}, function( error ) { alert( error ); } );
-
-
-
-				}
+		getNotaActual(rutcli).then(function(nombreArchivo){
+			if(nombreArchivo){
+				concatenaNota(nombreArchivo, xmlDet);
+				limpiar();
 			}
-			,function(error) {
-				alert('Error en la consulta: ' + error.message);
-			});
-        },
-	   	function(err){
-		alert('Error almacenamiento' + err.message);
-	   	},
-	   	function(){
-			window.localStorage.setItem("numnvt",numnvt + 1);
-			limpiar();
-        });	
+			else{
+				var subtot = totalizaNota();
+				var totneto;
+				var totiva;
+				var totgen;
+				var dscto;
+				var xmlCab = "";
+				var totDescuentos = getDescuentos();
+				var query = "select a.rutusu as CODVEN, b.razons, b.direccion as DIRECC,"+
+							"b.comuna, b.ciudad,c.desval as FORPAG,d.desval as PLAPAG,b.codlis, 0 as DESCTO01, 0 as DESCTO02, b.facturable "+
+							"from ma_usuario as a, en_cliente as b, de_dominio as c,de_dominio as d " +
+							"where b.forpag = c.codval " +
+							"and c.coddom = 5 " +
+							"and b.plapag = d.codval " +
+							"and d.coddom = 6 " +
+							"and a.codusu = '" + vendedor + "' " +
+							"and b.rutcli = " + rutcli;
+				window.sqlitePlugin.importPrepopulatedDatabase({file: "envios.db", "importIfExists": false});
+				var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+				db.transaction(function(tx){
+					tx.executeSql(query, [], function(tx,rs) {
+						if(rs.rows.length == 0){
+							alert("Cliente no configurado");
+						}
+						else{
+							totgen = subtot - totDescuentos;
+							totneto = Math.trunc(totgen / 1.19); //- (subtot * parseInt(rs.rows.item(0).DESCTO01)) - (subtot * parseInt(rs.rows.item(0).DESCTO02));
+							totiva = totgen - totneto;
+							
+							dscto = 0;
+							if($("#txtDescuento").val() != ""){
+								dscto = $("#txtDescuento").val();
+							}
+							var fecemi = getAgno().toString() + getMes().toString() + getDia().toString();
+							xmlCab = "<numnvt>" + numnvt +"</numnvt>" + String.fromCharCode(13) +
+									"<codven>" + rs.rows.item(0).CODVEN +"</codven>" + String.fromCharCode(13) +
+									"<fecemi>" + fecemi +"</fecemi>" + String.fromCharCode(13) +
+									"<vendedor>" + vendedor +"</vendedor>" + String.fromCharCode(13) +
+									"<rutcli>" + rutcli +"</rutcli>" + String.fromCharCode(13) +
+									"<razons>" + rs.rows.item(0).RAZONS + "</razons>" + String.fromCharCode(13) +
+									"<direcc>" + rs.rows.item(0).DIRECC + "</direcc>" + String.fromCharCode(13) +
+									"<comuna>" + rs.rows.item(0).COMUNA + "</comuna>" + String.fromCharCode(13) +
+									"<ciudad>" + rs.rows.item(0).CIUDAD + "</ciudad>" + String.fromCharCode(13) +
+									"<forpag>" + rs.rows.item(0).FORPAG + "</forpag>" + String.fromCharCode(13) +
+									"<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
+									"<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
+									"<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
+									"<dscto1>" + totDescuentos + "</dscto1>" + String.fromCharCode(13) +
+									"<dscto2>0</dscto2>" + String.fromCharCode(13) +
+									"<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
+									"<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
+									"<totgen>" + totgen +"</totgen>" + String.fromCharCode(13) +
+									"<totsal>" + totgen +"</totsal>" + String.fromCharCode(13) +
+									"<numbul>0</numbul>" + String.fromCharCode(13)+
+									"<codban>30</codban>" + String.fromCharCode(13) +
+									"<origen>REM</origen>" + String.fromCharCode(13) +
+									"<estado>0</estado>" + String.fromCharCode(13) +
+									"<pagada>0</pagada>" + String.fromCharCode(13)+
+									//"<factura>N</factura>" + String.fromCharCode(13)+
+									"<observ>"+ observ + "</observ>" + String.fromCharCode(13)+
+									"<factura>" + $("#cmbFacturable option:selected").text() + "</factura>" + String.fromCharCode(13);
+
+									var xmlText = '<?xml version="1.0" encoding="utf-8"?>' + String.fromCharCode(13) +
+									"<Pedidos>" + String.fromCharCode(13) +
+										"<NotaVenta>" + String.fromCharCode(13) +
+											"<Cabecera>" + String.fromCharCode(13) +
+												xmlCab +
+											"</Cabecera>" + String.fromCharCode(13) +
+											"<Detalle>" + String.fromCharCode(13)+
+												xmlDet+
+											"</Detalle>" + String.fromCharCode(13) +
+										"</NotaVenta>" + String.fromCharCode(13) +
+									"</Pedidos>";
+
+									window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory+"/nvt", function( directoryEntry ) {
+										var sysdate = new Date();
+										var mes = sysdate.getMonth() + 1;
+										var fechasalida = (sysdate.getYear() + 1900).toString() + getMes() + getDia() + sysdate.getHours().toString() + sysdate.getMinutes().toString() + sysdate.getSeconds().toString();
+										directoryEntry.getFile(fechasalida + window.localStorage.getItem("user") + numnvt + ".xml", { create: true }, function( fileEntry ) {
+											fileEntry.createWriter( function( fileWriter ) {
+												fileWriter.onwriteend = function( result ) {
+													alert( 'Nota de venta grabada con éxito! Numero '+ numnvt );
+
+												};
+												fileWriter.onerror = function( error ) {
+													alert( JSON.stringify(error) );
+												};
+												fileWriter.write( xmlText );
+											}, function( error ) { alert( error ); } );
+										}, function( error ) { alert( error ); } );
+									}, function( error ) { alert( error ); } );
+
+
+
+						}
+					}
+					,function(error) {
+						alert('Error en la consulta: ' + error.message);
+					});
+				},
+				function(err){
+				alert('Error almacenamiento' + err.message);
+				},
+				function(){
+					window.localStorage.setItem("numnvt",numnvt + 1);
+					limpiar();
+				});	
+			}
+		});
+		
 	}
 
 	function getDetalle(productos){
@@ -437,7 +458,7 @@ document.addEventListener('deviceready', function(){
 	   var query = "select a.codpro, a.despro, a.costo, b.predet, b.multip, a.catpro, b.canmay,b.premay, a.factur " +
 	   		 		"from ma_product as a, re_lvenpro as b, en_cliente c " +
 	   				"where a.codpro = b.codpro " +
-	   				"and c.lispre = b.codlis " +
+	   				"and c.codlis = b.codlis " +
 	   				"and c.rutcli = " + $("#txtRutcli").val() + " " +
 	   				"and a.codpro = '" + codpro + "'";
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
@@ -535,7 +556,8 @@ document.addEventListener('deviceready', function(){
 		db.executeSql(query, [], function(rs) {
 		    if(rs.rows.length == 0){
 		    	//alert("no items");
-		      return false;
+		    	db.close();
+		      	return false;
 		    }
 		    else{
 		    	var fila;
@@ -549,9 +571,11 @@ document.addEventListener('deviceready', function(){
 				db.executeSql(query, [], function(rs) {
 				    if(rs.rows.length == 0){
 				    	//alert("no items");
-				      return false;
+				    	db.close();
+				      	return false;
 				    }
 				    else{
+				    	db.close();
 				    	/*for (i=0; i<rs.rows.length; ++i){
 				    		fila = "<option>" + rs.rows.item(i).DESVAL + "</option>";
 				    		$("#cmbNewComuna").append(fila);
@@ -581,6 +605,8 @@ document.addEventListener('deviceready', function(){
     	$("#txtDescuento").val("");
     	$("#lblRazons").text("");
     	$('#cmbFacturable').val("S");
+    	$("#btnCabecera").text("Nueva nota de venta");
+    	$("#btnCerrarModallpr2").show();
     	window.localStorage.setItem("lincre", 0);
     	limpiarModal();
 		getNumnvt();
@@ -639,6 +665,13 @@ document.addEventListener('deviceready', function(){
 
 	//eventos de botones
 	function buscarProducto(){
+		var nombreCliente = $("#nombreCliente").text();
+		if(nombreCliente.length == 0){
+			alert("Debe ingresar datos de cliente para nueva nota");
+			$("#modalCodpro").modal("hide");
+			$("#modalGuardar").modal("show");
+			return false;
+		}
 		var txtPro =  $("#txtPro").val();
 		var txtCantid =  $("#txtCantid").val();
 	    if(txtPro!=''){
@@ -663,7 +696,11 @@ document.addEventListener('deviceready', function(){
 		limpiarModal();
 	});
 
-	$("#btnGuardar").click(function(e){
+	$(".btnGuardar").click(function(e){
+		confirmarGuardado();
+	});
+
+	$(".btnCabecera").click(function(e){
 		cargarModalGuardar();
 	});
 
@@ -673,7 +710,13 @@ document.addEventListener('deviceready', function(){
 		window.localStorage.removeItem("user");
 		window.localStorage.removeItem("password");
 		window.localStorage.removeItem("descuento");
-		window.location.replace("index.html");
+		$("#modalCargando").modal("toggle");
+		setTimeout(function(){
+			var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+			db.close();
+			$("#modalCargando").modal("toggle");
+			window.location.replace("index.html");
+		  },2000);
 		//navigator.app.loadUrl("file:///android_asset/www/index.html");
 	});
 
@@ -745,6 +788,11 @@ document.addEventListener('deviceready', function(){
 					}
 					$("#tblProd").append(tr);
 					$("#btnConfirmarGuardado").removeClass("disabled");
+					//se cambia el boton nueva nota de venta por cambiar datos de nota
+					var productos = $("#tblProd >tbody >tr");
+					if(productos.length == 1){
+						$("#btnCabecera").text("Editar Datos de Nota");
+					}
 					limpiarModal();
 					$("#totalNota").text("Total nota:$"+totalizaNota());
 					$("#totalNota2").text("Total nota:$"+totalizaNota());
@@ -756,7 +804,8 @@ document.addEventListener('deviceready', function(){
 		}
 	});
 
-	$("#btnConfirmarGuardado").click(function(e){
+
+	function confirmarGuardado(){
 		var rutcli = $("#txtRutcli").val();
 		var productos = $("#tblProd >tbody >tr");
 		if(!validaDescuento()){
@@ -769,7 +818,8 @@ document.addEventListener('deviceready', function(){
 				alert("Total excede credito");
 				return false;
 			}
-			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Descuentos $" + getDescuentos() + ", Cliente:"+nombreCliente)){
+			if (confirm("¿Desea grabar Nota de Venta? Subtotal:$" + totalizaNota() + ", Descuentos $" + getDescuentos() + 
+				", Total neto: $"+ (totalizaNota() - getDescuentos()) +",Cliente:"+nombreCliente)){
 			    var xmlDet = getDetalle(productos);
 				var numnvt = parseInt($("#lblTituloLpr").text());
 				var vendedor = window.localStorage.getItem("user");
@@ -781,12 +831,25 @@ document.addEventListener('deviceready', function(){
 		}
 		else{
 			alert("Debe ingresar rut y al menos un producto");
-			return;
+			return false;
 		}
+	}
+
+	function iniciarNota(){
+		if(!validaDescuento()){
+  			return false;
+  		}
+  		else{
+  			buscarClienteModal($("#txtRutcli").val(), true);
+  		}
+	}
+
+	$("#btnConfirmarGuardado").click(function(e){
+		
 	});
 
 
-    $("#txtRutcli" ).autocomplete({
+    $("#txtRutcli").autocomplete({
       source: function( request, response ) {
       	var buscarPor = request.term;
       	var query = "";
@@ -812,6 +875,9 @@ document.addEventListener('deviceready', function(){
 			        data.push(rs.rows.item(i));
 			        //alert(JSON.stringify(rs.rows.item(i)));
 			    }
+				if(db !== undefined && db !== null){
+					db.close();
+				}
 	      		response(data);
 		    }
 		  }, function(error) {
@@ -834,12 +900,24 @@ document.addEventListener('deviceready', function(){
       	var buscarPor = request.term;
       	var query = "";
       	if (!$.isNumeric(buscarPor)){
-      		query = "select a.codpro, a.despro as value from ma_product as a " +
-	   				"where upper(a.despro) like '%" + buscarPor.toUpperCase() + "%'";
+      		/*query = "select a.codpro, a.despro as value from ma_product as a " +
+	   				"where upper(a.despro) like '%" + buscarPor.toUpperCase() + "%'";*/
+			query = "select a.codpro, a.despro || ' D:' || b.predet || ',M:' || b.premay as value " +
+	   		 		"from ma_product as a, re_lvenpro as b, en_cliente c " +
+	   				"where a.codpro = b.codpro " +
+	   				"and c.codlis = b.codlis " +
+	   				"and c.rutcli = " + $("#txtRutcli").val() + " " +
+					"and upper(a.despro) like '%" + buscarPor.toUpperCase() + "%'";
       	}
       	else{
-      		query = "select a.codpro, a.despro as value from ma_product as a " +
-	   				"where codpro like '%" + buscarPor.toUpperCase() + "%'";
+      		/*query = "select a.codpro, a.despro as value from ma_product as a " +
+	   				"where codpro like '%" + buscarPor.toUpperCase() + "%'";*/
+			query = "select a.codpro, a.despro || ' D:' || b.predet || ',M:' || b.premay as value " +
+					   "from ma_product as a, re_lvenpro as b, en_cliente c " +
+					  "where a.codpro = b.codpro " +
+					  "and c.codlis = b.codlis " +
+					  "and c.rutcli = " + $("#txtRutcli").val() + " " +
+				   "and a.codpro like '%" + buscarPor.toUpperCase() + "%'";
       	}
       	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
@@ -853,6 +931,9 @@ document.addEventListener('deviceready', function(){
 			    for (i=0; i<rs.rows.length; ++i){
 			        data.push(rs.rows.item(i));
 			    }
+				if(db !== undefined && db !== null){
+					db.close();
+				}
 	      		response(data);
 		    }
 		  }, function(error) {
@@ -894,6 +975,9 @@ document.addEventListener('deviceready', function(){
 			    for (i=0; i<rs.rows.length; ++i){
 			        data.push(rs.rows.item(i));
 			    }
+				if(db !== undefined && db !== null){
+					db.close();
+				}
 	      		response(data);
 		    }
 		  }, function(error) {
@@ -932,6 +1016,9 @@ document.addEventListener('deviceready', function(){
 			    for (i=0; i<rs.rows.length; ++i){
 			        data.push(rs.rows.item(i));
 			    }
+				if(db !== undefined && db !== null){
+					db.close();
+				}
 	      		response(data);
 		    }
 		  }, function(error) {
@@ -947,12 +1034,7 @@ document.addEventListener('deviceready', function(){
     });
 
     $("#btnCerrarModallpr2").click(function(){
-  		if(!validaDescuento()){
-  			return false;
-  		}
-  		else{
-  			buscarClienteModal($("#txtRutcli").val(), true);
-  		}
+
     });
 
 	$("#btnZip").click(function(e){
@@ -1204,13 +1286,10 @@ document.addEventListener('deviceready', function(){
 			$("#txtNewDireccion").focus();
 			return false;
 		}
-
-
 		//valido que rut no exista
 		var sql = "SELECT razons, direccion, comuna from en_cliente " +
-    				  "where rutcli =" + $("#txtNewRut").val();
+    				  "where rutcli = " + $("#txtNewRut").val();
     	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-
 		db.executeSql(sql, [], function(rs){
 		    if(rs.rows.length > 0){
 		      alert("Rut existe");
@@ -1220,9 +1299,8 @@ document.addEventListener('deviceready', function(){
 				//valido que el giro ingresado exista
 				var sql = "SELECT desval from de_dominio " +
 							  "where coddom = 8 " +
-		    				  "and desval ='" + $("#cmbNewGiro").val() + "'";
+		    				  "and desval = '" + $("#cmbNewGiro").val() + "'";
 		    	var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
-
 				db.executeSql(sql, [], function(rs){
 				    if(rs.rows.length == 0){
 				      alert("Giro no existe");
@@ -1231,8 +1309,9 @@ document.addEventListener('deviceready', function(){
 					else{
 						//inserto cliente
 						var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
-														   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, LISPRE) " +
-														   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1)";
+														   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, LISPRE, CODLIS, LINCRE) " +
+														   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1,1, (select codref from de_dominio " +
+															"where coddom = 4))";
 						db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
 						var dv = $("#txtNewDV").val();
@@ -1290,6 +1369,22 @@ document.addEventListener('deviceready', function(){
 	$("#btnCancelarCliente").click(function(e){
 		limpiarFicha();
 	})
+
+	$("#btnProductos").click(function(e){
+		iniciarNota();
+	});
+
+	$("#btnCerrarMensaje").click(function(e){
+		$("#modalMensaje").modal("hide");
+		$("#modalGuardar").modal('hide');
+		$("#modalCodpro").modal('toggle');
+		$("#modalTxtCodpro").focus();
+	});
+
+	function mostrarMensaje(mensaje){
+		$("#modalMensaje").modal("show");
+		$("#lblMensaje").text(mensaje);
+	}
 
 	$(document).on('click','.eliminarFila',function() {
     	var cid = $(this).data('codpro');

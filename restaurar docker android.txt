@@ -1,0 +1,3 @@
+docker run --name cordova-build --mount type=bind,source=/mnt/c/dev/ventasbyf,target=/src -it beevelop/cordova bash
+luego, dentro de la consola
+yes | sdkmanager "build-tools;32.0.0"

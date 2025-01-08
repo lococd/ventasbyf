@@ -1,37 +1,38 @@
 function deleteNvts(){
   //agarro el directorio root
-  window.resolveLocalFileSystemURL( cordova.file.externalRootDirectory, function( directoryEntry ) {
-    directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
-      // tomo un lector del directorio
-      var directoryReader = dir.createReader();
+  window.resolveLocalFileSystemURL( cordova.file.externalDataDirectory, function( directoryEntry ) {
+      directoryEntry.getDirectory("nvt", {create: false, exclusive: false}, function(dir) {  //tomo el directorio root/nvt
+        // tomo un lector del directorio
+        var directoryReader = dir.createReader();
+        // listo todos los ficheros
+        directoryReader.readEntries(function(entries) {
+          var i;
+          var nombreArchivo = "";
+          var celdas = "";
+          for (i=0; i<entries.length; i++) {
 
-      // listo todos los ficheros
-      directoryReader.readEntries(function(entries) {
-                                      var i;
-                                      for (i=0; i<entries.length; i++) {
-                                          //tomo archivo por archivo
-                                          dir.getFile(entries[i].name, {create:false}, function(fileEntry) {
-                                                      //y borro el archivo
-                                                      fileEntry.remove(function(){
-                                                          //alert("archivo removido!");
-                                                      },function(error){
-                                                          alert("Problemas al borrar");
-                                                      },function(){
-                                                         alert("Archivo no existe");
-                                                      });
-                                          });
-                                      }
-                                  }
-      ,function fail(error) {
-        alert("Failed to list directory contents: " + error.code);
+            nombreArchivo = entries[i].name;
+            window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "nvt/" + nombreArchivo,
+              gotFile, fail);
+            function gotFile(fileEntry) {
+              fileEntry.remove(function(file) {
+              }, function(error){
+                alert("error deleting "+ error.message);
+              });
+            }
+            function fail(e) {
+              alert("FileSystem Error" + e.message);
+            }
+          }
+        }
+        ,function fail(error) {
+          alert("Failed to list directory contents: " + error.code);
+        });
+      },
+      function(error) { 
+        alert("Error "+error.code); 
+      });
     });
-
-    },
-    function(error) { 
-      //descomentar para debug
-      //alert("Error "+error.code); 
-    });
-  });
 }
 
 function getBase(fromMain){
@@ -50,10 +51,12 @@ function getBase(fromMain){
 
       function bajarBase(fromMain){
         try {
+           
            cordova.plugin.ftp.connect("ftp.byf.cl","app@byf.cl","ventasbyf_",
             function(result){
               cordova.plugin.ftp.download(cordova.file.externalDataDirectory + "/envios.db","/dbtest.db",function(percent){
                   if(percent == 1){
+                    deleteNvts();
                     window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "/envios.db",
                     function(fileDB){
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
@@ -64,7 +67,7 @@ function getBase(fromMain){
                                         fileDB.copyTo(dirDB, 'envios.db',
                                         function(){
                                             window.localStorage.setItem("numnvt", 1);
-                                            deleteNvts();
+                                            
                                             if(fromMain == "main"){
                                               alert("¡Base de datos cargada correctamente! Se reiniciará la aplicación");
                                               $("#modalDescargarBD").modal("hide");
