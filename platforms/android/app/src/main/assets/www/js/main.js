@@ -319,9 +319,9 @@ document.addEventListener('deviceready', function(){
 									"<vendedor>" + vendedor +"</vendedor>" + String.fromCharCode(13) +
 									"<rutcli>" + rutcli +"</rutcli>" + String.fromCharCode(13) +
 									"<razons>" + rs.rows.item(0).RAZONS + "</razons>" + String.fromCharCode(13) +
-									"<direcc>" + rs.rows.item(0).DIRECC + "</direcc>" + String.fromCharCode(13) +
-									"<comuna>" + rs.rows.item(0).COMUNA + "</comuna>" + String.fromCharCode(13) +
-									"<ciudad>" + rs.rows.item(0).CIUDAD + "</ciudad>" + String.fromCharCode(13) +
+									"<direcc>" + $("#cmbDireccion option:selected").text() + "</direcc>" + String.fromCharCode(13) +
+									"<comuna>" + $("#cmbDireccion option:selected").data("comuna") + "</comuna>" + String.fromCharCode(13) +
+									"<ciudad>" + $("#cmbDireccion option:selected").data("ciudad") + "</ciudad>" + String.fromCharCode(13) +
 									"<forpag>" + rs.rows.item(0).FORPAG + "</forpag>" + String.fromCharCode(13) +
 									"<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
 									"<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
@@ -550,6 +550,31 @@ document.addEventListener('deviceready', function(){
 	  });
 	};
 	
+	function cargarComboDirecciones(rutcli){
+		$("#cmbDireccion").empty();
+		var query = "SELECT a.rutcli, a.razons, b.direccion, b.comuna, b.ciudad " +
+					"FROM en_cliente a, re_ddescli b " +
+					"WHERE a.rutcli = b.rutcli " +
+					"AND a.rutcli = " + rutcli;
+		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+		db.executeSql(query, [], function(rs) {
+		    if(rs.rows.length == 0){
+		    	alert("Rut inválido");
+		    	db.close();
+		      	return false;
+		    }
+		    else{
+		    	db.close();
+		    	//alert(JSON.stringify(rs));
+		    	for (i=0; i<rs.rows.length; ++i){
+		    		fila = '<option data-comuna="' + rs.rows.item(i).comuna + '" data-ciudad="'+ rs.rows.item(i).ciudad + '">' + rs.rows.item(i).direccion + "</option>";
+		    		$("#cmbDireccion").append(fila);
+			    }
+		    }
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+	}
 	function cargarCombos(){
 		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 		var query = "SELECT DESVAL FROM DE_DOMINIO WHERE CODDOM = 1 ORDER BY DESVAL ASC";
@@ -804,6 +829,13 @@ document.addEventListener('deviceready', function(){
 		}
 	});
 
+	$("#txtRutcli").change(function(e){
+		var rutcli = $("#txtRutcli").val();
+
+		if(rutcli.length > 0){
+			cargarComboDirecciones(rutcli);
+		}
+	});
 
 	function confirmarGuardado(){
 		var rutcli = $("#txtRutcli").val();
@@ -993,6 +1025,52 @@ document.addEventListener('deviceready', function(){
       }
     });
 
+	$("#cmbComunaNueva").autocomplete({
+		source: function( request, response ) {
+			var buscarPor = request.term;
+			var query = "";
+			query = `select a.desval as value, b.desval as ciudad
+				  from de_dominio a,
+				  de_dominio b
+				  where a.codref = b.codval
+				  and a.coddom = 2
+				  and b.coddom = 1
+					 and upper(a.desval) like '%` + buscarPor.toUpperCase() + `%'`;
+  
+			var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+  
+			db.executeSql(query, [], function(rs) {
+				if(rs.rows.length == 0){
+					if(db !== undefined && db !== null){
+						db.close();
+					}
+					//alert("no items");
+					return false;
+				}
+				else{
+					
+					var data = [];
+					for (i=0; i<rs.rows.length; ++i){
+						data.push(rs.rows.item(i));
+					}
+					if(db !== undefined && db !== null){
+						db.close();
+					}
+						response(data);
+				}
+				}, function(error) {
+				alert('Error en la consulta: ' + error.message);
+				});
+			
+		},
+		minLength: 4,
+		select: function( event, ui ) {
+		  $("#cmbComunaNueva").val(ui.item.value);
+		  $("#cmbCiudadNueva").val(ui.item.ciudad);
+		  return false;
+		}
+	  });
+
 
     $("#cmbNewGiro").autocomplete({
       source: function( request, response ) {
@@ -1072,6 +1150,52 @@ document.addEventListener('deviceready', function(){
 			return false;
 		}
 	});
+
+	$("#btnCerrarNuevaDireccion").click(function(e){
+		$("#modalNuevaDireccion").modal("hide");
+	});
+
+	$("#btnNuevaDireccion").click(function(e){
+		var rutcli = $("#txtRutcli").val();
+		if(rutcli.length == 0){
+			alert("Ingrese rut cliente");
+			return false;
+		}
+		$("#modalNuevaDireccion").modal("show");
+	});
+
+	$("#btnGrabarNuevaDireccion").click(function(e){
+		var rutcli = $("#txtRutcli").val();
+		var direccion = $("#txtDireccionNueva").val();
+		var comuna = $("#cmbComunaNueva").val();
+		var ciudad = $("#cmbCiudadNueva").val();
+		grabarNuevaDireccion(rutcli,direccion,comuna,ciudad);
+		$("#modalNuevaDireccion").modal("hide");
+		$("#modalCargando").modal("show");
+		setTimeout(function(){
+			cargarComboDirecciones(rutcli);
+			$("#modalCargando").modal("hide");
+		}, 1000);
+		limpiarNuevaDireccion();
+	});
+
+	function limpiarNuevaDireccion(){
+		$("#txtNewDireccion").val("");
+		$("#cmbComunaNueva").val("");
+		$("#cmbCiudadNueva").val("");
+	}
+
+	function grabarNuevaDireccion(rutcli,direccion,comuna,ciudad){
+		var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+		var query = "INSERT INTO re_ddescli (rutcli, direccion, comuna, ciudad, principal, estado) VALUES (?, ?, ?, ?, 'N', 0)";
+		db.executeSql(query, [rutcli, direccion, comuna, ciudad], function(rs) {
+			db.close();
+			alert("Dirección grabada correctamente");
+			return true;
+		  }, function(error) {
+		    alert('Error en la consulta: ' + error.message);
+		  });
+	}
 
 	function moveNotasEnviadas(){
 		var pathDestino = cordova.file.externalDataDirectory+"nvtEnviadas";
@@ -1328,11 +1452,20 @@ document.addEventListener('deviceready', function(){
 						      return false;
 						    }
 						    else{
-						    	alert("Cliente Ingresado");
-						    	$("#txtRutcli").val($("#txtNewRut").val());
-						    	limpiarFicha();
-						    	$('#btnCancelarCliente').trigger("click");
-						    	buscarClienteModal($("#txtRutcli").val(), false);
+								var query = "INSERT INTO re_ddescli (rutcli, direccion, comuna, ciudad, principal, estado) VALUES (?, ?, ?, ?, 'S', 0)";
+								db.executeSql(query, [$("#txtNewRut").val(), $("#txtNewDireccion").val(), $("#cmbNewComuna").val(), $("#cmbNewCiudad").val()], function(rs) {
+									if (rs.rowsAffected > 0) {
+										alert("Cliente Ingresado");
+										$("#txtRutcli").val($("#txtNewRut").val());
+										limpiarFicha();
+										$('#btnCancelarCliente').trigger("click");
+										buscarClienteModal($("#txtRutcli").val(), false);
+									} else {
+										alert("Failed to insert record into re_ddescli");
+									}
+								}, function(error) {
+									alert('Error inserting into re_ddescli: ' + error.message);
+								});
 						    }
 						  }, function(error) {
 						    alert('Error en la consulta: ' + error.message);
@@ -1372,6 +1505,20 @@ document.addEventListener('deviceready', function(){
 
 	$("#btnProductos").click(function(e){
 		iniciarNota();
+	});
+
+	$("#btnVerMapa").click(function(e){
+		var direccion = $("#cmbDireccion option:selected").text();
+		if(direccion == ""){
+			alert("Seleccione dirección de despacho para ver mapa");
+			return false;
+		}
+		$("#modalMapa").modal("show");
+		inicializarMapa(direccion);
+	});
+
+	$("#btnCerrarMapa").click(function(e){
+		$("#modalMapa").modal("hide");
 	});
 
 	$("#btnCerrarMensaje").click(function(e){

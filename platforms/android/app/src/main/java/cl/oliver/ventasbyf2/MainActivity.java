@@ -17,7 +17,7 @@
        under the License.
  */
 
-package cl.oliver.ventasbyf;
+package cl.oliver.ventasbyf2;
 
 import android.os.Bundle;
 
