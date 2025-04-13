@@ -46,4 +46,6 @@
     <preference name="android-build-tool" value="gradle" />
     <preference name="AndroidPersistentFileLocation" value="Compatibility" />
     <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,root" />
+    <preference name="GOOGLE_MAPS_ANDROID_API_KEY" value="AIzaSyBn68EL8wFjvBhngKLbYRgtvG2ABvM0drw" />
+    <preference name="GOOGLE_MAPS_IOS_API_KEY" value="AIzaSyBn68EL8wFjvBhngKLbYRgtvG2ABvM0drw" />
 </widget>

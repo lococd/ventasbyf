@@ -1514,7 +1514,9 @@ document.addEventListener('deviceready', function(){
 			return false;
 		}
 		$("#modalMapa").modal("show");
-		inicializarMapa(direccion);
+		setInterval(function(){
+			inicializarMapa(direccion);
+		}, 1000);
 	});
 
 	$("#btnCerrarMapa").click(function(e){

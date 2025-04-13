@@ -11,7 +11,7 @@
         <script type="text/javascript" src="js/jquery.js"></script>
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
         <script type="text/javascript" src="js/jquery-ui.js"></script>
-        <script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyBn68EL8wFjvBhngKLbYRgtvG2ABvM0drw"></script>
+        <!--script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyBn68EL8wFjvBhngKLbYRgtvG2ABvM0drw"></script-->
         <script type="text/javascript" src="js/cargabase.js"></script>
         <script type="text/javascript" src="js/enviarnotas.js"></script>
         <script type="text/javascript" src="js/concatnotas.js"></script>
@@ -524,8 +524,11 @@
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-content"></div>
-              <div id="map_canvas" class="mapa"></div>
-              <div id="contgeo"></div>
+              <div style="max-width:100%;list-style:none; transition: none;overflow:hidden;width:500px;height:500px;">
+                <div id="g-mapdisplay" style="height:100%; width:100%;max-width:100%;">
+                  <iframe defer id="iframe-mapa" loading="lazy" style="height:100%;width:100%;border:0;" frameborder="0" src="https://maps.google.cl"></iframe>
+                </div>
+                <style>#g-mapdisplay img{max-height:none;max-width:none!important;background:none!important;}</style></div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" id="btnCerrarMapa">Cerrar</button>
               </div>

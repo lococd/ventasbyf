@@ -30,4 +30,6 @@
     <plugin name="cordova-plugin-ftp" spec="^1.2.1" />
     <plugin name="cordova-plugin-x-socialsharing-android12" spec="^6.0.5" />
     <engine name="android" spec="^11.0.0" />
+    <preference name="GOOGLE_MAPS_ANDROID_API_KEY" value="AIzaSyBn68EL8wFjvBhngKLbYRgtvG2ABvM0drw" />
+    <preference name="GOOGLE_MAPS_IOS_API_KEY" value="AIzaSyBn68EL8wFjvBhngKLbYRgtvG2ABvM0drw" />
 </widget>
