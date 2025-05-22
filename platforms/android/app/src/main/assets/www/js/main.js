@@ -318,7 +318,7 @@ document.addEventListener('deviceready', function(){
 									"<fecemi>" + fecemi +"</fecemi>" + String.fromCharCode(13) +
 									"<vendedor>" + vendedor +"</vendedor>" + String.fromCharCode(13) +
 									"<rutcli>" + rutcli +"</rutcli>" + String.fromCharCode(13) +
-									"<razons>" + rs.rows.item(0).RAZONS + "</razons>" + String.fromCharCode(13) +
+									"<razons>" + rs.rows.item(0).RAZONS.substring(0,49) + "</razons>" + String.fromCharCode(13) +
 									"<direcc>" + $("#cmbDireccion option:selected").text() + "</direcc>" + String.fromCharCode(13) +
 									"<comuna>" + $("#cmbDireccion option:selected").data("comuna") + "</comuna>" + String.fromCharCode(13) +
 									"<ciudad>" + $("#cmbDireccion option:selected").data("ciudad") + "</ciudad>" + String.fromCharCode(13) +
@@ -416,7 +416,14 @@ document.addEventListener('deviceready', function(){
 				//query = "INSERT INTO DE_NOTAVTA (CODEMP,NUMNVT,SEQUEN,CODPRO,PRECIO,CANTID,PREFIN,TOTNET,PORDOC,COMIS,PREPARACION,PESO) " +
 				//		"VALUES('1','"+numnvt+"','"+sequen+"','"+codpro+"','"+precio+"','"+cantid+"','"+precio+"','"+totnet+"','"+cantid+"','7.5','0','0')";
 						//alert(query);
-				
+				atributos = $(fila).find('td:eq(0)').data("attrib");
+				if (typeof atributos != 'undefined'){
+					atributos = atributos.replace(/\$\{numnvt\}/g,numnvt);
+					atributos = atributos.replace(/\$\{sequen\}/g,sequen);
+				}
+				else{
+					atributos = "";
+				}
 				xmlDet = xmlDet + "<Producto>" + String.fromCharCode(13) +
 									"<codemp>1</codemp>" + String.fromCharCode(13)+
 									"<numnvt>" + numnvt + "</numnvt>" + String.fromCharCode(13)+
@@ -437,14 +444,9 @@ document.addEventListener('deviceready', function(){
 									"<costo>" + costo + "</costo>" + String.fromCharCode(13) +
 									"<comis>7.5</comis>" + String.fromCharCode(13) +
 									"<facturable>" + facturable + "</facturable>" + String.fromCharCode(13) +
+									atributos +
 									"</Producto>" + String.fromCharCode(13);
-				atributos = $(fila).find('td:eq(0)').attr("data-attrib");
-				if (typeof atributos != 'undefined'){
-					atributos = atributos.replace(/\$\{numnvt\}/g,numnvt);
-					atributos = atributos.replace(/\$\{sequen\}/g,sequen);
-					atributos = String.fromCharCode(13) + atributos;
-					xmlProdDet = xmlProdDet + atributos;
-				}
+				
 				sequen = sequen + 1;
 			});
 			xmlDet = xmlDet.substring(0, xmlDet.length-1);
@@ -567,7 +569,9 @@ document.addEventListener('deviceready', function(){
 		    	db.close();
 		    	//alert(JSON.stringify(rs));
 		    	for (i=0; i<rs.rows.length; ++i){
-		    		fila = '<option data-comuna="' + rs.rows.item(i).comuna + '" data-ciudad="'+ rs.rows.item(i).ciudad + '">' + rs.rows.item(i).direccion + "</option>";
+		    		fila = '<option data-comuna="' + rs.rows.item(i).comuna + '" data-ciudad="'+ rs.rows.item(i).ciudad + '">'
+					+ rs.rows.item(i).direccion + ',' + rs.rows.item(i).comuna + ',' + rs.rows.item(i).ciudad +
+					"</option>";
 		    		$("#cmbDireccion").append(fila);
 			    }
 		    }
@@ -886,11 +890,11 @@ document.addEventListener('deviceready', function(){
       	var buscarPor = request.term;
       	var query = "";
       	if (!$.isNumeric(buscarPor)){
-      		query = "select a.rutcli, a.razons as value, a.comuna from en_cliente as a " +
+      		query = "select a.rutcli, a.razons as value, a.comuna, a.facturable from en_cliente as a " +
 	   				"where upper(a.razons) like '%" + buscarPor.toUpperCase() + "%'";
       	}
       	else{
-      		query = "select a.rutcli, a.razons as value, a.comuna from en_cliente as a " +
+      		query = "select a.rutcli, a.razons as value, a.comuna, a.facturable from en_cliente as a " +
 	   				"where rutcli like '%" + buscarPor.toUpperCase() + "%'";
       	}
 
@@ -923,6 +927,7 @@ document.addEventListener('deviceready', function(){
         $("#nombreCliente").text(ui.item.value);
         $("#lblRazons").text(ui.item.value);
         $("#lblComuna").text(ui.item.COMUNA);
+		$('#cmbFacturable').val(ui.item.FACTURABLE);
         return false;
       }
     } );
@@ -1169,6 +1174,16 @@ document.addEventListener('deviceready', function(){
 		var direccion = $("#txtDireccionNueva").val();
 		var comuna = $("#cmbComunaNueva").val();
 		var ciudad = $("#cmbCiudadNueva").val();
+		if(ciudad.length == 0 || ciudad == ""){
+			alert("Comuna debe pertener a una ciudad");
+			return false;
+		}
+		if(ciudad == "" || comuna == "" || direccion == "" ||
+			ciudad.length == 0 || comuna.length == 0 || direccion.length == 0
+		){
+			alert("Ingrese todos los datos");
+			return false;
+		}
 		grabarNuevaDireccion(rutcli,direccion,comuna,ciudad);
 		$("#modalNuevaDireccion").modal("hide");
 		$("#modalCargando").modal("show");
@@ -1514,7 +1529,7 @@ document.addEventListener('deviceready', function(){
 			return false;
 		}
 		$("#modalMapa").modal("show");
-		setInterval(function(){
+		setTimeout(function(){
 			inicializarMapa(direccion);
 		}, 1000);
 	});

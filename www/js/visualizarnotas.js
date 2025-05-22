@@ -24,11 +24,30 @@ document.addEventListener('deviceready', function(){
 															var xmlDoc = parser.parseFromString(this.result,"text/xml");
                                                             var numnvt = xmlDoc.getElementsByTagName("numnvt")[0].childNodes[0].nodeValue;
                                                             var detalle = xmlDoc.getElementsByTagName("Producto");
+															var atributosProducto = xmlDoc.getElementsByTagName("DeProducto");
                                                             var codpro,descripcion = "";
                                                             var precio,cantid, total = 0;
                                                             for (let i = 0; i < detalle.length; i++) {
                                                                 const producto = detalle[i];
                                                                 codpro = producto.getElementsByTagName("codpro")[0].childNodes[0].nodeValue;
+																strAtributos = "";
+																//buscamos codigo producto en el xml de atributos
+																for (let j = 0; j < atributosProducto.length; j++) {
+																	const atributo = atributosProducto[j];
+																	if (atributo.getElementsByTagName("Dcodpro")[0].childNodes[0].nodeValue == codpro) {
+																		var descripcionAtributo = atributo.getElementsByTagName("Ddespro")[0].childNodes[0].nodeValue;
+																		var cantidadAtributo = atributo.getElementsByTagName("Dcantid")[0].childNodes[0].nodeValue;
+																		//concatenamos los atributos y agregamos a la tabla principal
+																		strAtributos = strAtributos + "<tr>" +
+																		"<td></td>" +
+																		"<td>" + descripcionAtributo.toString() + "</td>" +
+																		"<td></td>" +
+																		"<td>" + cantidadAtributo.toString() + "</td>" +
+																		"<td></td>" +
+																		"</tr>";
+																		break;
+																	}
+																}
                                                                 descripcion = producto.getElementsByTagName("despro")[0].childNodes[0].nodeValue;
                                                                 precio = producto.getElementsByTagName("prefin")[0].childNodes[0].nodeValue;
                                                                 cantid = producto.getElementsByTagName("cantid")[0].childNodes[0].nodeValue;
@@ -39,7 +58,8 @@ document.addEventListener('deviceready', function(){
                                                                 "<td>" + precio.toString() + "</td>" + 
                                                                 "<td>" + cantid.toString() + "</td>" +
                                                                 "<td>" + total.toString() + "</td>" +
-                                                                "</tr>";
+                                                                "</tr>" +
+																strAtributos;
                                                             }
 				                                    		$("#detalleTblNota").append(celdas);
                                                             $("#numeroNota").text(numnvt);
