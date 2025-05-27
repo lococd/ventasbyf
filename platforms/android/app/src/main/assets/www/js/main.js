@@ -231,6 +231,7 @@ document.addEventListener('deviceready', function(){
 					mostrarMensaje("Cliente con deuda pendiente de $"+rs.rows.item(0).TOTSAL);
 					//cargarDeuda();
 				}else{
+					cargarComboDirecciones(rutcli);
 					if(hideModal){
 						$("#modalGuardar").modal('hide');
 						$("#modalCodpro").modal('toggle');
@@ -554,7 +555,7 @@ document.addEventListener('deviceready', function(){
 	
 	function cargarComboDirecciones(rutcli){
 		$("#cmbDireccion").empty();
-		var query = "SELECT a.rutcli, a.razons, b.direccion, b.comuna, b.ciudad " +
+		var query = "SELECT a.rutcli, a.razons, a.id_dir as coddir, b.id as id, b.direccion, b.comuna, b.ciudad " +
 					"FROM en_cliente a, re_ddescli b " +
 					"WHERE a.rutcli = b.rutcli " +
 					"AND a.rutcli = " + rutcli;
@@ -568,12 +569,15 @@ document.addEventListener('deviceready', function(){
 		    else{
 		    	db.close();
 		    	//alert(JSON.stringify(rs));
+				var direccionDefault = rs.rows.item(0).coddir;
 		    	for (i=0; i<rs.rows.length; ++i){
-		    		fila = '<option data-comuna="' + rs.rows.item(i).comuna + '" data-ciudad="'+ rs.rows.item(i).ciudad + '">'
+		    		fila = '<option value="' + rs.rows.item(i).id + '" data-comuna="' + rs.rows.item(i).comuna + '" data-ciudad="'+ rs.rows.item(i).ciudad + '">'
 					+ rs.rows.item(i).direccion + ',' + rs.rows.item(i).comuna + ',' + rs.rows.item(i).ciudad +
 					"</option>";
 		    		$("#cmbDireccion").append(fila);
 			    }
+				//seteamos direccion por defecto
+				$('#cmbDireccion').val(direccionDefault);
 		    }
 		  }, function(error) {
 		    alert('Error en la consulta: ' + error.message);
@@ -833,13 +837,13 @@ document.addEventListener('deviceready', function(){
 		}
 	});
 
-	$("#txtRutcli").change(function(e){
+	/*$("#txtRutcli").change(function(e){
 		var rutcli = $("#txtRutcli").val();
 
 		if(rutcli.length > 0){
 			cargarComboDirecciones(rutcli);
 		}
-	});
+	});*/
 
 	function confirmarGuardado(){
 		var rutcli = $("#txtRutcli").val();
@@ -928,6 +932,7 @@ document.addEventListener('deviceready', function(){
         $("#lblRazons").text(ui.item.value);
         $("#lblComuna").text(ui.item.COMUNA);
 		$('#cmbFacturable').val(ui.item.FACTURABLE);
+		cargarComboDirecciones(ui.item.RUTCLI);
         return false;
       }
     } );
@@ -1446,45 +1451,72 @@ document.addEventListener('deviceready', function(){
 				      return false;
 					}
 					else{
-						//inserto cliente
-						var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
-														   "CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, LISPRE, CODLIS, LINCRE) " +
-														   "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1,1, (select codref from de_dominio " +
-															"where coddom = 4))";
-						db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+						//valido que la comuna ingresada exista
+						var sql = "SELECT desval from de_dominio " +
+							  "where coddom = 2 " +
+		    				  "and desval = '" + $("#cmbNewComuna").val() + "'";
+						var db = window.sqlitePlugin.openDatabase({name: "envios.db"});
+						db.executeSql(sql, [], function(rs){
+							if(rs.rows.length == 0){
+								alert("Comuna no existe");
+								return false;
+							}
+							else{
+								//inserto cliente
+								var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
+																"CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, LISPRE, CODLIS, LINCRE) " +
+																"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1,1, (select codref from de_dominio " +
+																	"where coddom = 4))";
+								db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
-						var dv = $("#txtNewDV").val();
-						if(dv == "k"){
-							dv = "K";
-						}
-						db.executeSql(query, [$("#txtNewRut").val(), dv,$("#txtNewRazons").val(),
-											  $("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
-											  $("#txtNewFono").val(), window.localStorage.getItem("codven"), $("#cmbNewGiro").val(),
-											  $("#txtNewContacto").val(), $("#txtNewObservacion").val(), "S"], function(rs) {
-							//alert(JSON.stringify(rs));
-						    if(rs.rowsAffected == 0){
-						      alert("Error al ingresar Cliente");
-						      return false;
-						    }
-						    else{
-								var query = "INSERT INTO re_ddescli (rutcli, direccion, comuna, ciudad, principal, estado) VALUES (?, ?, ?, ?, 'S', 0)";
-								db.executeSql(query, [$("#txtNewRut").val(), $("#txtNewDireccion").val(), $("#cmbNewComuna").val(), $("#cmbNewCiudad").val()], function(rs) {
-									if (rs.rowsAffected > 0) {
-										alert("Cliente Ingresado");
-										$("#txtRutcli").val($("#txtNewRut").val());
-										limpiarFicha();
-										$('#btnCancelarCliente').trigger("click");
-										buscarClienteModal($("#txtRutcli").val(), false);
-									} else {
-										alert("Failed to insert record into re_ddescli");
+								var dv = $("#txtNewDV").val();
+								if(dv == "k"){
+									dv = "K";
+								}
+								db.executeSql(query, [$("#txtNewRut").val(), dv,$("#txtNewRazons").val(),
+													$("#txtNewDireccion").val(),$("#cmbNewComuna").val(), $("#cmbNewCiudad").val(),
+													$("#txtNewFono").val(), window.localStorage.getItem("codven"), $("#cmbNewGiro").val(),
+													$("#txtNewContacto").val(), $("#txtNewObservacion").val(), "S"], function(rs) {
+									//alert(JSON.stringify(rs));
+									if(rs.rowsAffected == 0){
+									alert("Error al ingresar Cliente");
+									return false;
+									}
+									else{
+										var direccion = $("#txtNewDireccion").val();
+										var comuna = $("#cmbNewComuna").val();
+										var ciudad = $("#cmbNewCiudad").val();
+										if(ciudad.length == 0 || ciudad == ""){
+											alert("Comuna debe pertener a una ciudad");
+											return false;
+										}
+										if(ciudad == "" || comuna == "" || direccion == "" ||
+											ciudad.length == 0 || comuna.length == 0 || direccion.length == 0
+										){
+											alert("Ingrese todos los datos");
+											return false;
+										}
+										var query = "INSERT INTO re_ddescli (rutcli, direccion, comuna, ciudad, principal, estado) VALUES (?, ?, ?, ?, 'S', 0)";
+										db.executeSql(query, [$("#txtNewRut").val(), direccion, comuna, ciudad], function(rs) {
+											if (rs.rowsAffected > 0) {
+												alert("Cliente Ingresado");
+												$("#txtRutcli").val($("#txtNewRut").val());
+												limpiarFicha();
+												$('#btnCancelarCliente').trigger("click");
+												buscarClienteModal($("#txtRutcli").val(), false);
+											} else {
+												alert("Failed to insert record into re_ddescli");
+											}
+										}, function(error) {
+											alert('Error inserting into re_ddescli: ' + error.message);
+										});
 									}
 								}, function(error) {
-									alert('Error inserting into re_ddescli: ' + error.message);
+									alert('Error en la consulta: ' + error.message);
 								});
-						    }
-						  }, function(error) {
-						    alert('Error en la consulta: ' + error.message);
-						  });
+							}
+						});
+						
 					}
 				}, function(error) {
 					alert('Error en la consulta: ' + error.message);
