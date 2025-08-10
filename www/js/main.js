@@ -231,11 +231,13 @@ document.addEventListener('deviceready', function(){
 					mostrarMensaje("Cliente con deuda pendiente de $"+rs.rows.item(0).TOTSAL);
 					//cargarDeuda();
 				}else{
-					cargarComboDirecciones(rutcli);
 					if(hideModal){
 						$("#modalGuardar").modal('hide');
 						$("#modalCodpro").modal('toggle');
 						$("#modalTxtCodpro").focus();
+					}
+					else{
+						cargarComboDirecciones(rutcli);
 					}
 				}
 				
@@ -275,6 +277,11 @@ document.addEventListener('deviceready', function(){
 	};
 
 	function grabaXML(rutcli,numnvt,vendedor,observ,xmlDet){
+		//valido direccion
+		if($("#cmbDireccion").val() == null || $("#cmbDireccion").val() == ""){
+			alert("Debe seleccionar una dirección de despacho");
+			return false;
+		}
 		getNotaActual(rutcli).then(function(nombreArchivo){
 			if(nombreArchivo){
 				concatenaNota(nombreArchivo, xmlDet);
@@ -475,6 +482,7 @@ document.addEventListener('deviceready', function(){
 	    	$("#modalTxtProdFacturable").val('');
 	    	$("#modalTxtPrecio").text('');
 	    	$("#modalTxtMultip").val(1);
+			$("#modalTxtMultip2").text('');
 	    	$("#insertarProducto").addClass("disabled");
 	      	$("#insertarProducto").prop("disabled", true);
 	      	//$("#txtCantid").trigger(':reset');
@@ -542,6 +550,7 @@ document.addEventListener('deviceready', function(){
 	      $("#modalTxtCanMay").val(rs.rows.item(0).CANMAY);
 	      $("#modalTxtCanMay").text(rs.rows.item(0).CANMAY);
 	      $("#modalTxtMultip").val(rs.rows.item(0).MULTIP);
+	      $("#modalTxtMultip2").text(rs.rows.item(0).MULTIP);
 	      $("#modalTxtProdFacturable").val(rs.rows.item(0).FACTUR);
 	      $("#insertarProducto").removeClass("disabled");
 	      $("#insertarProducto").prop("disabled", false);
@@ -572,7 +581,7 @@ document.addEventListener('deviceready', function(){
 				var direccionDefault = rs.rows.item(0).coddir;
 		    	for (i=0; i<rs.rows.length; ++i){
 		    		fila = '<option value="' + rs.rows.item(i).id + '" data-comuna="' + rs.rows.item(i).comuna + '" data-ciudad="'+ rs.rows.item(i).ciudad + '">'
-					+ rs.rows.item(i).direccion + ',' + rs.rows.item(i).comuna + ',' + rs.rows.item(i).ciudad +
+					+ rs.rows.item(i).direccion +
 					"</option>";
 		    		$("#cmbDireccion").append(fila);
 			    }
@@ -880,6 +889,9 @@ document.addEventListener('deviceready', function(){
   			return false;
   		}
   		else{
+			/*$("#modalGuardar").modal('hide');
+			$("#modalCodpro").modal('toggle');
+			$("#modalTxtCodpro").focus();*/
   			buscarClienteModal($("#txtRutcli").val(), true);
   		}
 	}
@@ -1464,9 +1476,9 @@ document.addEventListener('deviceready', function(){
 							else{
 								//inserto cliente
 								var query = "INSERT INTO EN_CLIENTE(RUTCLI, DV, RAZONS, DIRECCION, COMUNA," +
-																"CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, LISPRE, CODLIS, LINCRE) " +
+																"CIUDAD, TELEFONO, CODVEN, GIRO, CONTAC, OBSERV, FACTURABLE, FORPAG, PLAPAG, LISPRE, CODLIS, LINCRE, ID_DIR) " +
 																"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,1,1,1, (select codref from de_dominio " +
-																	"where coddom = 4))";
+																	"where coddom = 4), 0)";
 								db = window.sqlitePlugin.openDatabase({name: "envios.db"});
 
 								var dv = $("#txtNewDV").val();
@@ -1496,7 +1508,7 @@ document.addEventListener('deviceready', function(){
 											alert("Ingrese todos los datos");
 											return false;
 										}
-										var query = "INSERT INTO re_ddescli (rutcli, direccion, comuna, ciudad, principal, estado) VALUES (?, ?, ?, ?, 'S', 0)";
+										var query = "INSERT INTO re_ddescli (id, rutcli, direccion, comuna, ciudad, principal, estado) VALUES (0,?, ?, ?, ?, 'S', 0)";
 										db.executeSql(query, [$("#txtNewRut").val(), direccion, comuna, ciudad], function(rs) {
 											if (rs.rowsAffected > 0) {
 												alert("Cliente Ingresado");
