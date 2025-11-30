@@ -171,6 +171,17 @@ document.addEventListener('deviceready', function(){
 		}
 	}
 
+	function getQAttrib(){
+		let sum = 0;
+		$("#tblAttrib .qattrib").each(function() {
+			let val = parseInt($(this).val(), 10);
+			if (!isNaN(val)) {
+				sum += val;
+			}
+		});
+		return sum;
+	}
+
 	function getAtributos(){
 		var atributos = '';
 		var productos = $("#tblAttrib >tr");
@@ -334,7 +345,7 @@ document.addEventListener('deviceready', function(){
 									"<plapag>" + rs.rows.item(0).PLAPAG + "</plapag>" + String.fromCharCode(13) +
 									"<codlis>" + rs.rows.item(0).CODLIS + "</codlis>" + String.fromCharCode(13) +
 									"<subtot>" + subtot +"</subtot>" + String.fromCharCode(13) +
-									"<dscto1>" + totDescuentos + "</dscto1>" + String.fromCharCode(13) +
+									"<dscto1>" + dscto + "</dscto1>" + String.fromCharCode(13) +
 									"<dscto2>0</dscto2>" + String.fromCharCode(13) +
 									"<toneto>" + totneto +"</toneto>" + String.fromCharCode(13) +
 									"<totiva>" + totiva +"</totiva>" + String.fromCharCode(13) +
@@ -505,9 +516,10 @@ document.addEventListener('deviceready', function(){
       				for (var i = 0; i < rs2.rows.length; i++) {
 	      				fila = '<tr><td>' + rs2.rows.item(i).DESVAL + '</td>' +
 	      					   '<td><input type="number" id="txtCantid" data-catpro ="'+ rs.rows.item(0).CATPRO +
-	      					   '" class="form-control" max="99"></td></tr>';
+	      					   '" class="form-control qattrib" max="99"></td></tr>';
 	      				$("#tblAttrib").append(fila);
 	      			}
+					$(".modalSaldo").show();
 	      			$("#tabAttrib").removeClass("invisible");
       			}
       			else{
@@ -649,6 +661,7 @@ document.addEventListener('deviceready', function(){
     	$('#cmbFacturable').val("S");
     	$("#btnCabecera").text("Nueva nota de venta");
     	$("#btnCerrarModallpr2").show();
+		$("#modalTxtSaldo").text("");
     	window.localStorage.setItem("lincre", 0);
     	limpiarModal();
 		getNumnvt();
@@ -664,6 +677,7 @@ document.addEventListener('deviceready', function(){
 		$("#modalTxtCanMay").val("");
 		$("#modalTxtCanMay").text("");
 		$("#txtCantid").val("");
+		$("#modalTxtSaldo").text("");
 		$("#tblAttrib").empty();
     	$("#tabAttrib").addClass("invisible");
     	$("#insertarProducto").addClass("disabled");
@@ -671,6 +685,8 @@ document.addEventListener('deviceready', function(){
 		$("#tabAttrib").addClass("invisible");
 		$("#tblAttrib").empty();
 		$("#modalTxtProdFacturable").val("");
+		$(".modalSaldo").hide();
+		$("#modalTxtMultip2").text("");
 	}
 
 	function limpiarFicha(){
@@ -956,7 +972,7 @@ document.addEventListener('deviceready', function(){
       	if (!$.isNumeric(buscarPor)){
       		/*query = "select a.codpro, a.despro as value from ma_product as a " +
 	   				"where upper(a.despro) like '%" + buscarPor.toUpperCase() + "%'";*/
-			query = "select a.codpro, a.despro || ' D:' || b.predet || ',M:' || b.premay as value " +
+			query = "select a.codpro, a.despro , 'D:' || cast(b.predet as int) || ',M:' || cast(b.premay as int) as value " +
 	   		 		"from ma_product as a, re_lvenpro as b, en_cliente c " +
 	   				"where a.codpro = b.codpro " +
 	   				"and c.codlis = b.codlis " +
@@ -966,7 +982,7 @@ document.addEventListener('deviceready', function(){
       	else{
       		/*query = "select a.codpro, a.despro as value from ma_product as a " +
 	   				"where codpro like '%" + buscarPor.toUpperCase() + "%'";*/
-			query = "select a.codpro, a.despro || ' D:' || b.predet || ',M:' || b.premay as value " +
+			query = "select a.codpro, a.despro, 'D:' || cast(b.predet as int) || ',M:' || cast(b.premay as int) as value " +
 					   "from ma_product as a, re_lvenpro as b, en_cliente c " +
 					  "where a.codpro = b.codpro " +
 					  "and c.codlis = b.codlis " +
@@ -1002,7 +1018,11 @@ document.addEventListener('deviceready', function(){
        	buscarProducto();
         return false;
       }
-    });
+    }).autocomplete( "instance" )._renderItem = function( ul, item ) {
+      return $( "<li>" )
+        .append( "<div>" + item.DESPRO + "<br>" + item.value + "</div>" )
+        .appendTo( ul );
+    };
 
     $("#cmbNewComuna").autocomplete({
       source: function( request, response ) {
@@ -1338,6 +1358,16 @@ document.addEventListener('deviceready', function(){
 		  });
 	}
 
+	function actualizarSaldoProducto(){
+		var cantAtrib = parseInt(getQAttrib());
+		var multiplo = $("#txtCantid").val();
+		var diff = multiplo - cantAtrib;
+		if(diff < 0){
+			diff = 0;
+		}
+		$("#modalTxtSaldo").text(diff.toString());
+	}
+
 
 	$("#btnBorrarEnviadas").click(function(e){
 		//agarro el directorio root
@@ -1599,6 +1629,15 @@ document.addEventListener('deviceready', function(){
 	    $("#prod-"+cid).remove();
 	    $("#totalNota").text("Total nota:$" + totalizaNota());
 	    $("#totalNota2").text("Total nota:$" + totalizaNota());
+	});
+
+	
+	$(document).on('blur','.qattrib',function() {
+    	actualizarSaldoProducto();
+	});
+
+	$(document).on('change','#txtCantid',function() {
+		actualizarSaldoProducto();
 	});
 
 	$(document).on('click','.up,.down',function(){

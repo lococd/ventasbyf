@@ -15,8 +15,10 @@
         <script type="text/javascript" src="js/jquery-ui.js"></script>
         <script type="text/javascript" src="js/leaflet.js"></script>
         <script type="text/javascript" src="js/Control.Geocoder.js"></script>
+        <script type="text/javascript" src="js/version.js"></script>
         <script type="text/javascript" src="js/cargabase.js"></script>
         <script type="text/javascript" src="js/enviarnotas.js"></script>
+        <script type="text/javascript" src="js/vernotasenviadas.js"></script>
         <script type="text/javascript" src="js/concatnotas.js"></script>
         <script type="text/javascript" src="js/mapa.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
@@ -52,6 +54,7 @@
                     aria-haspopup="true" aria-expanded="false">Herramientas</a>
                   <ul class="dropdown-menu" aria-labelledby="navbarLevel2">
                     <li><a class="texto btnVerNotas" href="#">Listar y enviar Notas</a></li>
+                    <li><a class="texto btnVerNotas" href="#">Ver notas enviadas</a></li>
                     <li><a class="texto" id="btnBorrarEnviadas" href="#">Borrar Notas Enviadas</a></li>
                     <li><a class="texto btnCargarBase" href="#">Cargar nueva base de datos</a></li>
                     <li><a class="texto" id="btnVerDeuda" href="#">Ver Deuda</a></li>
@@ -130,55 +133,49 @@
                               <div class="col-md-12 text-center">
                                 <table class="table tabla-txt">
                                   <tr>
-                                    <td>CODIGO</td>
-                                    <td>PRODUCTO</td>
-                                    <td>CANTID</td>
+                                    <td colspan="5" class="text-left">CODIGO</td>
+                                    <td colspan="3">CANTIDAD</td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="5" class="text-left" id="modalTxtCodpro"></td>
+                                    <td colspan="3"></td>
                                   </tr>
                                   <tr id="modalDatosProducto" class="textoVerde">
-                                    <td id="modalTxtCodpro"></td>
-                                    <td class="text" id="modalTxtDespro"></td>
-                                    <td><input type="number" id="txtCantid" class="form-control" max="99"></td>
+                                    <td colspan="5" class="text" id="modalTxtDespro"></td>
+                                    <td colspan="3"><input type="number" id="txtCantid" class="form-control" max="9999"></td>
                                   </tr>
                                   <tr>
                                     <td>
-                                      <div class="row">
-                                        <div class="col-xs-6 col-md-6">
-                                          <h6>D</h6>
-                                        </div>
-                                        <div class="col-xs-6 col-md-6">
-                                          <h5 id="modalTxtPrecioNor"></h5>
-                                        </div>
-                                      </div>
+                                      <h6>D</h6>
                                     </td>
                                     <td>
-                                      <div class="row">
-                                        <div class="col-xs-6 col-md-6">
-                                          <h6>M</h6>
-                                        </div>
-                                        <div class="col-xs-6 col-md-6">
-                                          <h5 id="modalTxtPrecioMay"></h5>
-                                        </div>
-                                      </div>
+                                      <h6 id="modalTxtPrecioNor"></h6>
                                     </td>
                                     <td>
-                                      <div class="row">
-                                        <div class="col-xs-6 col-md-6">
-                                          <h6>CM</h6>
-                                        </div>
-                                        <div class="col-xs-6 col-md-6">
-                                          <h5 id="modalTxtCanMay" value="12"></h5>
-                                        </div>
-                                      </div>
+                                      <h6>CD</h6>
                                     </td>
                                     <td>
-                                      <div class="row">
-                                        <div class="col-xs-6 col-md-6">
-                                          <h6>MUL</h6>
-                                        </div>
-                                        <div class="col-xs-6 col-md-6">
-                                          <h5 id="modalTxtMultip2"></h5>
-                                        </div>
-                                      </div>
+                                      <h6 id="modalTxtMultip2"></h6>
+                                    </td>
+                                    <td>
+                                      <h6>M</h6>
+                                    </td>
+                                    <td>
+                                      <h6 id="modalTxtPrecioMay"></h6>
+                                    </td>
+                                    <td>
+                                      <h6>CM</h6>
+                                    </td>
+                                    <td>
+                                      <h6 id="modalTxtCanMay" value="12"></h6>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="modalSaldo" colspan="4">
+                                      Saldo:
+                                    </td>
+                                    <td colspan="4">
+                                      <h6 class="modalSaldo" id="modalTxtSaldo"></h6>
                                     </td>
                                   </tr>
                                 </table>
@@ -227,7 +224,8 @@
                               <span class="icon-bar bg-dark"></span>
                               <span class="icon-bar bg-dark"></span>
                             </button>
-                            <a class="navbar-brand textoBlanco" href="#">V1.9.8 Datos Nota</a>
+                            <a class="navbar-brand textoBlanco" href="#" id="txtVersion"></a>
+                            <a class="navbar-brand textoBlanco" href="#"> Datos Nota</a>
                           </div>
                           <div style="height: 1px;" aria-expanded="false" id="menuModal" class="navbar-collapse collapse">
                             <ul class="nav navbar-nav navbar-right">
@@ -239,6 +237,7 @@
                               <li><a id="btnNuevaDireccion" href="#">Nueva Dirección</a></li>
                               <!--li><a id="btnZip" href="#">Enviar Notas</a></li-->
                               <li><a class="btnVerNotas" href="#">Listar y enviar Notas</a></li>
+                              <li><a class="btnVerNotasEnviadas" href="#">Ver notas enviadas</a></li>
                               <li><a class="btnCargarBase" href="#">Cargar nueva base de datos</a></li>
                             </ul>
                           </div><!--/.nav-collapse -->
@@ -395,23 +394,27 @@
                 <div class="modal-body">
                   <div class="form-group">
                     <div class = "ui-front">
-                        <table id="tblNotas" class="table tabla-txt">
+                        <table id="tblNotas" class="table table-responsive table-striped table-condensed texto-responsivo">
                           <thead>
                             <tr>
-                              <td></td>
-                              <td colspan="2">Marcar/desmarcar todas</td>
-                              <td><input type="checkbox" id="toggleMarcarNotas"></td>
+                              <td class="text-right" colspan="4">Todos</td>
+                              <td colspan="1"><input type="checkbox" id="toggleMarcarNotas"></td>
                             </tr>
                             <tr>
-                              <td>Cliente</td>
                               <td>Fecha</td>
-                              <td>Total Neto</td>
-                              <td>Incluir</td>
+                              <td class="text-right">Total Neto</td>
+                              <td>Sel</td>
                               <td>Ver Nota</td>
                             </tr>
                           </thead>
                           <tbody id="detalleTblNotas">
-                            
+                            <tr>
+                              <td>AAAAAAAAAAAAAAAAAAAAAAAA</td>
+                              <td>05081994</td>
+                              <td>20000</td>
+                              <td>SHI</td>
+                              <td>VERNOTA</td>
+                            </tr>
                           </tbody>
                         </table>
                         
@@ -424,6 +427,49 @@
                   </div>
                   <button type="button" class="btn btn-default" id="btnEnviarNotas">Enviar Notas</button>
                   <button type="button" class="btn btn-default" id="btnCerrarEnviarNotas">Cerrar</button>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="modalVerNotasEnviadas" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Ver notas enviadas</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <div class = "ui-front">
+                        <table id="tblNotas" class="table table-responsive table-striped table-condensed texto-responsivo">
+                          <thead>
+                            <tr>
+                              <td class="text-right" colspan="4">Todos</td>
+                              <td colspan="1"><input type="checkbox" id="toggleMarcarNotas"></td>
+                            </tr>
+                            <tr>
+                              <td>Fecha</td>
+                              <td class="text-right">Total Neto</td>
+                              <td>Sel</td>
+                              <td>Ver Nota</td>
+                            </tr>
+                          </thead>
+                          <tbody id="detalleTblNotasEnviadas">
+                            <tr>
+                              <td>AAAAAAAAAAAAAAAAAAAAAAAA</td>
+                              <td>05081994</td>
+                              <td>20000</td>
+                              <td>SHI</td>
+                              <td>VERNOTA</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" id="btnCerrarVerNotasEnviadas">Cerrar</button>
                 </div>
             </div>
           </div>

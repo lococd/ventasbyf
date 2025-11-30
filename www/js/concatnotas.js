@@ -1,4 +1,4 @@
-async function getNotaActual(rutcli){
+async function getNotaActual(rutcli, coddir){
     //para resolver este problema y como tenemos callbacks en la función que permite acceder a los contenidos de archivos
     //y a la vez esa función es asíncrona, se debe generar un array de promesas,
     //se espera a la resolución de todas esas promesas, y luego se resolverá a una única promesa
@@ -25,7 +25,8 @@ async function getNotaActual(rutcli){
                                                                         var parser = new DOMParser();
                                                                         var xmlDoc = parser.parseFromString(this.result,"text/xml");
                                                                         var rutcliArchivo = xmlDoc.getElementsByTagName("rutcli")[0].childNodes[0].nodeValue;
-                                                                        if(rutcli == rutcliArchivo){
+                                                                        var coddirArchivo = xmlDoc.getElementsByTagName("direcc")[0].childNodes[0].nodeValue;
+                                                                        if(rutcli == rutcliArchivo && coddir == coddirArchivo){
                                                                             resolve(archivo.name);
                                                                         }
                                                                         else{

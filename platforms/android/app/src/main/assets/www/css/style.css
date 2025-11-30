@@ -176,10 +176,23 @@ h3{
   display: none;
 }
 
+.texto-responsivo > tbody > tr > td {
+  word-wrap: break-word;
+  max-width: 80px;
+}
+
 .glyphicon-refresh-animate {
   -animation: spin .7s infinite linear;
   -webkit-animation: spin2 .7s infinite linear;
 }
+
+.ui-autocomplete .ui-menu-item:nth-child(even) {
+        background-color: #f2f2f2; /* Light gray for even rows */
+    }
+
+    .ui-autocomplete .ui-menu-item:nth-child(odd) {
+        background-color: #ffffff; /* White for odd rows */
+    }
 
 @-webkit-keyframes spin2 {
   from { -webkit-transform: rotate(0deg);}

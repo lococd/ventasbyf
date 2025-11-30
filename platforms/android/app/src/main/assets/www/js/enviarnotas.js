@@ -1,10 +1,10 @@
-function visualizarNota(nombreArchivo){
+function visualizarNota(nombreArchivo, carpeta="nvt") {
 	//este es el que sirve, nunca pude separar en visualizarnotas.js :c
 	$("#detalleTblNota").empty();
 	try {
 		//agarro el directorio root
 		var celdas = "";
-		window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + "nvt/" + nombreArchivo,
+		window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + carpeta +"/" + nombreArchivo,
 		gotFile, fail);
 
 		function gotFile(fileEntry) {
@@ -104,14 +104,25 @@ document.addEventListener('deviceready', function(){
 															var xmlDoc = parser.parseFromString(this.result,"text/xml");
 															var totneto = xmlDoc.getElementsByTagName("totgen")[0].childNodes[0].nodeValue;
 															var razons = xmlDoc.getElementsByTagName("razons")[0].childNodes[0].nodeValue;
-															var fecemi = xmlDoc.getElementsByTagName("fecemi")[0].childNodes[0].nodeValue;
-															celdas = celdas + "<tr><td>" + razons + "</td>" +
+															var fecemiRaw = xmlDoc.getElementsByTagName("fecemi")[0].childNodes[0].nodeValue;
+															var fecemi = "";
+															if (fecemiRaw && fecemiRaw.length === 8) {
+																// yyyymmdd -> dd/mm/yy
+																var year = fecemiRaw.substring(2, 4); // get last two digits
+																var month = fecemiRaw.substring(4, 6);
+																var day = fecemiRaw.substring(6, 8);
+																fecemi = day + "/" + month + "/" + year;
+															} else {
+																fecemi = fecemiRaw;
+															}
+															celdas = celdas + "<tr>" +
 															"<td>" + fecemi + "</td>" +
-															"<td>$" + totneto + "</td>" +
-				                                    		'<td><input class="chk-enviar" type="checkbox" data-filename="'+file.name+'" data-contenido="'+
+															'<td class="text-right">$' + totneto + "</td>" +
+				                                    		'<td><input class="chk-enviar text-right" type="checkbox" data-filename="'+file.name+'" data-contenido="'+
 				                                    		this.result.replaceAll("\"","'")+'"></td>' +
 															'<td><a href="#" class="btn btn-primary" onclick="visualizarNota(\''+ file.name +'\')">Ver</a></td>' +
-															'</tr>';
+															'</tr>'+
+															'<tr><td colspan="4"><b>' + razons + '</b></td></tr>'
 				                                    		$("#detalleTblNotas").append(celdas);
 														}
 														reader.readAsText(file);
