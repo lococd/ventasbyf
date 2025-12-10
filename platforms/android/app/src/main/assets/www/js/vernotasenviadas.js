@@ -110,14 +110,14 @@ document.addEventListener('deviceready', function(){
 																var month = fecemiRaw.substring(4, 6);
 																var day = fecemiRaw.substring(6, 8);
 																fecemi = day + "/" + month + "/" + year;
-															} else {
+															}
+															else {
 																fecemi = fecemiRaw;
 															}
 															celdas = celdas + "<tr>" +
 															"<td>" + fecemi + "</td>" +
 															'<td class="text-right">$' + totneto + "</td>" +
-				                                    		'<td><input class="chk-enviar text-right" type="checkbox" data-filename="'+file.name+'" data-contenido="'+
-				                                    		this.result.replaceAll("\"","'")+'"></td>' +
+				                                    		'<td></td>' +
 															'<td><a href="#" class="btn btn-primary" onclick="visualizarNota(\''+ file.name +'\',\'nvtEnviadas\')">Ver</a></td>' +
 															'</tr>'+
 															'<tr><td colspan="4"><b>' + razons + '</b></td></tr>';

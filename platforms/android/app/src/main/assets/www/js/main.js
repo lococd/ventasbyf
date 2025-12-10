@@ -216,7 +216,8 @@ document.addEventListener('deviceready', function(){
     		var sql = /*"SELECT razons, direccion, lincre, comuna, sum(totsal) b from en_cliente a, en_notavta b" +
     				  "where rutcli =" + rutcli;*/
     				  "SELECT a.rutcli, a.razons, direccion, lincre - sum(ifnull(totsal,0)) LINCRE, a.comuna, " +
-					  "sum(ifnull(totsal,0)) as TOTSAL " +
+					  "sum(ifnull(totsal,0)) as TOTSAL, " +
+					  "telefono " +
 					  "from en_cliente a " +
 					  "left outer join " +
     				  "en_notavta b " +
@@ -232,6 +233,7 @@ document.addEventListener('deviceready', function(){
 		    	$("#nombreCliente").text(rs.rows.item(0).RAZONS);
         		$("#lblRazons").text(rs.rows.item(0).RAZONS);
 		    	$("#lblComuna").text(rs.rows.item(0).COMUNA);
+				$("#txtTelefono").val(parseInt(rs.rows.item(0).TELEFONO));
 		    	window.localStorage.setItem("lincre", rs.rows.item(0).LINCRE);
 
 				if(rs.rows.item(0).LINCRE <=0){
@@ -293,7 +295,7 @@ document.addEventListener('deviceready', function(){
 			alert("Debe seleccionar una dirección de despacho");
 			return false;
 		}
-		getNotaActual(rutcli).then(function(nombreArchivo){
+		getNotaActual(rutcli, $("#cmbDireccion option:selected").text()).then(function(nombreArchivo){
 			if(nombreArchivo){
 				concatenaNota(nombreArchivo, xmlDet);
 				limpiar();
@@ -358,7 +360,8 @@ document.addEventListener('deviceready', function(){
 									"<pagada>0</pagada>" + String.fromCharCode(13)+
 									//"<factura>N</factura>" + String.fromCharCode(13)+
 									"<observ>"+ observ + "</observ>" + String.fromCharCode(13)+
-									"<factura>" + $("#cmbFacturable option:selected").text() + "</factura>" + String.fromCharCode(13);
+									"<factura>" + $("#cmbFacturable option:selected").text() + "</factura>" + String.fromCharCode(13) +
+									"<telefono>" + $("#txtTelefono").val() + "</telefono>" + String.fromCharCode(13);
 
 									var xmlText = '<?xml version="1.0" encoding="utf-8"?>' + String.fromCharCode(13) +
 									"<Pedidos>" + String.fromCharCode(13) +
@@ -662,6 +665,7 @@ document.addEventListener('deviceready', function(){
     	$("#btnCabecera").text("Nueva nota de venta");
     	$("#btnCerrarModallpr2").show();
 		$("#modalTxtSaldo").text("");
+		$("#txtTelefono").val("");
     	window.localStorage.setItem("lincre", 0);
     	limpiarModal();
 		getNumnvt();
@@ -922,11 +926,11 @@ document.addEventListener('deviceready', function(){
       	var buscarPor = request.term;
       	var query = "";
       	if (!$.isNumeric(buscarPor)){
-      		query = "select a.rutcli, a.razons as value, a.comuna, a.facturable from en_cliente as a " +
+      		query = "select a.rutcli, a.razons as value, a.comuna, a.facturable, a.telefono from en_cliente as a " +
 	   				"where upper(a.razons) like '%" + buscarPor.toUpperCase() + "%'";
       	}
       	else{
-      		query = "select a.rutcli, a.razons as value, a.comuna, a.facturable from en_cliente as a " +
+      		query = "select a.rutcli, a.razons as value, a.comuna, a.facturable, a.telefono from en_cliente as a " +
 	   				"where rutcli like '%" + buscarPor.toUpperCase() + "%'";
       	}
 
@@ -960,6 +964,7 @@ document.addEventListener('deviceready', function(){
         $("#lblRazons").text(ui.item.value);
         $("#lblComuna").text(ui.item.COMUNA);
 		$('#cmbFacturable').val(ui.item.FACTURABLE);
+		$("#txtTelefono").val(parseInt(ui.item.TELEFONO));
 		cargarComboDirecciones(ui.item.RUTCLI);
         return false;
       }

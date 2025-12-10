@@ -178,7 +178,7 @@ h3{
 
 .texto-responsivo > tbody > tr > td {
   word-wrap: break-word;
-  max-width: 80px;
+  max-width: 85px;
 }
 
 .glyphicon-refresh-animate {
