@@ -44,6 +44,7 @@ allprojects {
 apply plugin: 'com.android.library'
 
 android {
+    namespace "cl.oliver.ventasbyf2"
     compileSdkVersion cordovaConfig.COMPILE_SDK_VERSION
     buildToolsVersion cordovaConfig.BUILD_TOOLS_VERSION
 

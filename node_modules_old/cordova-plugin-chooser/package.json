@@ -1,0 +1,61 @@
+{
+  "_from": "git+https://github.com/cyph/cordova-plugin-chooser.git",
+  "_id": "cordova-plugin-chooser@1.3.2",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/cordova-plugin-chooser",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "https://github.com/cyph/cordova-plugin-chooser.git",
+    "rawSpec": "https://github.com/cyph/cordova-plugin-chooser.git",
+    "saveSpec": "git+https://github.com/cyph/cordova-plugin-chooser.git",
+    "fetchSpec": "https://github.com/cyph/cordova-plugin-chooser.git",
+    "gitCommittish": null
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "git+https://github.com/cyph/cordova-plugin-chooser.git#12863c700b2ff29c51e6755ff92b11a61e568f9b",
+  "_spec": "https://github.com/cyph/cordova-plugin-chooser.git",
+  "_where": "/src",
+  "author": {
+    "name": "Cyph, Inc.",
+    "email": "cordova-plugin-chooser@cyph.com",
+    "url": "https://github.com/cyph"
+  },
+  "bugs": {
+    "url": "https://github.com/cyph/cordova-plugin-chooser/issues"
+  },
+  "bundleDependencies": false,
+  "cordova": {
+    "id": "cordova-plugin-chooser",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "deprecated": false,
+  "description": "Cordova file chooser plugin",
+  "homepage": "https://github.com/cyph/cordova-plugin-chooser#readme",
+  "keywords": [
+    "file",
+    "chooser",
+    "picker",
+    "file-chooser",
+    "android",
+    "ios"
+  ],
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "name": "cordova-plugin-chooser",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyph/cordova-plugin-chooser.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.3.2"
+}

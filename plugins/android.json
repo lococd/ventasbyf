@@ -8,34 +8,37 @@
   },
   "installed_plugins": {
     "com.phonegap.plugins.sqlite": {
-      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf2"
     },
     "cordova-plugin-chooser": {
-      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf2"
     },
     "cordova-plugin-file": {
       "ANDROIDX_WEBKIT_VERSION": "1.4.0",
-      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf2"
     },
     "cordova-plugin-filechooser": {
-      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf2"
     },
     "cordova-plugin-filepath": {
-      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf2"
     },
     "cordova-plugin-ftp": {
-      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf2"
     },
     "cordova-plugin-x-socialsharing-android12": {
-      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf2"
     },
     "es6-promise-plugin": {
-      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf2"
     }
   },
   "dependent_plugins": {
     "com.jjdltc.cordova.plugin.zip": {
-      "PACKAGE_NAME": "cl.oliver.ventasbyf"
+      "PACKAGE_NAME": "cl.oliver.ventasbyf2"
+    },
+    "cordova-plugin-compat": {
+      "PACKAGE_NAME": "cl.oliver.ventasbyf2"
     }
   }
 }

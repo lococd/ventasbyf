@@ -1,0 +1,78 @@
+{
+  "_from": "cordova-plugin-x-socialsharing-android12",
+  "_id": "cordova-plugin-x-socialsharing-android12@6.0.5",
+  "_inBundle": false,
+  "_integrity": "sha512-1NrHROIxrsjDHp+haL+68QsK4QoPcSNDwNC0JSvGXWqXsf1G8qZPulWs6M6m/FMcq5c5imG2C41H1ZT0B+Sxaw==",
+  "_location": "/cordova-plugin-x-socialsharing-android12",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "cordova-plugin-x-socialsharing-android12",
+    "name": "cordova-plugin-x-socialsharing-android12",
+    "escapedName": "cordova-plugin-x-socialsharing-android12",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/cordova-plugin-x-socialsharing-android12/-/cordova-plugin-x-socialsharing-android12-6.0.5.tgz",
+  "_shasum": "1b33e3b7653c48cda04e1fcd0471a6160ae7de4a",
+  "_spec": "cordova-plugin-x-socialsharing-android12",
+  "_where": "/src",
+  "author": {
+    "name": "Eddy Verbruggen - @EddyVerbruggen"
+  },
+  "bugs": {
+    "url": "https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin/issues"
+  },
+  "bundleDependencies": false,
+  "cordova": {
+    "id": "cordova-plugin-x-socialsharing-android12",
+    "platforms": [
+      "ios",
+      "android",
+      "wp8",
+      "windows",
+      "web"
+    ]
+  },
+  "deprecated": false,
+  "description": "Share text, images (and other files), or a link via the native sharing widget of your device. Android is fully supported, as well as iOS 6 and up. WP8 has somewhat limited support.",
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.0.0"
+    }
+  ],
+  "homepage": "https://github.com/Takkuz/corodova-plugin-socialsharing-android12#readme",
+  "keywords": [
+    "Social",
+    "Share",
+    "Twitter",
+    "Facebook",
+    "Email",
+    "SMS",
+    "WhatsApp",
+    "Tumblr",
+    "Pocket",
+    "LinkedIn",
+    "cordova",
+    "WebShare",
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android",
+    "cordova-windows"
+  ],
+  "license": "MIT",
+  "name": "cordova-plugin-x-socialsharing-android12",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Takkuz/corodova-plugin-socialsharing-android12.git"
+  },
+  "types": "./types/index.d.ts",
+  "version": "6.0.5"
+}
